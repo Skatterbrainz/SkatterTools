@@ -1,0 +1,83 @@
+/*
+'****************************************************************
+' Filename..: cmwt.css
+' Purpose...: base CSS stylesheet
+' Version...: 05/28/2015
+'****************************************************************
+*/
+body {
+	font-family: 'Segoe UI', 'Lucida Grande', Verdana, Arial, Helvetica, sans-serif;
+}
+
+a:link    {color: #0052A3; text-decoration: none;}
+a:visited {color: #0052A3; text-decoration: none;}
+a:hover   {color: red; text-decoration: underline;}
+a:active  {color: darkred;}
+
+h1,h2,h3 {
+	font-family: arial,helvetica;
+	color: #2E86C1;
+}
+
+.accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    transition: 0.4s;
+}
+
+.statbutton {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    transition: 0.4s;
+}
+
+.active, .accordion:hover, .statbutton:hover {
+    background-color: #2E4053;
+	color: white;
+}
+
+.panel {
+    padding: 0 18px;
+    background-color: #ccc;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+.limenu {
+	font-family: verdana,sans;
+	font-size: 10pt;
+}
+
+.limain {
+	font-family: verdana,sans;
+	font-size: 10pt;
+	padding: 2px;
+}
+
+.ulmenu {
+	list-style: square inside; 
+	margin: 1; 
+	padding: 0;
+}
+
+.footer {
+	text-align: center;
+	font-family: verdana,sans;
+	margin-top: 10px;
+	font-size: 10pt;
+}
