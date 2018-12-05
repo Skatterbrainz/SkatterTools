@@ -39,9 +39,10 @@ $PHPCgiPath = ($env:PATH).Split(";") | Select-String "PHP"
 $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
 $STVersion  = "1812.04"
-$CmDBHost   = "cm02.contoso.local"
-$CmSiteCode = "P02"
-$STTheme    = "stdark.css" # "stlight.css"
+$CmDBHost   = "cm01.contoso.local"
+$CmSiteCode = "P01"
+$STTheme    = "stdark.css"
+# more themes may come soon if this project lives on
 
 # --------------------------------------------------
 
