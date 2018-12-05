@@ -95,15 +95,17 @@ finally {
     }
 }
 
-$tabs = @('General','Storage','Software','Collections','Groups','Users','Notes')
+$tabs = @('General','Storage','Network','Software','Tools','Notes')
+$tabset = "<table id=tablex><tr>"
 foreach ($tab in $tabs) {
     if ($tab -eq $TabSelected) {
-        $tabset += "<input type='button' class='button1' id='b_$tab' name='b_$tab' value='$tab' />"
+        $tabset += "<td class=`"btab`">$tab</td>"
     }
     else {
-        $tabset += "<input type='button' class='button1' id='b_$tab' name='b_$tab' value='$tab' />"
+        $tabset += "<td class=`"btab`">$tab</td>"
     }
 }
+$tabset += "</tr></table>"
 
 @"
 <html>

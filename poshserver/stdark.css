@@ -136,6 +136,17 @@ h1,h2,h3 {
     padding: 5px;
 }
 
+#tablex {
+    border-collapse: collapse;
+    font-family: verdana,sans;
+    font-size: 10pt;
+}
+
+#tablex td, #tablex th {
+    border: 1pt solid #303030;
+    padding: 5px;
+}
+
 .button1 {
     padding: 5px;
     height: 32px;
@@ -174,4 +185,23 @@ h1,h2,h3 {
     cursor: pointer;
     background-color: #2E86C1;
     color: #000;
+}
+
+.btab {
+    text-align: center;
+    font-family: verdana;
+    font-size: 10pt;
+    background-color: #435168;
+    color: #fff;
+    width: 120px;
+}
+
+.btab:hover {
+    text-align: center;
+    font-family: verdana;
+    font-size: 10pt;
+    cursor: pointer;
+    background-color: #2E86C1;
+    color: #000;
+    width: 120px;
 }
