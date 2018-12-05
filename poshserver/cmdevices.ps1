@@ -5,35 +5,43 @@ $DebugMode   = $PoshQuery.z
 
 $PageTitle   = "CM Devices"
 $PageCaption = "CM Devices"
-
+$IsFiltered  = $False
 $content = ""
 
 $query = @"
-select distinct 
-    ResourceID, Name, UserName, OperatingSystem,
-    OsBuild,SystemType,ClientVersion FROM (
+SELECT
+	ResourceID,
+	[Name],
+	Manufacturer,
+	Model,
+	OperatingSystem,
+	OSBuild,
+	ADSite 
+FROM (
 SELECT 
-	dbo.vWorkstationStatus.ResourceID, 
-    dbo.vWorkstationStatus.Name, 
-	dbo.vWorkstationStatus.UserName, 
-	dbo.v_GS_OPERATING_SYSTEM.Caption0 AS OperatingSystem, 
-	CASE
-		WHEN (dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 = 10586) THEN '1511'
-		WHEN (dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 = 14393) THEN '1607'
-		WHEN (dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 = 15063) THEN '1703'
-		WHEN (dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 = 16299) THEN '1709'
-		WHEN (dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 = 17134) THEN '1803'
-		WHEN (dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 = 7601) THEN 'SP1'
-		WHEN (dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 = 9600) THEN 'RTM'
-		ELSE dbo.v_GS_OPERATING_SYSTEM.BuildNumber0
-		END AS OsBuild, 
-	dbo.vWorkstationStatus.SystemType, 
-	dbo.vWorkstationStatus.ClientVersion 
+	dbo.v_R_System.ResourceID, 
+	dbo.v_R_System.Name0 as [Name], 
+	dbo.v_GS_COMPUTER_SYSTEM.Manufacturer0 as Manufacturer, 
+	dbo.v_GS_COMPUTER_SYSTEM.Model0 as Model, 
+	dbo.v_GS_SYSTEM_ENCLOSURE.SerialNumber0 as SerialNumber, 
+	dbo.vWorkstationStatus.ClientVersion, 
+	dbo.vWorkstationStatus.LastHardwareScan as LastHwScan, 
+	dbo.vWorkstationStatus.LastPolicyRequest, 
+	dbo.vWorkstationStatus.LastDDR,
+	dbo.v_R_System.AD_Site_Name0 as ADSite, 
+	dbo.v_GS_OPERATING_SYSTEM.Caption0 as OperatingSystem, 
+	dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 as OSBuild
 FROM 
-	dbo.vWorkstationStatus LEFT OUTER JOIN
-	dbo.v_GS_OPERATING_SYSTEM ON 
-    dbo.vWorkstationStatus.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID 
-) AS T1 
+	dbo.v_R_System INNER JOIN
+    dbo.v_GS_COMPUTER_SYSTEM ON 
+	dbo.v_R_System.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
+    dbo.v_GS_SYSTEM_ENCLOSURE ON 
+	dbo.v_R_System.ResourceID = dbo.v_GS_SYSTEM_ENCLOSURE.ResourceID INNER JOIN
+    dbo.vWorkstationStatus ON 
+	dbo.v_R_System.ResourceID = dbo.vWorkstationStatus.ResourceID INNER JOIN
+    dbo.v_GS_OPERATING_SYSTEM ON 
+	dbo.v_R_System.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
+) AS T1
 "@
 
 if (![string]::IsNullOrEmpty($SearchField)) {
@@ -51,14 +59,14 @@ try {
     $rs = New-Object -ComObject "ADODB.RecordSet"
     $rs.Open($query, $connection)
     $rowcount = 0
-    $rowcount += $rs.RecordCount
     $colcount = $rs.Fields.Count
     $rs.MoveFirst()
     
     $content = '<table id=table1><tr>'
     for ($i = 0; $i -lt $colcount; $i++) {
-        if ($rs.Fields($i).Name -ne 'ResourceID') {
-            $content += '<th>'+$rs.Fields($i).Name+'</th>'
+        $fn = $rs.Fields($i).Name
+        if ($fn -ne 'ResourceID') {
+            $content += '<th><a href="cmdevices.ps1?s='+$fn+'" title="Sort">'+$fn+'</a></th>'
         }
     }
     $content += '</tr>'
@@ -96,6 +104,7 @@ try {
         }
         $content += '</tr>'
         $rs.MoveNext()
+        $rowcount++
     }
     $content += '<tr>'
     $content += '<td colspan='+$($colcount-1)+'>'+$rowcount+' rows returned'
