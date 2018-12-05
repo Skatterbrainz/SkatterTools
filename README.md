@@ -1,7 +1,7 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 2018.12.04
+## Latest: 2018.12.05
 
 * Rewritten for PoSHServer (micro web server based on PowerShell)
 * Download PoSHServer from: http://www.poshserver.net/ 
@@ -12,6 +12,12 @@ Skattered tools from Skatterbrainz
 * Type: Start-PoshServer -HomeDirectory "<path to skattertools>"
 * Open SkatterTools at http://localhost:8080/index.htm
 * Enjoy!
+  
+## Test Notes
+
+* Tested with IE 11, Chrome 70
+* SQL Server 2017
+* ConfigMgr 1810
 
 ## Disclaimers
 
