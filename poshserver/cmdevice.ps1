@@ -1,13 +1,19 @@
-$SearchField = $PoshQuery.f
+﻿$SearchField = $PoshQuery.f
 $SearchValue = $PoshQuery.v
 $ItemName    = $PoshQuery.n
+$TabSelected = $PoshQuery.tab
 $SortField   = Get-SortField -Default "Name"
 $DebugMode   = $PoshQuery.z
 
 $PageTitle   = "CM Device: $ItemName"
 $PageCaption = "CM Device: $ItemName"
 
+if ([string]::IsNullOrEmpty($TabSelected)) {
+    $TabSelected = "b_general"
+}
+
 $content = ""
+$tabset  = ""
 
 $query = @"
 SELECT
@@ -61,7 +67,7 @@ try {
     $colcount = $rs.Fields.Count
     $rs.MoveFirst()
     
-    $content = '<table id=table1><tr>'
+    $content = '<table id=table2><tr>'
 
     for ($i = 0; $i -lt $colcount; $i++) {
         $fn = $rs.Fields($i).Name
@@ -72,7 +78,7 @@ try {
         else {
             $fvx = ""
         }
-        $content += '<tr><td style="width:200px">'+$fn+'</td>'
+        $content += '<tr><td style="width:200px;background-color:#435168">'+$fn+'</td>'
         $content += '<td>'+$fvx+'</td></tr>'        
     }
     $content += '</table>'
@@ -89,6 +95,16 @@ finally {
     }
 }
 
+$tabs = @('General','Storage','Software','Collections','Groups','Users','Notes')
+foreach ($tab in $tabs) {
+    if ($tab -eq $TabSelected) {
+        $tabset += "<input type='button' class='button1' id='b_$tab' name='b_$tab' value='$tab' />"
+    }
+    else {
+        $tabset += "<input type='button' class='button1' id='b_$tab' name='b_$tab' value='$tab' />"
+    }
+}
+
 @"
 <html>
 <head>
@@ -99,6 +115,7 @@ finally {
 
 <h1>$PageCaption</h1>
 
+$tabset
 $content
 
 $(if ($DebugMode -eq 1) {"<p>$query</p>"})

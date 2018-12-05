@@ -17,6 +17,7 @@
 		<li class="limenu"><a href="cmdevices.ps1" title="Devices" target="main">Devices</a></li>
 		<li class="limenu"><a href="cmucollections.ps1" title="User Collections" target="main">User Collections</a></li>
 		<li class="limenu"><a href="cmdcollections.ps1" title="Device Collections" target="main">Device Collections</a></li>
+        <li class="limenu"><a href="formtest.ps1" title="Search" target="main">Search</a></li>
 	</ul>
 </div>
 

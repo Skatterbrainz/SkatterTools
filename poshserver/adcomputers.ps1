@@ -1,16 +1,39 @@
-$SearchField = $PoshQuery.f
+﻿$SearchField = $PoshQuery.f
 $SearchValue = $PoshQuery.v
+$SearchType  = $PoshQuery.x
 $SortField   = Get-SortField -Default "Name"
 $DebugMode   = $PoshQuery.z
+$TabSelected = $PoshQuery.tab
 
 $PageTitle   = "AD Computers"
 $PageCaption = "AD Computers"
 $IsFiltered  = $False
+$content = ""
+$tabset  = ""
+
+if ([string]::IsNullOrEmpty($TabSelected)) {
+    $TabSelected = "all"
+}
+if ($SearchValue -eq 'all') {
+    $SearchValue = ""
+}
+else {
+    if ($SearchField -eq 'Name') {
+        $TabSelected = $SearchValue
+        $PageTitle += " ($SearchValue)"
+        $PageCaption = $PageTitle
+    }
+}
 
 try {
     $computers = Get-ADsComputers | Sort-Object $SortField
     if (![string]::IsNullOrEmpty($SearchValue)) {
-        $computers = $computers | Where-Object {$_."$SearchField" -eq $SearchValue}
+        if ($SearchType -eq 'like') {
+            $computers = $computers | Where-Object {$_."$SearchField" -like "$SearchValue*"}
+        }
+        else {
+            $computers = $computers | Where-Object {$_."$SearchField" -eq $SearchValue}
+        }
         $IsFiltered = $True
     }
     $columns = @('Name','OS','OSVer','Created','LastLogon')
@@ -61,6 +84,8 @@ catch {
     $content = "Error: $($Error[0].Exception.Message)"
 }
 
+$tabset = New-MenuTabSet -BaseLink 'adcomputers.ps1?x=like&f=name&v=' -DefaultID $TabSelected
+
 @"
 <html>
 <head>
@@ -71,6 +96,7 @@ catch {
 
 <h1>$PageCaption</h1>
 
+$tabset
 $content
 
 </body>

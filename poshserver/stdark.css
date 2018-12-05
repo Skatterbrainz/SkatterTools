@@ -124,10 +124,54 @@ h1,h2,h3 {
 
 #table2 tr {background-color: #343e4f; color:#fff;}
 
+#table3 {
+    border: 0;
+    width: 100%;
+    font-family: verdana,sans;
+    font-size: 10pt;
+}
+
+#table3 td, #table3 th {
+    border: none;
+    padding: 5px;
+}
+
+.button1 {
+    padding: 5px;
+    height: 32px;
+    font-family: verdana;
+    font-size: 10pt;
+    width: 120px;
+    background-color: #c0c0c0;
+    border: 1px solid #ccc;
+}
+
+.button1:hover {
+    background-color:#fff;
+    border: 1px solid #c0c0c0;
+}
+
 .footer {
 	text-align: center;
 	font-family: verdana,sans;
 	margin-top: 10px;
 	font-size: 10pt;
 	color: #c0c0c0;
+}
+
+.dyn1 {
+    text-align: center;
+    font-family: verdana;
+    font-size: 10pt;
+    background-color: #435168;
+    color: #fff;
+}
+
+.dyn2 {
+    text-align: center;
+    font-family: verdana;
+    font-size: 10pt;
+    cursor: pointer;
+    background-color: #2E86C1;
+    color: #000;
 }

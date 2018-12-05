@@ -3,10 +3,17 @@
 # This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+# SkatterTools configuration
+
+$CmDBHost   = "cm02.contoso.local"
+$CmSiteCode = "P02"
+$STTheme    = "stdark.css" 
+# more themes may be added if this project lives on
+
 # PoSH Server Configuration
 
 # Default Document
-$DefaultDocument = "index.ps1"
+$DefaultDocument = "index.htm"
 
 # Log Schedule
 # Options: Hourly, Daily
@@ -38,11 +45,7 @@ $ContentFilterBlackList = "audio/mpeg video/mpeg"
 $PHPCgiPath = ($env:PATH).Split(";") | Select-String "PHP"
 $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
-$STVersion  = "1812.04"
-$CmDBHost   = "cm01.contoso.local"
-$CmSiteCode = "P01"
-$STTheme    = "stdark.css"
-# more themes may come soon if this project lives on
+$STVersion  = "1812.05"
 
 # --------------------------------------------------
 
@@ -333,4 +336,43 @@ function Get-SortField {
     else {
         return $PoshQuery.s
     }
+}
+
+function New-MenuTabSet {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $BaseLink,
+        [parameter(Mandatory=$False)]
+        [string] $DefaultID = ""
+    )
+    $output = "<table id=table3><tr>"
+    if ($DefaultID -eq 'all') {
+        $output += "<td class=`"dyn2`" title='All'>All</td>"
+    }
+    else {
+        $xlink = $BaseLink + 'all'
+        $output += "<td class=`"dyn1`" onMouseOver=`"this.className='dyn2'`" onMouseOut=`"this.className='dyn1'`" title=`"Show All`" onClick=`"document.location.href='$xlink'`">All</td>"
+    }
+    for ($i=65; $i -lt $(65+26); $i++) {
+        $c = [char]$i
+        $xlink = $BaseLink + $c
+        if ($DefaultID -eq $c) {
+            $output += "<td class=`"dyn2`">$c</td>"
+        }
+        else {
+            $output += "<td class=`"dyn1`" onMouseOver=`"this.className='dyn2'`" onMouseOut=`"this.className='dyn1'`" title=`"Filter on $c`" onClick=`"document.location.href='$xlink'`">$c</td>"
+        }
+    }
+    for ($i=0; $i -lt 10; $i++) {
+        $xlink = $BaseLink + $i
+        if ($DefaultID -eq $c) {
+            $output += "<td class=`"dyn2`">$i</td>"
+        }
+        else {
+            $output += "<td class=`"dyn1`" onMouseOver=`"this.className='dyn2'`" onMouseOut=`"this.className='dyn1'`" title=`"Filter on $i`" onClick=`"document.location.href='$xlink'`">$i</td>"
+        }
+    }
+    $output += "</tr></table>"
+    return $output
 }
