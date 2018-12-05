@@ -5,9 +5,12 @@
 
 # SkatterTools configuration
 
-$CmDBHost   = "cm02.contoso.local"
-$CmSiteCode = "P02"
-$STTheme    = "stdark.css" 
+$CmDBHost      = "cm02.contoso.local"
+$CmSMSProvider = "cm02.contoso.local"
+$SkDBHost      = "db01.contosol.local"
+$SkDBDatabase  = "skattertools"
+$CmSiteCode    = "P02"
+$STTheme       = "stdark.css" 
 # more themes may be added if this project lives on
 
 # PoSH Server Configuration
