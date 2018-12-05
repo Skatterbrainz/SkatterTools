@@ -65,13 +65,12 @@
 <button class="accordion" title="Active Directory">Active Directory</button>
 <div class="panel">
 	<ul class="ulmenu">
-		<li class="limenu">Forests and Domains</li>
-		<li class="limenu">Sites</li>
-		<li class="limenu">Site Links</li>
-		<li class="limenu">Domain Controllers</li>
-		<li class="limenu"><a href="adcomputers.ps1" target="main" title="AD Computers">Computers</a></li>
 		<li class="limenu"><a href="adusers.ps1" target="main" title="AD Users">Users</a></li>
 		<li class="limenu"><a href="adgroups.ps1" target="main" title="AD Groups">Groups</a></li>
+		<li class="limenu"><a href="adcomputers.ps1" target="main" title="AD Computers">Computers</a></li>
+		<li class="limenu">Forest</li>
+		<li class="limenu">Sites</li>
+		<li class="limenu">Site Links</li>
 		<li class="limenu">Printers</li>
 		<li class="limenu">Shares</li>
 		<li class="limenu">OU Browser</li>
