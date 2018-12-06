@@ -136,6 +136,20 @@ h1,h2,h3 {
     padding: 5px;
 }
 
+#tabledetail {
+    border-collapse: collapse;
+    font-family: verdana,sans;
+    font-size: 10pt;
+}
+
+#tabledetail td, #tabledetail th {
+    width: 100%;
+    border: 1px solid #eee;
+    padding: 5px;
+    color: #fff;
+    background-color: #386040;
+}
+
 #tablex {
     border-collapse: collapse;
     font-family: verdana,sans;

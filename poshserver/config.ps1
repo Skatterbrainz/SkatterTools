@@ -5,13 +5,14 @@
 
 # SkatterTools configuration
 
+$SkWebPath     = "e:\web"
 $CmDBHost      = "cm02.contoso.local"
 $CmSMSProvider = "cm02.contoso.local"
 $SkDBHost      = "db01.contosol.local"
 $SkDBDatabase  = "skattertools"
 $CmSiteCode    = "P02"
-$STTheme       = "stdark.css" 
-# more themes may be added if this project lives on
+$STTheme       = "stdark.css"
+$SkNotesPath   = "notes.xml"
 
 # PoSH Server Configuration
 
@@ -341,6 +342,21 @@ function Get-SortField {
     }
 }
 
+function Get-PageParam {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $TagName,
+        [parameter(Mandatory=$False)]
+        [string] $Default = ""
+    )
+    $output = $PoshQuery."$TagName"
+    if ([string]::IsNullOrEmpty($output)) {
+        $output = $Default
+    }
+    return $output
+}
+
 function New-MenuTabSet {
     param (
         [parameter(Mandatory=$True)]
@@ -378,4 +394,124 @@ function New-MenuTabSet {
     }
     $output += "</tr></table>"
     return $output
+}
+
+function New-ColumnSortRow {
+    param (
+        $ColumnNames,
+        $BaseLink,
+        $SortDirection
+    )
+    $output = ""
+    foreach ($col in $ColumnNames) {
+        if ($col -eq $SortField) {
+            if ($SortDirection -eq 'Asc') {
+                $xlink = "<a href=`"$BaseLink&s=$col&so=desc`">$col</a>"
+                $ilink = "<img src='graphics/sortasc.png' border=0 alt='' />"
+            }
+            else {
+                $xlink = "<a href=`"$BaseLink&s=$col&so=asc`">$col</a>"
+                $ilink = "<img src='graphics/sortdesc.png' border=0 alt='' />"
+            }
+        }
+        else {
+            $xlink = "<a href=`"$BaseLink&s=$col&so=asc`">$col</a>"
+            $ilink = ""
+        }
+        $output += '<th>'+$xlink+' '+$ilink+'</th>'
+    }
+    return $output
+}
+
+function Write-DetailInfo {
+    param ($PageRef = "", $Mode = "")
+    if ($Mode -eq "1") {
+        $output = @"
+<h3>Page Details</h3><table id=tabledetail>
+    <tr><td style=`"width:200px;`">SearchField</td><td>$SearchField</td></tr>
+    <tr><td style=`"width:200px;`">SearchValue</td><td>$SearchValue</td></tr>
+    <tr><td style=`"width:200px;`">SearchType</td><td>$SearchType</td></tr>
+    <tr><td style=`"width:200px;`">SortField</td><td>$SortField</td></tr>
+    <tr><td style=`"width:200px;`">SortOrder</td><td>$SortOrder</td></tr>
+    <tr><td style=`"width:200px;`">TabSelected</td><td>$TabSelected</td></tr>
+    <tr><td style=`"width:200px;`">Detailed</td><td>$Detailed</td></tr>
+    <tr><td style=`"width:200px;`">PageTitle</td><td>$PageTitle</td></tr>
+    <tr><td style=`"width:200px;`">PageCaption</td><td>$PageCaption</td></tr>
+    <tr><td colspan=2>
+    <a href=`"$PageRef`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SearchOrder&tab=$TabSelected`">Hide Details</a>
+    </td></tr>
+</table>
+"@
+        return $output
+    }
+    else {
+        $output = @"
+<table id=table3>
+<tr>
+<td><a href=`"$PageRef`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SearchOrder&tab=$TabSelected&zz=1`">Show Details</a></td>
+</tr>
+</table>
+"@
+        return $output
+    }
+}
+
+function New-NoteAttachment {
+    param (
+        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectType,
+        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectID,
+        [parameter(Mandatory=$True)] 
+            [ValidateNotNullOrEmpty()] 
+            [ValidateLength(1,255)]
+            [string] $Comment
+    )
+}
+
+function New-NoteAttachment {
+    param (
+        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $Comment,
+        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectType,
+        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectID
+    )
+    $xmlfile = Join-Path -Path $SkWebPath -ChildPath "notes\notes.xml"
+    if (!(Test-Path $xmlfile)) {
+        return -1
+    }
+    else {
+        try {
+            $doc = [xml](Get-Content -Path $xmlfile)
+            $note = $doc.notes.note[0].clone()
+            $note.date = "$(Get-Date)"
+            $note.author = $PoshUserName
+            $note.otype = $ObjectType
+            $note.oid = $ObjectID
+            $note.comment = $Comment
+            $doc.DocumentElement.AppendChild($note)
+            $doc.Save($xmlfile)
+            return 0
+        }
+        catch {
+            return $Error[0].Exception.Message
+        }
+    }
+}
+
+function Get-NoteAttachments {
+    param (
+        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectType,
+        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectID
+    )
+    $xmlfile = Join-Path -Path $SkWebPath -ChildPath "notes\notes.xml"
+    if (!(Test-Path $xmlfile)) {
+        return -1
+    }
+    else {
+        try {
+            $doc = [xml](Get-Content -Path $xmlfile)
+            return $doc.notes.note | ?{$_.otype -eq $ObjectType -and $_.oid -eq $ObjectID}
+        }
+        catch {
+            return ""
+        }
+    }
 }

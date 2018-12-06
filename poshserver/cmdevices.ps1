@@ -1,6 +1,7 @@
 $SearchField = $PoshQuery.f
 $SearchValue = $PoshQuery.v
 $SortField   = Get-SortField -Default "Name"
+$SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
 $DebugMode   = $PoshQuery.z
 
 $PageTitle   = "CM Devices"
@@ -49,7 +50,7 @@ if (![string]::IsNullOrEmpty($SearchField)) {
     $PageCaption += " ($SearchValue)"
     $IsFiltered = $True
 }
-$query += ' order by '+$SortField
+$query += ' order by '+$SortField+' '+$SortOrder
 
 try {
     $connection = New-Object -ComObject "ADODB.Connection"
@@ -63,6 +64,7 @@ try {
     $rs.MoveFirst()
     
     $content = '<table id=table1><tr>'
+<#
     for ($i = 0; $i -lt $colcount; $i++) {
         $fn = $rs.Fields($i).Name
         if ($fn -ne 'ResourceID') {
@@ -70,6 +72,17 @@ try {
         }
     }
     $content += '</tr>'
+#>
+    $columns = @()
+    for ($i = 0; $i -lt $colcount; $i++) {
+        $fn = $rs.Fields($i).Name
+        if ($fn -ne 'ResourceID') {
+            $columns += $fn
+        }
+    }
+
+    $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "cmdevices.ps1?f=$SearchField&v=$SearchValue&x=$SearchType" -SortDirection $SortOrder
+    $content += "</tr>"
 
     while (!$rs.EOF) {
         $content += '<tr>'

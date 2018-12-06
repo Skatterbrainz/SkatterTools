@@ -29,9 +29,9 @@ $PageCaption = "Learning Resources"
             </ul>
         </td>
         <td width="50%">
-       	  <ul class="ulmenu">
-	  	<li class="limain">Please Suggest More Links!!!</li>
-	  </ul>
+            <ul class="ulmenu">
+                <li class="limain"><a href="https://twitter.com/skatterbrainzz/following" target="_new">My Twitter Sources</a></li>
+            </ul>
         </td>
     </tr>
 </table>

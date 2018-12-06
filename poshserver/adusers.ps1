@@ -1,18 +1,16 @@
-﻿$SearchField = $PoshQuery.f
-$SearchValue = $PoshQuery.v
-$SearchType  = $PoshQuery.x
-$SortField   = Get-SortField -Default "sAMAccountName"
-$DebugMode   = $PoshQuery.z
-$TabSelected = $PoshQuery.tab
+﻿$SearchField = Get-PageParam -TagName 'f' -Default ""
+$SearchValue = Get-PageParam -TagName 'v' -Default ""
+$SearchType  = Get-PageParam -TagName 'x' -Default 'like'
+$SortField   = Get-PageParam -TagName 's' -Default 'UserName'
+$SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
+$TabSelected = Get-PageParam -TagName 'tab' -Default 'all'
+$Detailed    = Get-PageParam -TagName 'zz' -Default ""
 
 $PageTitle   = "AD Users"
 $PageCaption = "AD Users"
-$content = ""
-$tabset  = ""
+$content     = ""
+$tabset      = ""
 
-if ([string]::IsNullOrEmpty($TabSelected)) {
-    $TabSelected = "all"
-}
 if ($SearchValue -eq 'all') {
     $SearchValue = ""
 }
@@ -25,7 +23,12 @@ else {
 }
 
 try {
-    $users = Get-ADsUsers | Sort-Object Name
+    if ($SortOrder -eq 'Asc') {
+        $users = Get-ADsUsers | Sort-Object $SortField
+    }
+    else {
+        $users = Get-ADsUsers | Sort-Object $SortField -Descending
+    }
     if (![string]::IsNullOrEmpty($SearchValue)) {
         if ($SearchType -eq 'like') {
             $users = $users | Where-Object {$_."$SearchField" -like "$SearchValue*"}
@@ -38,9 +41,7 @@ try {
     $usercount = $users.Count
     $columns = @('UserName','DisplayName','Title','Department','Email')
     $content = '<table id=table1><tr>'
-    foreach ($col in $columns) {
-        $content += '<th>'+$col+'</th>'
-    }
+    $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "adusers.ps1?f=$SearchField&v=$SearchValue&x=$SearchType" -SortDirection $SortOrder
     $content += '</tr>'
     foreach ($user in $users) {
         $content += '<tr>'
@@ -70,6 +71,8 @@ catch {
 }
 
 $tabset = New-MenuTabSet -BaseLink 'adusers.ps1?x=like&f=username&v=' -DefaultID $TabSelected
+
+$content += Write-DetailInfo -PageRef "adusers.ps1" -Mode $Detailed
 
 @"
 <html>

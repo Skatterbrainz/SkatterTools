@@ -1,6 +1,7 @@
 ﻿$SearchField = $PoshQuery.f
 $SearchValue = $PoshQuery.v
 $SearchType  = $PoshQuery.x
+$SortOrder   = $PoshQuery.so
 $SortField   = Get-SortField -Default "Name"
 $DebugMode   = $PoshQuery.z
 $TabSelected = $PoshQuery.tab
@@ -24,6 +25,9 @@ else {
         $PageCaption = $PageTitle
     }
 }
+if ([string]::IsNullOrEmpty($SortOrder)) {
+    $SortOrder = 'Asc'
+}
 
 try {
     $computers = Get-ADsComputers | Sort-Object $SortField
@@ -38,6 +42,7 @@ try {
     }
     $columns = @('Name','OS','OSVer','Created','LastLogon')
     $content = '<table id=table1><tr>'
+    $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "adcomputer.ps1?f=$SearchField&v=$fv&x=$SortType
     foreach ($col in $columns) {
         $content += '<th>'+$col+'</th>'
     }
