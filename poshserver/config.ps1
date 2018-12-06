@@ -12,6 +12,7 @@ $SkDBHost      = "db01.contosol.local"
 $SkDBDatabase  = "skattertools"
 $CmSiteCode    = "P02"
 $STTheme       = "stdark.css"
+$SkNotesEnable = "true"
 $SkNotesPath   = "notes.xml"
 
 # PoSH Server Configuration
