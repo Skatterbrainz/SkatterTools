@@ -1,21 +1,39 @@
-﻿$SearchField = $PoshQuery.f
-$SearchValue = $PoshQuery.v
-$ItemName    = $PoshQuery.n
-$TabSelected = $PoshQuery.tab
-$SortField   = Get-SortField -Default "Name"
-$DebugMode   = $PoshQuery.z
+﻿$SearchField = Get-PageParam -TagName 'f' -Default ""
+$SearchValue = Get-PageParam -TagName 'v' -Default ""
+$SearchType  = Get-PageParam -TagName 'x' -Default 'exact'
+$SortField   = Get-PageParam -TagName 's' -Default 'Name'
+$CustomName  = Get-PageParam -TagName 'n' -Default ""
+$SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
+$TabSelected = Get-PageParam -TagName 'tab' -Default 'General'
+$Detailed    = Get-PageParam -TagName 'zz' -Default ""
 
-$PageTitle   = "CM Device: $ItemName"
-$PageCaption = "CM Device: $ItemName"
+$PageTitle   = "CM Device: $CustomName"
+$PageCaption = "CM Device: $CustomName"
 
 if ([string]::IsNullOrEmpty($TabSelected)) {
-    $TabSelected = "b_general"
+    $TabSelected = "General"
 }
 
 $content = ""
 $tabset  = ""
 
-$query = @"
+$tabs = @('General','Storage','Collections','Software','Tools','Notes')
+$tabset = "<table id=tablex><tr>"
+foreach ($tab in $tabs) {
+    $xlink = "cmdevice.ps1?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SortOrder&n=$CustomName&tab=$tab"
+    if ($tab -eq $TabSelected) {
+        $tabset += "<td class=`"btab`">$tab</td>"
+    }
+    else {
+        $tabset += "<td class=`"btab`" onClick=`"document.location.href='$xlink'`" title=`"$tab`">$tab</td>"
+    }
+}
+$tabset += "</tr></table>"
+
+switch ($TabSelected) {
+    'General' {
+
+        $query = @"
 SELECT
 	ResourceID,
 	[Name],
@@ -53,59 +71,137 @@ FROM
 	dbo.v_R_System.ResourceID = dbo.vWorkstationStatus.ResourceID INNER JOIN
     dbo.v_GS_OPERATING_SYSTEM ON 
 	dbo.v_R_System.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
-) AS T1
-WHERE $SearchField = '$SearchValue'
+) AS T1 
+WHERE ($SearchField = '$SearchValue') 
 "@
 
-try {
-    $connection = New-Object -ComObject "ADODB.Connection"
-    $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-    $connection.Open($connString);
-    $IsOpen = $True
-    $rs = New-Object -ComObject "ADODB.RecordSet"
-    $rs.Open($query, $connection)
-    $colcount = $rs.Fields.Count
-    $rs.MoveFirst()
+        try {
+            $connection = New-Object -ComObject "ADODB.Connection"
+            $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+            $connection.Open($connString);
+            $IsOpen = $True
+            $rs = New-Object -ComObject "ADODB.RecordSet"
+            $rs.Open($query, $connection)
+            $colcount = $rs.Fields.Count
+            $rs.MoveFirst()
     
-    $content = '<table id=table2><tr>'
+            $content = '<table id=table2><tr>'
 
-    for ($i = 0; $i -lt $colcount; $i++) {
-        $fn = $rs.Fields($i).Name
-        $fv = $rs.Fields($i).Value
-        if (![string]::IsNullOrEmpty($fv)) {
-            $fvx = '<a href="cmdevices.ps1?f='+$fn+'&v='+$fv+'" title="Filter">'+$fv+'</a>'
+            for ($i = 0; $i -lt $colcount; $i++) {
+                $fn = $rs.Fields($i).Name
+                $fv = $rs.Fields($i).Value
+                if (![string]::IsNullOrEmpty($fv)) {
+                    $fvx = '<a href="cmdevices.ps1?f='+$fn+'&v='+$fv+'" title="Filter">'+$fv+'</a>'
+                }
+                else {
+                    $fvx = ""
+                }
+                $content += '<tr><td style="width:200px;background-color:#435168">'+$fn+'</td>'
+                $content += '<td>'+$fvx+'</td></tr>'        
+            }
+            $content += '</table>'
         }
-        else {
-            $fvx = ""
+        catch {
+            $content += "Error: $($Error[0].Exception.Message)"
+            $content += "<br/>SearchField: $SearchField"
+            $content += "<br/>SearchValue: $SearchValue"
+            $content += "<br/>Query: $query"
         }
-        $content += '<tr><td style="width:200px;background-color:#435168">'+$fn+'</td>'
-        $content += '<td>'+$fvx+'</td></tr>'        
+        finally {
+            if ($isopen -eq $true) {
+                $connection.Close()
+            }
+        }
+        break;
     }
-    $content += '</table>'
-}
-catch {
-    $content += "Error: $($Error[0].Exception.Message)"
-    $content += "<br/>SearchField: $SearchField"
-    $content += "<br/>SearchValue: $SearchValue"
-    $content += "<br/>Query: $query"
-}
-finally {
-    if ($isopen -eq $true) {
-        $connection.Close()
-    }
-}
+    'Collections' {
+        $query = @"
+SELECT DISTINCT 
+    dbo.v_FullCollectionMembership.CollectionID, 
+    dbo.v_Collection.Name, 
+    dbo.v_Collection.MemberCount 
+FROM 
+    dbo.v_FullCollectionMembership INNER JOIN 
+    dbo.v_Collection ON 
+    dbo.v_FullCollectionMembership.CollectionID = dbo.v_Collection.CollectionID 
+    INNER JOIN dbo.v_Collections ON 
+    dbo.v_Collection.Name = dbo.v_Collections.CollectionName 
+WHERE 
+    (dbo.v_Collection.CollectionID IN 
+      (SELECT DISTINCT CollectionID 
+       FROM dbo.v_FullCollectionMembership AS T2 
+       WHERE (ResourceID = $SearchValue)
+      )
+    ) 
+ORDER BY dbo.v_Collection.Name
+"@
+        $xxx = "query defined"
+        try {
+#            $content = $query
+            $connection = New-Object -ComObject "ADODB.Connection"
+            $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+            $connection.Open($connString);
+            $xxx = "connection opened"
+            $IsOpen = $True
+            $rs = New-Object -ComObject "ADODB.RecordSet"
+            $rs.Open($query, $connection, 0, 1)
+            $xxx = "recordset created"
+            $rowcount = 0
 
-$tabs = @('General','Storage','Network','Software','Tools','Notes')
-$tabset = "<table id=tablex><tr>"
-foreach ($tab in $tabs) {
-    if ($tab -eq $TabSelected) {
-        $tabset += "<td class=`"btab`">$tab</td>"
+            if ($rs.BOF -and $rs.BOF) {
+                $xxx = "recordset is empty"
+            }
+            else {
+                $content = "<table id=table1>"
+                $content += "<tr>"
+                for ($i=0; $i -lt $colcount; $i++) {
+                    $fn = $rs.Fields($i).Name
+                    $content += "<th>$fn</th>"
+                    $xxx = $fn
+                }
+                $content += "</tr>"
+                $xxx = "column headings defined"
+                $colcount = $rs.Fields.Count
+                $rs.MoveFirst()
+                $xxx = "recordset opened ($colcount columns)"
+            
+                while (!$rs.EOF) {
+                    $content += '<tr>'
+    #                $cid = $rs.Fields('CollectionID').value
+                    for ($i = 0; $i -lt $colcount; $i++) {
+                        $fn = $rs.Fields($i).Name
+                        $fv = $rs.Fields($i).Value
+                        $xxx = $fn
+                        if ([string]::IsNullOrEmpty($fv)) { $fv = "" }
+                        $content += "<td>$fv</td>"
+                    } # for
+                    $content += '</tr>'
+                    $rs.MoveNext()
+                    $rowcount++
+                }
+            }
+            $rs.Close()
+            $content += "</table>"
+        }
+        catch {
+            $content = "<table id=table2>"
+            $content += "<tr><td>Error: $($Error[0].Exception.Message)</td></tr>"
+            $content += "<tr><td>Query: $query</td></tr>"
+            $content += "<tr><td>Last Step: $xxx</td></tr>"
+            $content += "</table>"
+        }
+        finally {
+            if ($IsOpen) {
+                $connection.Close()
+            }
+        }
+        break;
     }
-    else {
-        $tabset += "<td class=`"btab`">$tab</td>"
+    'Notes' {
+        break;
     }
 }
-$tabset += "</tr></table>"
+$content += Write-DetailInfo -PageRef "cmdevice.ps1" -Mode $Detailed
 
 @"
 <html>

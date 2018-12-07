@@ -226,7 +226,8 @@ function Get-ADsGroups {
     [CmdletBinding()]
     param (
         [parameter(Mandatory=$False)]
-        [string] $GroupName = ""
+        [string] $GroupName = "",
+        [switch] $ShowMemberCounts
     )
     $pageSize = 200
     if ([string]::IsNullOrEmpty($GroupName)) {
@@ -242,12 +243,16 @@ function Get-ADsGroups {
     $as.PropertiesToLoad.Add('distinguishedName') | Out-Null
     $as.PageSize = $pageSize
     $results = $as.FindAll()
+    $mcount = 0
     foreach ($item in $results) {
         $cn = ($item.properties.item('name') | Out-String).Trim()
         $ouPath = ($item.Properties.item('distinguishedName') | Out-String).Trim() -replace $("CN=$cn,", "")
         [datetime]$created = ($item.Properties.item('whenCreated') | Out-String).Trim()
         [datetime]$changed = ($item.Properties.item('whenChanged') | Out-String).Trim()
         $desc = ($item.Properties.item('description') | Out-String).Trim()
+        if ($ShowMemberCounts) {
+            $mcount = (Get-ADsGroupMembers -GroupName $cn).Count
+        }
         $props  = [ordered]@{
             Name        = $cn
             DN          = ($item.Properties.item('distinguishedName') | Out-String).Trim()
@@ -255,6 +260,7 @@ function Get-ADsGroups {
             Description = $desc
             Created     = $created
             Changed     = $changed
+            Members     = $mcount
         }
         New-Object psObject -Property $props
     }
@@ -286,24 +292,37 @@ function Get-ADsGroupMembers {
         $strFilter = "(objectCategory=group)"
     }
     else {
-        $strFilter = "(&(objectCategory=group)(sAMAccountName=$GroupName))"
+        $strFilter = "(&(objectCategory=group)(cn=$GroupName))"
     }
-    $objSearcher = New-Object System.DirectoryServices.DirectorySearcher
-    $objSearcher.Filter = $strFilter
-    $objSearcher.PageSize = 1000
-    $objPath = $objSearcher.FindAll()
-    foreach ($objItem in $objPath) {
-        try {
-            $objUser = $objItem.GetDirectoryEntry()
-            $group   = [adsi]$($objUser.distinguishedName).ToString()
-            $Group.Member | ForEach-Object {
-                $Searcher = [adsisearcher]"(distinguishedname=$_)"
-                $searcher.FindOne().Properties
+    try {
+        $as = [adsisearcher]$strFilter
+        [void]$as.PropertiesToLoad.Add('name')
+        [void]$as.PropertiesToLoad.Add('distinguishedName')
+        $as.PageSize = 1000
+        $results = $as.FindOne()
+        if ($results) {
+            $dn = $results.Properties.distinguishedName | Out-String
+            $gx = [adsisearcher]"(&(objectCategory=group)(distiguishedName=$dn))"
+            $group = $gx.FindOne()
+            $members = $group.Properties.member
+            foreach ($member in $members) {
+                $user = [adsisearcher]"(distinguishedName=$member)"
+                [void]$user.PropertiesToLoad.Add('sAmAccountName')
+                [void]$user.PropertiesToLoad.Add('displayName')
+                [void]$user.PropertiesToLoad.Add('distinguishedName')
+                if ($u = $user.FindOne()) {
+                    $props = [ordered]@{
+                        UserName    = $u.Properties.samaccountname | Out-String
+                        DisplayName = $u.Properties.displayname | Out-String
+                        DN          = $u.Properties.distinguishedname | Out-String
+                    }
+                    New-Object -TypeName PSObject -Property $props
+                }
             }
-        }
-        catch {
-            Write-Error $_.Exception.Message
-        }
+        } # end if
+    }
+    catch {
+        return $Error[0].Exception.Message
     }
 }
 
@@ -330,6 +349,7 @@ function Get-ADsServicePrincipalNames {
     }
 }
 
+# this one needs to get the hell out of here!
 function Get-SortField {
     param (
         [parameter(Mandatory=$False)]
@@ -434,12 +454,13 @@ function Write-DetailInfo {
     <tr><td style=`"width:200px;`">SearchType</td><td>$SearchType</td></tr>
     <tr><td style=`"width:200px;`">SortField</td><td>$SortField</td></tr>
     <tr><td style=`"width:200px;`">SortOrder</td><td>$SortOrder</td></tr>
+    <tr><td style=`"width:200px;`">CustomName</td><td>$CustomName</td></tr>
     <tr><td style=`"width:200px;`">TabSelected</td><td>$TabSelected</td></tr>
     <tr><td style=`"width:200px;`">Detailed</td><td>$Detailed</td></tr>
     <tr><td style=`"width:200px;`">PageTitle</td><td>$PageTitle</td></tr>
     <tr><td style=`"width:200px;`">PageCaption</td><td>$PageCaption</td></tr>
     <tr><td colspan=2>
-    <a href=`"$PageRef`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SearchOrder&tab=$TabSelected`">Hide Details</a>
+    <a href=`"$PageRef`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SearchOrder&n=$CustomName&tab=$TabSelected`">Hide Details</a>
     </td></tr>
 </table>
 "@
@@ -449,7 +470,7 @@ function Write-DetailInfo {
         $output = @"
 <table id=table3>
 <tr>
-<td><a href=`"$PageRef`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SearchOrder&tab=$TabSelected&zz=1`">Show Details</a></td>
+<td><a href=`"$PageRef`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SearchOrder&n=$CustomName&tab=$TabSelected&zz=1`">Show Details</a></td>
 </tr>
 </table>
 "@
@@ -459,18 +480,9 @@ function Write-DetailInfo {
 
 function New-NoteAttachment {
     param (
-        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectType,
-        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectID,
-        [parameter(Mandatory=$True)] 
-            [ValidateNotNullOrEmpty()] 
+        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] 
             [ValidateLength(1,255)]
-            [string] $Comment
-    )
-}
-
-function New-NoteAttachment {
-    param (
-        [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $Comment,
+            [string] $Comment,
         [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectType,
         [parameter(Mandatory=$True)] [ValidateNotNullOrEmpty()] [string] $ObjectID
     )

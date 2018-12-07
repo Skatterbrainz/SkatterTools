@@ -1,13 +1,19 @@
-$SearchField = $PoshQuery.f
-$SearchValue = $PoshQuery.v
-$SortField   = Get-SortField -Default "Name"
+$SearchField = Get-PageParam -TagName 'f' -Default ""
+$SearchValue = Get-PageParam -TagName 'v' -Default ""
+$SearchType  = Get-PageParam -TagName 'x' -Default 'like'
+$SortField   = Get-PageParam -TagName 's' -Default 'Name'
 $SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
-$DebugMode   = $PoshQuery.z
+$TabSelected = Get-PageParam -TagName 'tab' -Default 'General'
+$Detailed    = Get-PageParam -TagName 'zz' -Default ""
 
 $PageTitle   = "CM Devices"
 $PageCaption = "CM Devices"
 $IsFiltered  = $False
 $content = ""
+
+if ($SearchValue -eq 'all') {
+    $SearchValue = ""
+}
 
 $query = @"
 SELECT
@@ -51,7 +57,6 @@ if (![string]::IsNullOrEmpty($SearchField)) {
     $IsFiltered = $True
 }
 $query += ' order by '+$SortField+' '+$SortOrder
-
 try {
     $connection = New-Object -ComObject "ADODB.Connection"
     $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
@@ -64,15 +69,6 @@ try {
     $rs.MoveFirst()
     
     $content = '<table id=table1><tr>'
-<#
-    for ($i = 0; $i -lt $colcount; $i++) {
-        $fn = $rs.Fields($i).Name
-        if ($fn -ne 'ResourceID') {
-            $content += '<th><a href="cmdevices.ps1?s='+$fn+'" title="Sort">'+$fn+'</a></th>'
-        }
-    }
-    $content += '</tr>'
-#>
     $columns = @()
     for ($i = 0; $i -lt $colcount; $i++) {
         $fn = $rs.Fields($i).Name
@@ -118,7 +114,9 @@ try {
         $content += '</tr>'
         $rs.MoveNext()
         $rowcount++
-    }
+    } # while
+    $rs.Close()
+            
     $content += '<tr>'
     $content += '<td colspan='+$($colcount-1)+'>'+$rowcount+' rows returned'
     if ($IsFiltered -eq $true) {
