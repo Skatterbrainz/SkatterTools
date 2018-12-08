@@ -1,7 +1,7 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 2018.12.05
+## Latest: 1812.08.01 (12/8/2018)
 
 * Rewritten for PoSHServer (micro web server based on PowerShell)
 * Download PoSHServer from: http://www.poshserver.net/ 
