@@ -11,7 +11,7 @@ Skattered tools from Skatterbrainz
 * Open PowerShell console using Run as Administrator
 * Type: Start-PoshServer -HomeDirectory "<path to skattertools>"
 * Open SkatterTools at http://localhost:8080/index.htm
-* Enjoy!
+* THIS IS STILL IN DEVELOPMENT - Enjoy!
   
 ## Test Notes
 
