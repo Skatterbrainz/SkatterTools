@@ -91,12 +91,17 @@ try {
                 $fn = $rs.Fields($i).Name
                 $fv = $rs.Fields($i).Value
                 switch ($fn) {
+                    'CollectionName' {
+                        $cn = $fv
+                        $fvx = $fv
+                        break;
+                    }
                     'CollectionID' {
-                        $fvx = "<a href=`"cmcollection.ps1?id=$fv`" title=`"Details`">$fv</a>"
+                        $fvx = "<a href=`"cmcollection.ps1?f=collectionid&v=$fv&t=$CollectionType&n=$cn`" title=`"Details`">$fv</a>"
                         break;
                     }
                     'LimitedTo' {
-                        $fvx = "<a href=`"cmcollection.ps1?id=$fv`" title=`"Details`">$fv</a>"
+                        $fvx = "<a href=`"cmcollection.ps1?f=collectionid&v=$fv&t=$CollectionType`" title=`"Details`">$fv</a>"
                         break;
                     }
                     default {

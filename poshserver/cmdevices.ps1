@@ -3,7 +3,7 @@ $SearchValue = Get-PageParam -TagName 'v' -Default ""
 $SearchType  = Get-PageParam -TagName 'x' -Default 'like'
 $SortField   = Get-PageParam -TagName 's' -Default 'Name'
 $SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
-$TabSelected = Get-PageParam -TagName 'tab' -Default 'all'
+$TabSelected = Get-PageParam -TagName 'tab' -Default $DefaultComputersTab
 $Detailed    = Get-PageParam -TagName 'zz' -Default ""
 
 $PageTitle   = "CM Devices"
@@ -96,7 +96,7 @@ try {
 
         $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "cmdevices.ps1?f=$SearchField&v=$SearchValue&x=$SearchType" -SortDirection $SortOrder
         $content += "</tr>"
-
+        $xxx += "<br/>column headings defined"
         while (!$rs.EOF) {
             $content += '<tr>'
             $rid = $rs.Fields('ResourceID').value

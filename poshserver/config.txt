@@ -1,0 +1,12 @@
+﻿; SkatterTools Configuration Settings
+STTheme=stdark.css
+CmDBHost=cm02.contoso.local
+CmSMSProvider=cm02.contoso.local
+CmSiteCode=P02
+SkNotesEnable=false
+SkNotesDBHost=
+SkDBDatabase=
+SkNotesPath=notes\notes.xml
+DefaultGroupsTab=all
+DefaultUsersTab=all
+DefaultComputersTab=all
