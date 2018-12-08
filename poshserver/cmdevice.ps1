@@ -17,18 +17,13 @@ if ([string]::IsNullOrEmpty($TabSelected)) {
 $content = ""
 $tabset  = ""
 
-$tabs = @('General','Storage','Collections','Software','Tools','Notes')
-$tabset = "<table id=tablex><tr>"
-foreach ($tab in $tabs) {
-    $xlink = "cmdevice.ps1?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SortOrder&n=$CustomName&tab=$tab"
-    if ($tab -eq $TabSelected) {
-        $tabset += "<td class=`"btab`">$tab</td>"
-    }
-    else {
-        $tabset += "<td class=`"btab`" onClick=`"document.location.href='$xlink'`" title=`"$tab`">$tab</td>"
-    }
+if ($SkNotesEnable -eq 'true') {
+    $tabs = @('General','Storage','Collections','Software','Tools','Notes')
 }
-$tabset += "</tr></table>"
+else {
+    $tabs = @('General','Storage','Collections','Software','Tools')
+}
+$tabset = New-MenuTabSet2 -MenuTabs $tabs -BaseLink "cmdevice.ps1"
 
 switch ($TabSelected) {
     'General' {

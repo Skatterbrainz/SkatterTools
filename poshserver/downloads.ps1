@@ -1,4 +1,4 @@
-$PageTitle   = "Tools and Downloads"
+$PageTitle   = ""
 $PageCaption = "Tools and Downloads"
 
 @"

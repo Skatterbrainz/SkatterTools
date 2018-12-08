@@ -3,17 +3,20 @@
 # This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-# SkatterTools configuration
+# SkatterTools Site Configuration
 
 $SkWebPath     = "e:\web"
+$STTheme       = "stdark.css"
 $CmDBHost      = "cm02.contoso.local"
 $CmSMSProvider = "cm02.contoso.local"
-$SkDBHost      = "db01.contosol.local"
-$SkDBDatabase  = "skattertools"
 $CmSiteCode    = "P02"
-$STTheme       = "stdark.css"
-$SkNotesEnable = "true"
-$SkNotesPath   = "notes.xml"
+$SkNotesEnable = "false"
+$SkNotesDBHost = ""
+$SkDBDatabase  = ""
+$SkNotesPath   = "notes\notes.xml"
+$DefaultGroupsTab    = "all"
+$DefaultUsersTab     = "all"
+$DefaultComputersTab = "all"
 
 # PoSH Server Configuration
 
@@ -50,7 +53,7 @@ $ContentFilterBlackList = "audio/mpeg video/mpeg"
 $PHPCgiPath = ($env:PATH).Split(";") | Select-String "PHP"
 $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
-$STVersion  = "1812.05"
+$STVersion  = "1812.08.01"
 
 # --------------------------------------------------
 
@@ -100,22 +103,6 @@ function Get-CmSqlQueryData {
 }
 
 function Get-AdsUsers {
-    <#
-    .DESCRIPTION
-        Returns AD LDAP information for User accounts
-    .PARAMETER UserName
-        Optional: name of user to query. Default is all users
-    .EXAMPLE
-        $x = .\Get-ADsUsers.ps1
-    .EXAMPLE
-        $x = .\Get-ADsUsers.ps1 -UserName "jsmith"
-    .EXAMPLE
-        $staff = .Get-ADsUsers.ps1 | ?{$_.Manager -eq 'CN=John Smith,OU=Users,OU=CORP,DC=contoso,DC=local'}
-    .NOTES
-        1.0.0 - DS - Initial release
-        1.0.1 - DS - Added UserName parameter for focused search
-    #>
-
     [CmdletBinding()]
     param (
         [parameter(Mandatory=$False, HelpMessage="Optional user name")]
@@ -222,12 +209,34 @@ function Get-ADsComputers {
     }
 }
 
+function Get-ADsComputer {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Name 
+    )
+    $as = [adsisearcher]"(&(objectCategory=computer)(name=$Name))"
+    $comp = $as.FindOne()
+    $adprops = $comp.Properties
+    $columns = $adprops.PropertyNames
+
+    $props = [ordered]@{
+        Name     = $($adprops.cn | Out-String).Trim()
+        Fullname = $($adprops.dnshostname | Out-String).Trim()
+        Created  = [datetime]($adprops.whencreated | Out-String)
+        DN       = $($adprops.distinguishedname | Out-String).Trim()
+        SPNlist  = $($adprops.serviceprincipalname)
+        OS       = $($adprops.operatingsystem | Out-String).Trim()
+    }
+    New-Object -TypeName PSObject -Property $props
+}
+
 function Get-ADsGroups {
     [CmdletBinding()]
     param (
         [parameter(Mandatory=$False)]
-        [string] $GroupName = "",
-        [switch] $ShowMemberCounts
+        [string] $GroupName = ""
     )
     $pageSize = 200
     if ([string]::IsNullOrEmpty($GroupName)) {
@@ -243,16 +252,12 @@ function Get-ADsGroups {
     $as.PropertiesToLoad.Add('distinguishedName') | Out-Null
     $as.PageSize = $pageSize
     $results = $as.FindAll()
-    $mcount = 0
     foreach ($item in $results) {
         $cn = ($item.properties.item('name') | Out-String).Trim()
         $ouPath = ($item.Properties.item('distinguishedName') | Out-String).Trim() -replace $("CN=$cn,", "")
         [datetime]$created = ($item.Properties.item('whenCreated') | Out-String).Trim()
         [datetime]$changed = ($item.Properties.item('whenChanged') | Out-String).Trim()
         $desc = ($item.Properties.item('description') | Out-String).Trim()
-        if ($ShowMemberCounts) {
-            $mcount = (Get-ADsGroupMembers -GroupName $cn).Count
-        }
         $props  = [ordered]@{
             Name        = $cn
             DN          = ($item.Properties.item('distinguishedName') | Out-String).Trim()
@@ -260,9 +265,48 @@ function Get-ADsGroups {
             Description = $desc
             Created     = $created
             Changed     = $changed
-            Members     = $mcount
         }
         New-Object psObject -Property $props
+    }
+}
+
+function Get-ADsGroupMembers {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $GroupName
+    )
+    $group = Get-ADsGroups | Where-Object {$_.name -eq $GroupName}
+    if ($group) {
+        Write-Verbose "group information found"
+        $dn = $group.DN
+        $gx = [adsi]"LDAP://$dn"
+        $gx.member | Foreach-Object {
+            $searcher = [adsisearcher]"(distinguishedname=$_)"
+            $user = $searcher.FindOne().Properties
+            $uname   = $($user.name | out-string).Trim()
+            $created = [datetime]$($user.whencreated | Out-string).Trim() -f 'mm/DD/yyyy hh:mm'
+            $udn     = $($user.distinguishedname | Out-string).Trim()
+            if (($user.objectclass -join ',').Trim() -like "*group*") {
+                $utype = 'Group'
+            }
+            else {
+                $utype = 'User'
+            }
+            $utitle  = $($user.title | Out-String).Trim()
+            $props = [ordered]@{
+                UserName = $uname
+                Created  = $created
+                Type     = $utype
+                DN       = $udn
+                Title    = $utitle
+            }
+            New-Object PSObject -Property $props
+        }
+    }
+    else {
+        Write-Verbose "group was not found"
     }
 }
 
@@ -278,51 +322,6 @@ function Get-OSBuildName {
         '10.0 (15063)' { return '1703'; break; }
         '10.0 (14393)' { return '1607'; break; }
         '10.0 (10586)' { return '1511'; break; }
-    }
-}
-
-function Get-ADsGroupMembers {
-    [CmdletBinding()]
-    param (
-        [parameter(Mandatory=$False)]
-        [ValidateNotNullOrEmpty()]
-        [string] $GroupName = ""
-    )
-    if ([string]::IsNullOrEmpty($GroupName)) {
-        $strFilter = "(objectCategory=group)"
-    }
-    else {
-        $strFilter = "(&(objectCategory=group)(cn=$GroupName))"
-    }
-    try {
-        $as = [adsisearcher]$strFilter
-        [void]$as.PropertiesToLoad.Add('name')
-        [void]$as.PropertiesToLoad.Add('distinguishedName')
-        $as.PageSize = 1000
-        $results = $as.FindOne()
-        if ($results) {
-            $dn = $results.Properties.distinguishedName | Out-String
-            $gx = [adsisearcher]"(&(objectCategory=group)(distiguishedName=$dn))"
-            $group = $gx.FindOne()
-            $members = $group.Properties.member
-            foreach ($member in $members) {
-                $user = [adsisearcher]"(distinguishedName=$member)"
-                [void]$user.PropertiesToLoad.Add('sAmAccountName')
-                [void]$user.PropertiesToLoad.Add('displayName')
-                [void]$user.PropertiesToLoad.Add('distinguishedName')
-                if ($u = $user.FindOne()) {
-                    $props = [ordered]@{
-                        UserName    = $u.Properties.samaccountname | Out-String
-                        DisplayName = $u.Properties.displayname | Out-String
-                        DN          = $u.Properties.distinguishedname | Out-String
-                    }
-                    New-Object -TypeName PSObject -Property $props
-                }
-            }
-        } # end if
-    }
-    catch {
-        return $Error[0].Exception.Message
     }
 }
 
@@ -417,11 +416,38 @@ function New-MenuTabSet {
     return $output
 }
 
+function New-MenuTabSet2 {
+    param (
+        [parameter(Mandatory=$True)]
+        [string[]] $MenuTabs,
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $BaseLink
+    )
+    $output = "<table id=tablex><tr>"
+    foreach ($tab in $tabs) {
+        $xlink = "$baselink`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SortOrder&n=$CustomName&tab=$tab"
+        if ($tab -eq $TabSelected) {
+            $output += "<td class=`"btab`">$tab</td>"
+        }
+        else {
+            $output += "<td class=`"btab`" onClick=`"document.location.href='$xlink'`" title=`"$tab`">$tab</td>"
+        }
+    }
+    $output += "</tr></table>"
+    return $output
+}
+
 function New-ColumnSortRow {
     param (
-        $ColumnNames,
-        $BaseLink,
-        $SortDirection
+        [parameter(Mandatory=$True)]
+        [string[]] $ColumnNames,
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $BaseLink,
+        [parameter(Mandatory=$False)]
+        [ValidateSet('Asc','Desc')]
+        [string] $SortDirection = 'Asc'
     )
     $output = ""
     foreach ($col in $ColumnNames) {
@@ -445,7 +471,12 @@ function New-ColumnSortRow {
 }
 
 function Write-DetailInfo {
-    param ($PageRef = "", $Mode = "")
+    param (
+        [parameter(Mandatory=$False)]
+        [string] $PageRef = "", 
+        [parameter(Mandatory=$False)]
+        [string] $Mode = ""
+    )
     if ($Mode -eq "1") {
         $output = @"
 <h3>Page Details</h3><table id=tabledetail>
@@ -455,12 +486,14 @@ function Write-DetailInfo {
     <tr><td style=`"width:200px;`">SortField</td><td>$SortField</td></tr>
     <tr><td style=`"width:200px;`">SortOrder</td><td>$SortOrder</td></tr>
     <tr><td style=`"width:200px;`">CustomName</td><td>$CustomName</td></tr>
+    <tr><td style=`"width:200px;`">CollectionType</td><td>$CollectionType</td></tr>
     <tr><td style=`"width:200px;`">TabSelected</td><td>$TabSelected</td></tr>
     <tr><td style=`"width:200px;`">Detailed</td><td>$Detailed</td></tr>
     <tr><td style=`"width:200px;`">PageTitle</td><td>$PageTitle</td></tr>
     <tr><td style=`"width:200px;`">PageCaption</td><td>$PageCaption</td></tr>
+    <tr><td style=`"width:200px;`">Last Step</td><td>$xxx</td></tr>
     <tr><td colspan=2>
-    <a href=`"$PageRef`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SearchOrder&n=$CustomName&tab=$TabSelected`">Hide Details</a>
+    <a href=`"$PageRef`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SearchOrder&t=$CollectionType&n=$CustomName&tab=$TabSelected`">Hide Details</a>
     </td></tr>
 </table>
 "@
@@ -528,3 +561,43 @@ function Get-NoteAttachments {
         }
     }
 }
+
+function Show-NoteAttachments {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ObjectType,
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ObjectName,
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ReturnBaseLink,
+        [parameter(Mandatory=$False)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ReturnBaseSearchField = ""
+    )
+    $notes = Get-NoteAttachments -ObjectType $ObjectType -ObjectID $ObjectName
+    $output = "<table id=table1>"
+    $output += "<tr><th style=`"width:200px`">Date</th>"
+    $output += "<th style=`"width:200px`">Author</th><th>Comment</th></tr>"
+    if ($notes.count -gt 0) {
+        foreach ($note in $notes) {
+            $output += "<tr><td>$($note.date)</td>"
+            $output += "<td>$($note.author)</td>"
+            $output += "<td>$($note.comment)</td></tr>"
+        }
+    }
+    else {
+        $output += "<tr><td colspan='3'>No Notes were found</td></tr>"
+    }
+    $output += "</table><br/>"
+    $output += "<form name='form1' id='form1' method='post' action='attachnote.ps1'>"
+    $output += "<input type='hidden' name='otype' id='otype' value='$ObjectType' />"
+    $output += "<input type='hidden' name='oid' id='oid' value='$ObjectName' />"
+    $output += "<input type='submit' class='button1' name='ok' id='ok' value='Add Note' />"
+    $output += "</form>"
+    return $output
+}
+
+$LastLoadTime = Get-Date

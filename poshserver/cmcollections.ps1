@@ -6,9 +6,16 @@ $SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
 $TabSelected = Get-PageParam -TagName 'tab' -Default 'all'
 $Detailed    = Get-PageParam -TagName 'zz' -Default ""
 $CustomName  = ""
+$CollectionType = Get-PageParam -TagName 't' -Default '2'
 
-$PageTitle   = "CM Collections"
-$PageCaption = "CM Collections"
+if ($CollectionType -eq '2') {
+    $Ctype = "Device"
+}
+else {
+    $Ctype = "User"
+}
+$PageTitle   = "CM $CType Collections"
+$PageCaption = "CM $CType Collections"
 $content     = ""
 $tabset      = ""
 
@@ -19,8 +26,10 @@ if ($SearchValue -eq 'all') {
     $SearchValue = ""
 }
 else {
-    $PageTitle += " ($SearchValue)"
-    $PageCaption = $PageTitle
+    if (![string]::IsNullOrEmpty($SearchValue)) {
+        $PageTitle += " ($SearchValue)"
+        $PageCaption = $PageTitle
+    }
 }
 
 $query = 'SELECT DISTINCT 
@@ -40,12 +49,15 @@ FROM
 
 if (![string]::IsNullOrEmpty($SearchValue)) {
     if ($SearchType -eq 'like') {
-        $query += " WHERE ($SearchField like '$SearchValue%')"
+        $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField like '$SearchValue%')"
     }
     else {
-        $query += " WHERE ($SearchField = '$SearchValue')"
+        $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField = '$SearchValue')"
     }
     $IsFiltered = $True
+}
+else {
+    $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType)"
 }
 $query += " ORDER BY $SortField $SortOrder"
 $xxx = "query: $query"
@@ -78,16 +90,30 @@ try {
             for ($i = 0; $i -lt $colcount; $i++) {
                 $fn = $rs.Fields($i).Name
                 $fv = $rs.Fields($i).Value
-                $content += "<td>$fv</td>"
+                switch ($fn) {
+                    'CollectionID' {
+                        $fvx = "<a href=`"cmcollection.ps1?id=$fv`" title=`"Details`">$fv</a>"
+                        break;
+                    }
+                    'LimitedTo' {
+                        $fvx = "<a href=`"cmcollection.ps1?id=$fv`" title=`"Details`">$fv</a>"
+                        break;
+                    }
+                    default {
+                        $fvx = $fv
+                        break;
+                    }
+                } # switch
+                $content += "<td>$fvx</td>"
             }
             $content += "</tr>"
             $rs.MoveNext();
             $rowcount++
         } # while
     }
-    $content += "<tr><td colspan=`"$($colcount-1)`">$rowcount rows returned"
+    $content += "<tr><td colspan=`"$($colcount)`">$rowcount rows returned"
     if ($IsFiltered -eq $true) {
-        $content += " - <a href=`"cmdevicecollections.ps1`" title=`"Show All`">Show All</a>"
+        $content += " - <a href=`"cmcollections.ps1?t=$CollectionType`" title=`"Show All`">Show All</a>"
     }
     $content += "</td></tr>"
     $content += "</table>"
@@ -101,8 +127,8 @@ finally {
     }
 }
 
-$tabset = New-MenuTabSet -BaseLink "cmdevicecollections.ps1?x=like&f=collectionname&v=" -DefaultID $TabSelected
-$content += Write-DetailInfo -PageRef "cmdevicecollections.ps1" -Mode $Detailed
+$tabset = New-MenuTabSet -BaseLink "cmcollections.ps1?t=$CollectionType&x=like&f=collectionname&v=" -DefaultID $TabSelected
+$content += Write-DetailInfo -PageRef "cmcollections.ps1" -Mode $Detailed
 
 @"
 <html>
