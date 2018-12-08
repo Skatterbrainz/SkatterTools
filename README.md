@@ -1,7 +1,16 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 1812.08.01 (12/8/2018)
+## Latest: 1812.08.04 (12/8/2018)
+
+### Updates
+
+* NOTE: Save your config.ps1 file first! You may want to use it for...
+* Moved functions out of config.ps1 to sktools.ps1
+* Moved skattertools variables out of config.ps1 to config.txt
+* Updates to CM collections, CM users, AD users, added missing license page
+
+## Overview
 
 * Rewritten for PoSHServer (micro web server based on PowerShell)
 * Download PoSHServer from: http://www.poshserver.net/ 
