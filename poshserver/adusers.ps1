@@ -3,7 +3,7 @@ $SearchValue = Get-PageParam -TagName 'v' -Default ""
 $SearchType  = Get-PageParam -TagName 'x' -Default 'like'
 $SortField   = Get-PageParam -TagName 's' -Default 'UserName'
 $SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
-$TabSelected = Get-PageParam -TagName 'tab' -Default 'all'
+$TabSelected = Get-PageParam -TagName 'tab' -Default $DefaultUsersTab
 $Detailed    = Get-PageParam -TagName 'zz' -Default ""
 
 $PageTitle   = "AD Users"

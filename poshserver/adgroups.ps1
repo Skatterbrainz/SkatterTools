@@ -1,23 +1,59 @@
-$SearchField = $PoshQuery.f
-$SearchValue = $PoshQuery.v
-$SortField   = Get-SortField -Default "Name"
-$DebugMode   = $PoshQuery.z
+﻿$SearchField = Get-PageParam -TagName 'f' -Default ""
+$SearchValue = Get-PageParam -TagName 'v' -Default ""
+$SearchType  = Get-PageParam -TagName 'x' -Default 'like'
+$SortField   = Get-PageParam -TagName 's' -Default 'Name'
+$SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
+$TabSelected = Get-PageParam -TagName 'tab' -Default $DefaultGroupsTab
+$Detailed    = Get-PageParam -TagName 'zz' -Default ""
 
 $PageTitle   = "AD Groups"
 $PageCaption = "AD Groups"
-$content = ""
+$content     = ""
+$tabset      = ""
+
+if ($SearchValue -eq 'all') {
+    $SearchValue = ""
+}
+else {
+    if ($SearchField -eq 'Name') {
+        $TabSelected = $SearchValue
+        $PageTitle += " ($SearchValue)"
+        $PageCaption = $PageTitle
+    }
+}
 
 try {
-    $groups = Get-ADsGroups | Sort-Object $SortField
+    if ($SortOrder -eq 'Asc') {
+        $groups = Get-ADsGroups | Sort-Object $SortField
+    }
+    else {
+        $groups = Get-ADsGroups | Sort-Object $SortField -Descending
+    }
     if (![string]::IsNullOrEmpty($SearchValue)) {
-        $groups = $groups | Where-Object {$_."$SearchField" -eq $SearchValue}
+        switch ($SearchType) {
+            'like' {
+                $groups = $groups | Where-Object {$_."$SearchField" -like "*$SearchValue*"}
+                break;
+            }
+            'begins' {
+                $groups = $groups | Where-Object {$_."$SearchField" -like "$SearchValue*"}
+                break;
+            }
+            'ends' {
+                $groups = $groups | Where-Object {$_."$SearchField" -like "*$SearchValue"}
+                break;
+            }
+            default {
+                $groups = $groups | Where-Object {$_."$SearchField" -eq "$SearchValue"}
+                break;
+            }
+        }
+
         $IsFiltered = $True
     }
-    $columns = @('Name','Description','Created','Changed')
+    $columns = @('Name','Description')
     $content = '<table id=table1><tr>'
-    foreach ($col in $columns) {
-        $content += '<th>'+$col+'</th>'
-    }
+    $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "adgroups.ps1?f=$SearchField&v=$SearchValue&x=$SearchType" -SortDirection $SortOrder
     $content += '</tr>'
     $rowcount = 0
     foreach ($group in $groups) {
@@ -27,26 +63,29 @@ try {
             switch ($col) {
                 'Name' {
                     $fvx = '<a href="adgroup.ps1?f=Name&v='+$fv+'" title="Details">'+$fv+'</a>'
+                    $content += '<td style=`"width:30%`">'+$fvx+'</td>'
                 }
                 default {
                     $fvx = $fv
+                    $content += '<td>'+$fvx+'</td>'
                 }
             }
-            $content += '<td>'+$fvx+'</td>'
         }
         $content += '</tr>'
         $rowcount++
     }
     $content += '<tr>'
-    $content += '<th colspan='+$($columns.Count)+'>'+$rowcount+' groups found'
+    $content += '<td colspan='+$($columns.Count)+'>'+$rowcount+' groups found'
     if ($IsFiltered -eq $True) {
         $content += ' - <a href="adgroups.ps1" title="Show All">Show All</a>'
     }
-    $content += '</th></tr></table>'    
+    $content += '</td></tr></table>'    
 }
 catch {
     $content = "Error: $($Error[0].Exception.Message)"
 }
+
+$tabset = New-MenuTabSet -BaseLink 'adgroups.ps1?x=begins&f=name&v=' -DefaultID $TabSelected
 
 @"
 <html>
@@ -58,6 +97,7 @@ catch {
 
 <h1>$PageCaption</h1>
 
+$tabset
 $content
 
 </body>

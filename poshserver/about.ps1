@@ -16,13 +16,14 @@ $STPageCaption = "About SkatterTools"
     <tr><td>ConfigMgr DB Host</td><td>$CmDBHost</td></tr>
     <tr><td>ConfigMgr Site</td><td>$CmSiteCode</td></tr>
 	<tr><td>Current User</td><td>$PoshUserName</td></tr>
-    <tr><td>Install Path</td><td>$SkWebPath
-    <tr><td>SMS Provider</td><td>$CmSMSProvider
-    <tr><td>SkDBHost</td><td>$SkDBHost
-    <tr><td>SkDBName</td><td>$SkDBDatabase
-    <tr><td>Web Theme</td><td>$STTheme
-    <tr><td>Notes Enabled</td><td>$SkNotesEnable
-    <tr><td>Notes Path</td><td>$SkNotesPath
+    <tr><td>Install Path</td><td>$SkWebPath</td></tr>
+    <tr><td>SMS Provider</td><td>$CmSMSProvider</td></tr>
+    <tr><td>SkDBHost</td><td>$SkNotesDBHost</td></tr>
+    <tr><td>SkDBName</td><td>$SkDBDatabase</td></tr>
+    <tr><td>Web Theme</td><td>$STTheme</td></tr>
+    <tr><td>Notes Enabled</td><td>$SkNotesEnable</td></tr>
+    <tr><td>Notes Path</td><td>$SkNotesPath</td></tr>
+    <tr><td>Last Load</td><td>$LastLoadTime</td></tr>
 </table>
 </body>
 </html>

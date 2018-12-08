@@ -66,18 +66,13 @@ switch ($TabSelected) {
     }
 }
 
-$tablist = @('General','Groups','Notes')
-$tabset = '<table id=tablex><tr>'
-foreach ($tab in $tablist) {
-    if ($TabSelected -eq $tab) {
-        $tabset += "<td class=`"dyn2`" style=`"width:100px`">$tab</td>"
-    }
-    else {
-        $xlink = "aduser.ps1?f=username&v=$SearchValue&x=exact&tab=$tab"
-        $tabset += "<td class=`"dyn1`" style=`"width:100px`" onMouseOver=`"this.className='dyn2'`" onMouseOut=`"this.className='dyn1'`" onClick=`"document.location.href='$xlink'`">$tab</td>"
-    }
+if ($SkNotesEnable -eq 'true') {
+    $tabs = @('General','Groups','Notes')
 }
-$tabset += '</tr></table>'
+else {
+    $tabs = @('General','Groups')
+}
+$tabset = New-MenuTabSet2 -MenuTabs $tabs -BaseLink "aduser.ps1"
 
 $content += Write-DetailInfo -PageRef "aduser.ps1" -Mode $Detailed
 

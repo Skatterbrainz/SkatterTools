@@ -1,10 +1,10 @@
-﻿$SearchField = $PoshQuery.f
-$SearchValue = $PoshQuery.v
-$SearchType  = $PoshQuery.x
-$SortOrder   = $PoshQuery.so
-$SortField   = Get-SortField -Default "Name"
-$DebugMode   = $PoshQuery.z
-$TabSelected = $PoshQuery.tab
+﻿$SearchField = Get-PageParam -TagName 'f' -Default ""
+$SearchValue = Get-PageParam -TagName 'v' -Default ""
+$SearchType  = Get-PageParam -TagName 'x' -Default 'like'
+$SortField   = Get-PageParam -TagName 's' -Default 'Name'
+$SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
+$TabSelected = Get-PageParam -TagName 'tab' -Default $DefaultGroupsTab
+$Detailed    = Get-PageParam -TagName 'zz' -Default ""
 
 $PageTitle   = "AD Computers"
 $PageCaption = "AD Computers"
@@ -42,10 +42,7 @@ try {
     }
     $columns = @('Name','OS','OSVer','Created','LastLogon')
     $content = '<table id=table1><tr>'
-    $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "adcomputer.ps1?f=$SearchField&v=$fv&x=$SortType
-    foreach ($col in $columns) {
-        $content += '<th>'+$col+'</th>'
-    }
+    $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "adcomputer.ps1?f=$SearchField&v=$fv&x=$SortType"
     $content += '</tr>'
     $rowcount = 0
     foreach ($comp in $computers) {
@@ -54,11 +51,11 @@ try {
             $fv = $($comp."$col")
             switch ($col) {
                 'Name' {
-                    $fvx = '<a href="adcomputer.ps1?f=Name&v='+$fv+'" title="Details">'+$fv+'</a>'
+                    $fvx = "<a href=`"adcomputer.ps1?f=Name&v=$fv`" title=`"Details`">$fv</a>"
                     break;
                 }
                 'OS' {
-                    $fvx = '<a href="adcomputers.ps1?f=OS&v='+$fv+'" title="Filter">'+$fv+'</a>'
+                    $fvx = "<a href=`"adcomputers.ps1?f=OS&v=$fv`" title=`"Filter`">$fv</a>"
                     break;
                 }
                 'OSVer' {
@@ -81,7 +78,7 @@ try {
     $content += '<tr>'
     $content += '<th colspan='+$($columns.Count)+'>'+$rowcount+' computers found'
     if ($IsFiltered -eq $True) {
-        $content += ' - <a href="adcomputers.ps1" title="Show All">Show All</a>'
+        $content += " - <a href=`"adcomputers.ps1`" title=`"Show All`">Show All</a>"
     }
     $content += '</th></tr></table>'    
 }
@@ -89,7 +86,7 @@ catch {
     $content = "Error: $($Error[0].Exception.Message)"
 }
 
-$tabset = New-MenuTabSet -BaseLink 'adcomputers.ps1?x=like&f=name&v=' -DefaultID $TabSelected
+$tabset = New-MenuTabSet -BaseLink "adcomputers.ps1?x=like&f=name&v=" -DefaultID $TabSelected
 
 @"
 <html>
