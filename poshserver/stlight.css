@@ -1,17 +1,17 @@
 /*
 '****************************************************************
-' Filename..: stdark.css
-' Purpose...: dark theme CSS stylesheet for SkatterTools
+' Filename..: stlight.css
+' Purpose...: light theme CSS stylesheet for SkatterTools
 ' Version...: 2018.12.15
 '****************************************************************
 */
 body {
 	font-family: 'Segoe UI', 'Lucida Grande', Verdana, Arial, Helvetica, sans-serif;
-	background-color: #303030;
+	background-color: #fff;
 }
 
 .bannerbody {
-    background-color: #262626;
+    background-color: #eee;
 	font-family: arial,helvetica;
 	font-size: 44pt;
 	padding-left: 10px;
@@ -20,10 +20,10 @@ body {
     cursor: pointer;
 }
 
-a:link    {color: #c0c0c0; text-decoration: none;}
-a:visited {color: #c0c0c0; text-decoration: none;}
-a:hover   {color: #2E86C1; text-decoration: underline;}
-a:active  {color: darkred;}
+a:link    {color: blue; text-decoration: none;}
+a:visited {color: blue; text-decoration: none;}
+a:hover   {color: red; text-decoration: underline;}
+a:active  {color: red;}
 
 h1,h2,h3 {
 	font-family: arial,helvetica;
@@ -31,8 +31,8 @@ h1,h2,h3 {
 }
 
 .accordion {
-    background-color: #303030;
-    color: #eee;
+    background-color: #fff;
+    color: #000;
     cursor: pointer;
     padding: 18px;
     width: 100%;
@@ -45,8 +45,8 @@ h1,h2,h3 {
 }
 
 .statbutton {
-    background-color: #303030;
-    color: #eee;
+    background-color: #eee;
+    color: #000;
     cursor: pointer;
     padding: 18px;
     width: 100%;
@@ -59,13 +59,13 @@ h1,h2,h3 {
 }
 
 .active, .accordion:hover, .statbutton:hover {
-    background-color: #000;
-	color: white;
+    background-color: #c0c0c0;
+	color: 000;
 }
 
 .panel {
     padding: 0 18px;
-    background-color: #343e4f;
+    background-color: #fff;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.2s ease-out;
@@ -100,16 +100,16 @@ h1,h2,h3 {
     padding: 5px;
 }
 
-#table1 tr:nth-child(even){background-color: #435168; color:#fff;}
-#table1 tr:nth-child(odd){background-color: #343e4f; color:#fff;}
-#table1 tr:hover {background-color: #8595b2; color: #000;}
+#table1 tr:nth-child(even){background-color: #eee; color:#000;}
+#table1 tr:nth-child(odd){background-color: #e1e1e1; color:#000;}
+#table1 tr:hover {background-color: #eee; color: #000;}
 
 #table1 th {
     padding-top: 8px;
     padding-bottom: 8px;
     text-align: center;
-    background-color: #343e4f;
-    color: #fff;
+    background-color: #eee;
+    color: #000;
 }
 
 #table2 {
@@ -128,11 +128,11 @@ h1,h2,h3 {
     padding-top: 8px;
     padding-bottom: 8px;
     text-align: center;
-    background-color: #343e4f;
-    color: #fff;
+    background-color: #eee;
+    color: #000;
 }
 
-#table2 tr {background-color: #343e4f; color:#fff;}
+#table2 tr {background-color: #eee; color:#000;}
 
 #table3 {
     border: 0;
@@ -156,8 +156,8 @@ h1,h2,h3 {
     width: 100%;
     border: 1px solid #eee;
     padding: 5px;
-    color: #fff;
-    background-color: #386040;
+    color: #000;
+    background-color: #eee;
 }
 
 #tablex {
@@ -167,7 +167,7 @@ h1,h2,h3 {
 }
 
 #tablex td, #tablex th {
-    border: 1pt solid #303030;
+    border: 1pt solid #eee;
     padding: 5px;
 }
 
@@ -191,15 +191,15 @@ h1,h2,h3 {
 	font-family: verdana,sans;
 	margin-top: 10px;
 	font-size: 10pt;
-	color: #c0c0c0;
+	color: #000;
 }
 
 .dyn1 {
     text-align: center;
     font-family: verdana;
     font-size: 10pt;
-    background-color: #435168;
-    color: #fff;
+    background-color: #eee;
+    color: #000;
 }
 
 .dyn2 {
@@ -207,7 +207,7 @@ h1,h2,h3 {
     font-family: verdana;
     font-size: 10pt;
     cursor: pointer;
-    background-color: #2E86C1;
+    background-color: #e1e1e1;
     color: #000;
 }
 
@@ -215,8 +215,8 @@ h1,h2,h3 {
     text-align: center;
     font-family: verdana;
     font-size: 10pt;
-    background-color: #435168;
-    color: #fff;
+    background-color: #eee;
+    color: #000;
     width: 120px;
 }
 
@@ -225,7 +225,7 @@ h1,h2,h3 {
     font-family: verdana;
     font-size: 10pt;
     cursor: pointer;
-    background-color: #2E86C1;
+    background-color: #e1e1e1;
     color: #000;
     width: 120px;
 }

@@ -6,36 +6,36 @@
 <link rel="stylesheet" type="text/css" href="$STTheme"/>
 <script src="accordion.js"></script>
 </head>
-<body style="margin: 0;background:#303030;">
+<body style="margin: 0;">
 
 <button class="statbutton" onClick="window.top.location.href='./index.htm'" title="Dashboard" target="main">Dashboard</button>
 
-<button class="accordion" title="Assets">Assets</button>
+<button class="accordion" title="Configuration Manager Assets">CM Assets</button>
 <div class="panel">
 	<ul class="ulmenu">
 		<li class="limenu"><a href="cmusers.ps1" title="Users" target="main">Users</a></li>
 		<li class="limenu"><a href="cmdevices.ps1" title="Devices" target="main">Devices</a></li>
-		<li class="limenu"><a href="cmucollections.ps1" title="User Collections" target="main">User Collections</a></li>
-		<li class="limenu"><a href="cmdcollections.ps1" title="Device Collections" target="main">Device Collections</a></li>
-        <li class="limenu"><a href="formtest.ps1" title="Search" target="main">Search</a></li>
+		<li class="limenu"><a href="cmcollections.ps1?t=1" title="User Collections" target="main">User Collections</a></li>
+		<li class="limenu"><a href="cmcollections.ps1?t=2" title="Device Collections" target="main">Device Collections</a></li>
+        <li class="limenu"><a href="search.ps1?g=cm" title="Search" target="main">Search</a></li>
 	</ul>
 </div>
 
-<button class="accordion" title="Software">Software</button>
+<button class="accordion" title="Configuration Manager Software">CM Software</button>
 <div class="panel">
 	<ul class="ulmenu">
-		<li class="limenu"><a href="cmapps.htm" target="main" title="Applications">Applications</a></li>
-		<li class="limenu"><a href="cmpackages.htm" target="main" title="Packages">Packages</a></li>
+		<li class="limenu"><a href="cmapps.ps1" target="main" title="Applications">Applications</a></li>
+		<li class="limenu"><a href="cmpackages.ps1" target="main" title="Packages">Packages</a></li>
 		<li class="limenu">Software Updates</li>
 		<li class="limenu">Operating Systems</li>
 		<li class="limenu">Boot Images</li>
 		<li class="limenu">Task Sequences</li>
 		<li class="limenu">Scripts</li>
-		<li class="limenu"><a href="https://chocolatey.org/packages" target="main">Choco Packages</a></li>
+        <li class="limenu"><a href="search.ps1?g=cm" title="Search" target="main">Search</a></li>
 	</ul>
 </div>
 
-<button class="accordion" title="Monitoring">Monitoring</button>
+<button class="accordion" title="Configuration Manager Monitoring">CM Monitoring</button>
 <div class="panel">
 	<ul class="ulmenu">
 		<li class="limenu">Queries</li>
@@ -46,7 +46,7 @@
 	</ul>
 </div>
 
-<button class="accordion" title="Administrators">Administration</button>
+<button class="accordion" title="Configuration Manager Site">CM Site</button>
 <div class="panel">
 	<ul class="ulmenu">
 		<li class="limenu">Hierarchy</li>
@@ -69,13 +69,10 @@
 		<li class="limenu"><a href="adgroups.ps1" target="main" title="AD Groups">Groups</a></li>
 		<li class="limenu"><a href="adcomputers.ps1" target="main" title="AD Computers">Computers</a></li>
 		<li class="limenu">Forest</li>
-		<li class="limenu">Sites</li>
-		<li class="limenu">Site Links</li>
-		<li class="limenu">Printers</li>
-		<li class="limenu">Shares</li>
-		<li class="limenu">OU Browser</li>
-		<li class="limenu">Group Policy</li>
+		<li class="limenu"><a href="adsites.ps1" target="main" title="AD Sites">Sites</a></li>
+		<li class="limenu"><a href="adbrowser.ps1" target="main" title="AD OU Explorer">OU Explorer</a></li>
         <li class="limenu"><a href="adreps.ps1" target="main">AD Reports</a></li>
+        <li class="limenu"><a href="search.ps1?g=ad" title="Search" target="main">Search</a></li>
 	</ul>
 </div>
 
