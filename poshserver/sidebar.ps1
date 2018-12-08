@@ -79,13 +79,12 @@
 <button class="accordion" title="Support">Support</button>
 <div class="panel">
 	<ul class="ulmenu">
-		<li class="limenu">ConfigMgr Docs</li>
+		<li class="limenu"><a href="https://docs.microsoft.com/en-us/sccm/" target="_new" title="ConfigMgr Docs">ConfigMgr Docs</a></li>
 		<li class="limenu"><a href="downloads.ps1" target="main" title="Downloads">Downloads</a></li>
 		<li class="limenu"><a href="learning.ps1" target="main" title="Learning">Learning</a></li>
-		<li class="limenu">CMWT Help</li>
-		<li class="limenu">CMWT Feedback</li>
+		<li class="limenu"><a href="help.ps1" target="main" title="SkatterTools Help">SkatterTools Help</a></li>
 		<li class="limenu">Donate!</li>
-		<li class="limenu"><a href="https://github.com/Skatterbrainz/SkatterTools/blob/master/README.md" target="main" title="Check for Update">Check for Update</a></li>
+		<li class="limenu"><a href="https://github.com/Skatterbrainz/SkatterTools/blob/master/README.md" target="_new" title="Check for Update">Check for Update</a></li>
 		<li class="limenu"><a href="about.ps1" target="main" title="About">About</a></li>
 	</ul>
 </div>

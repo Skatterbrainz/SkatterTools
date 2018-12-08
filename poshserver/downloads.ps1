@@ -27,7 +27,7 @@ $PageCaption = "Tools and Downloads"
 			<h2>Software Updates</h2>
 
 			<ul class="ulmenu">
-				<li class="limain">Dam Good Admin: WSUS Configuration Script</li>
+				<li class="limain"><a href="https://damgoodadmin.com/2018/10/17/latest-software-maintenance-script-making-wsus-suck-slightly-less/" target="_new">Dam Good Admin: WSUS Configuration Script</a></li>
 			</ul>
 		</td>
 	</tr>
@@ -38,7 +38,7 @@ $PageCaption = "Tools and Downloads"
 			<ul class="ulmenu">
 				<li class="limain"><a href="https://docs.microsoft.com/en-us/windows-hardware/get-started/adk-install" target="_new">Windows ADK</a></li>
 				<li class="limain"><a href="https://docs.microsoft.com/en-us/sccm/mdt/" target="_new">Microsoft Deployment Toolkit (MDT)</a></li>
-				<li class="limain">David Segura: OSBuilder</li>
+				<li class="limain"><a href="https://www.osdeploy.com/" target="_new">David Segura: OSBuilder</a></li>
 				<li class="limain">Phil Pritchett: RunOSBuilder</li>
 			</ul>
         </td>
@@ -55,7 +55,13 @@ $PageCaption = "Tools and Downloads"
 			<ul class="ulmenu">
 				<li class="limain"><a href="https://code.visualstudio.com/" target="_new" title="Visual Studio Code">Visual Studio Code</a></li>
 				<li class="limain"><a href="https://chocolatey.org" target="main" title="Chocolatey">Chocolatey</a></li>
-			</ul>        </td>
+			</ul>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Want more links added?  Tweet them to me! <a href="https://twitter.com/skatterbrainzz" target="_new">@skatterbrainzz</a>
+        </td>
     </tr>
 </table>
 
