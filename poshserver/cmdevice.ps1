@@ -27,74 +27,76 @@ $tabset = New-MenuTabSet2 -MenuTabs $tabs -BaseLink "cmdevice.ps1"
 
 switch ($TabSelected) {
     'General' {
-
-        $query = @"
-SELECT
-	ResourceID,
-	[Name],
-	Manufacturer,
-	Model,
-	SerialNumber,
-	OperatingSystem,
-	OSBuild,
-	ClientVersion,
-	LastHwScan,
-	LastDDR,
-	LastPolicyRequest,
-	ADSite 
-FROM (
-SELECT 
-	dbo.v_R_System.ResourceID, 
-	dbo.v_R_System.Name0 as [Name], 
-	dbo.v_GS_COMPUTER_SYSTEM.Manufacturer0 as Manufacturer, 
-	dbo.v_GS_COMPUTER_SYSTEM.Model0 as Model, 
-	dbo.v_GS_SYSTEM_ENCLOSURE.SerialNumber0 as SerialNumber, 
-	dbo.vWorkstationStatus.ClientVersion, 
-	dbo.vWorkstationStatus.LastHardwareScan as LastHwScan, 
-	dbo.vWorkstationStatus.LastPolicyRequest, 
-	dbo.vWorkstationStatus.LastDDR,
-	dbo.v_R_System.AD_Site_Name0 as ADSite, 
-	dbo.v_GS_OPERATING_SYSTEM.Caption0 as OperatingSystem, 
-	dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 as OSBuild
-FROM 
-	dbo.v_R_System INNER JOIN
-    dbo.v_GS_COMPUTER_SYSTEM ON 
-	dbo.v_R_System.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
-    dbo.v_GS_SYSTEM_ENCLOSURE ON 
-	dbo.v_R_System.ResourceID = dbo.v_GS_SYSTEM_ENCLOSURE.ResourceID INNER JOIN
-    dbo.vWorkstationStatus ON 
-	dbo.v_R_System.ResourceID = dbo.vWorkstationStatus.ResourceID INNER JOIN
-    dbo.v_GS_OPERATING_SYSTEM ON 
-	dbo.v_R_System.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
-) AS T1 
-WHERE ($SearchField = '$SearchValue') 
-"@
-
         try {
+            $query = 'SELECT
+	            ResourceID,
+	            [Name],
+	            Manufacturer,
+	            Model,
+	            SerialNumber,
+	            OperatingSystem,
+	            OSBuild,
+	            ClientVersion,
+	            LastHwScan,
+	            LastDDR,
+	            LastPolicyRequest,
+	            ADSite 
+            FROM (
+            SELECT 
+	            dbo.v_R_System.ResourceID, 
+	            dbo.v_R_System.Name0 as [Name], 
+	            dbo.v_GS_COMPUTER_SYSTEM.Manufacturer0 as Manufacturer, 
+	            dbo.v_GS_COMPUTER_SYSTEM.Model0 as Model, 
+	            dbo.v_GS_SYSTEM_ENCLOSURE.SerialNumber0 as SerialNumber, 
+	            dbo.vWorkstationStatus.ClientVersion, 
+	            dbo.vWorkstationStatus.LastHardwareScan as LastHwScan, 
+	            dbo.vWorkstationStatus.LastPolicyRequest, 
+	            dbo.vWorkstationStatus.LastDDR,
+	            dbo.v_R_System.AD_Site_Name0 as ADSite, 
+	            dbo.v_GS_OPERATING_SYSTEM.Caption0 as OperatingSystem, 
+	            dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 as OSBuild
+            FROM 
+	            dbo.v_R_System INNER JOIN
+                dbo.v_GS_COMPUTER_SYSTEM ON 
+	            dbo.v_R_System.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
+                dbo.v_GS_SYSTEM_ENCLOSURE ON 
+	            dbo.v_R_System.ResourceID = dbo.v_GS_SYSTEM_ENCLOSURE.ResourceID INNER JOIN
+                dbo.vWorkstationStatus ON 
+	            dbo.v_R_System.ResourceID = dbo.vWorkstationStatus.ResourceID INNER JOIN
+                dbo.v_GS_OPERATING_SYSTEM ON 
+	            dbo.v_R_System.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
+            ) AS T1 
+            WHERE ('+$SearchField+' = '''+$SearchValue+''')'
+            $xxx = "query: $query"
             $connection = New-Object -ComObject "ADODB.Connection"
             $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
             $connection.Open($connString);
+            $xxx += "<br/>connection opened"
             $IsOpen = $True
             $rs = New-Object -ComObject "ADODB.RecordSet"
             $rs.Open($query, $connection)
-            $colcount = $rs.Fields.Count
-            $rs.MoveFirst()
-    
-            $content = '<table id=table2><tr>'
-
-            for ($i = 0; $i -lt $colcount; $i++) {
-                $fn = $rs.Fields($i).Name
-                $fv = $rs.Fields($i).Value
-                if (![string]::IsNullOrEmpty($fv)) {
-                    $fvx = '<a href="cmdevices.ps1?f='+$fn+'&v='+$fv+'" title="Filter">'+$fv+'</a>'
-                }
-                else {
-                    $fvx = ""
-                }
-                $content += '<tr><td style="width:200px;background-color:#435168">'+$fn+'</td>'
-                $content += '<td>'+$fvx+'</td></tr>'        
+            if ($rs.BOF -and $rs.EOF) {
+                $content = "<table id=table2><tr><td style=`"height:150px;text-align:center`">No matching record found</td></tr></table>"
             }
-            $content += '</table>'
+            else {
+                $xxx += "<br/>recordset returned data"
+                $colcount = $rs.Fields.Count
+                $rs.MoveFirst()
+                $content = '<table id=table2><tr>'
+                for ($i = 0; $i -lt $colcount; $i++) {
+                    $fn = $rs.Fields($i).Name
+                    $fv = $rs.Fields($i).Value
+                    if (![string]::IsNullOrEmpty($fv)) {
+                        $fvx = '<a href="cmdevices.ps1?f='+$fn+'&v='+$fv+'" title="Filter">'+$fv+'</a>'
+                    }
+                    else {
+                        $fvx = ""
+                    }
+                    $content += '<tr><td style="width:200px;background-color:#435168">'+$fn+'</td>'
+                    $content += '<td>'+$fvx+'</td></tr>'        
+                }
+                $content += '</table>'
+            }
         }
         catch {
             $content += "Error: $($Error[0].Exception.Message)"
@@ -110,86 +112,87 @@ WHERE ($SearchField = '$SearchValue')
         break;
     }
     'Collections' {
-        $query = @"
-SELECT DISTINCT 
-    dbo.v_FullCollectionMembership.CollectionID, 
-    dbo.v_Collection.Name, 
-    dbo.v_Collection.MemberCount 
-FROM 
-    dbo.v_FullCollectionMembership INNER JOIN 
-    dbo.v_Collection ON 
-    dbo.v_FullCollectionMembership.CollectionID = dbo.v_Collection.CollectionID 
-    INNER JOIN dbo.v_Collections ON 
-    dbo.v_Collection.Name = dbo.v_Collections.CollectionName 
-WHERE 
-    (dbo.v_Collection.CollectionID IN 
-      (SELECT DISTINCT CollectionID 
-       FROM dbo.v_FullCollectionMembership AS T2 
-       WHERE (ResourceID = $SearchValue)
-      )
-    ) 
-ORDER BY dbo.v_Collection.Name
-"@
+
         $xxx = "query defined"
         try {
-#            $content = $query
+            $query = 'SELECT DISTINCT 
+            dbo.v_FullCollectionMembership.CollectionID, dbo.v_Collection.Name AS CollectionName 
+            FROM dbo.v_FullCollectionMembership INNER JOIN dbo.v_Collection ON 
+            dbo.v_FullCollectionMembership.CollectionID = dbo.v_Collection.CollectionID 
+            WHERE (dbo.v_FullCollectionMembership.Name = '''+$CustomName+''') 
+            ORDER BY CollectionName'
+            $xxx = "query: $query"
             $connection = New-Object -ComObject "ADODB.Connection"
             $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
             $connection.Open($connString);
-            $xxx = "connection opened"
+            $xxx += "<br/>connection opened"
             $IsOpen = $True
             $rs = New-Object -ComObject "ADODB.RecordSet"
             $rs.Open($query, $connection, 0, 1)
-            $xxx = "recordset created"
+            $xxx += "<br/>recordset created"
             $rowcount = 0
-
             if ($rs.BOF -and $rs.BOF) {
-                $xxx = "recordset is empty"
+                $xxx += "recordset is empty"
+                $content = "<table id=table2><tr><td style=`"height:150px;text-align:center`">No matching records found</td></tr></table>"
             }
             else {
-                $content = "<table id=table1>"
-                $content += "<tr>"
-                for ($i=0; $i -lt $colcount; $i++) {
+                $xxx += "<br/>recordset is not empty"
+                $colcount = $rs.Fields.Count
+                $xxx += "<br/>$colcount fields found"
+                [void]$rs.MoveFirst()
+                $content = "<table id=table1><tr>"
+                for ($i = 0; $i -lt $colcount; $i++) {
                     $fn = $rs.Fields($i).Name
                     $content += "<th>$fn</th>"
-                    $xxx = $fn
                 }
+                $memberlist = @()
                 $content += "</tr>"
-                $xxx = "column headings defined"
-                $colcount = $rs.Fields.Count
-                $rs.MoveFirst()
-                $xxx = "recordset opened ($colcount columns)"
-            
+                $xxx += "<br/>column headings defined"
                 while (!$rs.EOF) {
-                    $content += '<tr>'
-    #                $cid = $rs.Fields('CollectionID').value
-                    for ($i = 0; $i -lt $colcount; $i++) {
-                        $fn = $rs.Fields($i).Name
-                        $fv = $rs.Fields($i).Value
-                        $xxx = $fn
-                        if ([string]::IsNullOrEmpty($fv)) { $fv = "" }
-                        $content += "<td>$fv</td>"
-                    } # for
-                    $content += '</tr>'
-                    $rs.MoveNext()
+                    $cid = $rs.Fields("CollectionID").Value
+                    $cnn = $rs.Fields("CollectionName").Value
+                    $memberlist += $cid
+                    $content += "<tr><td style=`"width:200px`">"
+                    $content += "<a href=`"cmcollection.ps1?f=collectionid&v=$fv&t=2&x=equals&n=$cnn`" title=`"Details`">$cid</a></td>"
+                    $content += "<td>$cnn</td></tr>"
+                    [void]$rs.MoveNext()
                     $rowcount++
                 }
+                $content += "<tr><td colspan=`"$colcount`">$rowcount memberships found</td></tr>"
+                $content += "</table>"
             }
-            $rs.Close()
-            $content += "</table>"
+            [void]$rs.Close()
+            $xxx += "<br/>recordset closed"
         }
         catch {
-            $content = "<table id=table2>"
-            $content += "<tr><td>Error: $($Error[0].Exception.Message)</td></tr>"
-            $content += "<tr><td>Query: $query</td></tr>"
-            $content += "<tr><td>Last Step: $xxx</td></tr>"
-            $content += "</table>"
+            $xxx += "<br/>Error: $($Error[0].Exception.Message)"
         }
         finally {
             if ($IsOpen) {
                 $connection.Close()
+                $xxx += "<br/>connection is closed"
             }
         }
+        $dcolls = Get-CmCollectionsList -MembershipType direct | ?{$_.CollectionID -notlike 'SMS*'}
+        $dcolls = $dcolls | ?{$_.CollectionType -eq 2}
+        if ($memberlist.count -gt 0) {
+            $dcolls = $dcolls | ?{$_.CollectionID -notin $memberlist}
+        }
+        $content += "<form name='form1' id='form1' method='post' action='addmember.ps1'>"
+        $content += "<input type='hidden' name='resname' id='resname' value='$CustomName' />"
+        $content += "<input type='hidden' name='resid' id='resid' value='$SearchValue' />"
+        $content += "<input type='hidden' name='restype' id='restype' value='5' />"
+        $content += "<table id=table2><tr><td>"
+        $content += "<select name='collid' id='collid' size=1 style='width:500px;padding:5px'>"
+        $content += "<option value=`"`"></option>"
+        foreach ($row in $dcolls) {
+            $cid = $row.CollectionID
+            $cnn = $row.CollectionName
+            $content += "<option value=`"$cnn`">$cnn</option>"
+        }
+        $content += "</select> <input type='submit' name='ok' id='ok' value='Add' class='button1' />"
+        $content += " (direct membership collections only)</td></tr></table></form>"
+
         break;
     }
     'Notes' {
@@ -210,8 +213,6 @@ $content += Write-DetailInfo -PageRef "cmdevice.ps1" -Mode $Detailed
 
 $tabset
 $content
-
-$(if ($DebugMode -eq 1) {"<p>$query</p>"})
 
 </body>
 </html>

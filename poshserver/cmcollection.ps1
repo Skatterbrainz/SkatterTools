@@ -86,15 +86,21 @@ switch ($TabSelected) {
     'DirectRules' {
         try {
             $query = 'SELECT DISTINCT 
-                dbo.v_CollectionRuleDirect.CollectionID, 
-                dbo.v_CollectionRuleDirect.RuleName, 
-                dbo.v_CollectionRuleDirect.ResourceID, 
-                dbo.v_CollectionRuleDirect.ResourceType, 
-                dbo.v_Collection.Name AS CollectionName
-            FROM dbo.v_CollectionRuleDirect INNER JOIN 
-                dbo.v_Collection ON 
-                dbo.v_CollectionRuleDirect.CollectionID = dbo.v_Collection.CollectionID
-            WHERE (dbo.v_CollectionRuleDirect.CollectionID = '''+$SearchValue+''') 
+            dbo.v_CollectionRuleDirect.RuleName, 
+            dbo.v_CollectionRuleDirect.ResourceID, 
+            dbo.v_CollectionRuleDirect.ResourceType, 
+            dbo.v_R_System.AD_Site_Name0 AS ADSite, 
+            dbo.v_GS_COMPUTER_SYSTEM.Model0 AS Model, 
+            dbo.v_GS_OPERATING_SYSTEM.Caption0 AS OSName, 
+            dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 AS OSBuild
+            FROM 
+            dbo.v_CollectionRuleDirect INNER JOIN
+            dbo.v_Collection ON dbo.v_CollectionRuleDirect.CollectionID = dbo.v_Collection.CollectionID INNER JOIN
+            dbo.v_R_System ON dbo.v_CollectionRuleDirect.ResourceID = dbo.v_R_System.ResourceID INNER JOIN
+            dbo.v_GS_COMPUTER_SYSTEM ON dbo.v_CollectionRuleDirect.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
+            dbo.v_GS_OPERATING_SYSTEM ON dbo.v_CollectionRuleDirect.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
+            WHERE 
+            (dbo.v_CollectionRuleDirect.CollectionID = '''+$SearchValue+''')
             ORDER BY dbo.v_CollectionRuleDirect.RuleName'
             $xxx += "<br/>query: $query"
             $connection = New-Object -ComObject "ADODB.Connection"
@@ -114,18 +120,29 @@ switch ($TabSelected) {
             else {
                 [void]$rs.MoveFirst()
                 $content = "<table id=table1><tr>"
-                for ($i = 0; $i -lt $colcount; $i++) {
-                    $fn = $rs.Fields($i).Name
+                foreach ($fn in ('RuleName','ResourceType','ADSite','Model','OSName','OSBuild')) {
                     $content += "<th>$fn</th>"
                 }
                 $content += "</tr>"
                 while (!$rs.EOF) {
-                    $content += "<tr>"
-                    for ($i = 0; $i -lt $colcount; $i++) {
-                        $fn = $rs.Fields($i).Name
-                        $fv = $($rs.Fields($i).Value | Out-String).Trim()
-                        $content += "<td>$fv</td>"
+                    $rulename = $rs.Fields("RuleName").Value
+                    $resID    = $rs.Fields("ResourceID").Value
+                    $resType  = $rs.Fields("ResourceType").Value
+                    switch ($resType) {
+                        4 { $resTypeName = 'User'; break; }
+                        5 { $resTypeName = 'Device'; break; }
                     }
+                    $adsite  = $rs.Fields("ADSite").Value
+                    $model   = $rs.Fields("Model").Value
+                    $osname  = $rs.Fields("OSName").Value
+                    $osbuild = $rs.Fields("OSBuild").Value
+                    $content += "<tr>"
+                    $content += "<td><a href=`"cmdevice.ps1?f=resourceid&v=$resID&x=equals&n=$ruleName`" title=`"Details`">$rulename</a></td>"
+                    $content += "<td>$resTypeName</td>"
+                    $content += "<td><a href=`"cmdevices.ps1?f=adsite&v=$adsite&x=equals`" title=`"Find Other Devices`">$adsite</a></td>"
+                    $content += "<td><a href=`"cmdevices.ps1?f=model&v=$model&x=equals`" title=`"Find Other Devices`">$model</a></td>"
+                    $content += "<td><a href=`"cmdevices.ps1?f=OperatingSystem&v=$osname&x=equals`" title=`"Find Other Devices`">$osname</a></td>"
+                    $content += "<td>$osbuild</td>"
                     $content += "</tr>"
                     $rowcount++
                     [void]$rs.MoveNext()

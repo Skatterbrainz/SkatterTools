@@ -40,9 +40,8 @@ $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
 # --------------------------------------------------
 
-if ($SkToolsLoaded -ne 1) { 
+if ($Global:SkToolsLoaded -ne 1) { 
     . $HomeDirectory\sktools.ps1
-    $LastLoadTime = Get-Date
 }
 
 if ($CustomConfig) {
