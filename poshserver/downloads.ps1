@@ -19,7 +19,7 @@ $PageCaption = "Tools and Downloads"
 			<ul class="ulmenu">
 				<li class="limain"><a href="http://www.scconfigmgr.com/driver-automation-tool/" target="_new">Driver Automation Tool</a></li>
 				<li class="limain"><a href="http://www.scconfigmgr.com/category/console-extension/" target="_new">ConfigMgr Console Extension</a></li>
-				<li class="limain">Anders Rodland: Client Health Script</li>
+				<li class="limain"><a href="https://gallery.technet.microsoft.com/ConfigMgr-Client-Health-ccd00bd7" target="_new">Anders Rodland: Client Health Script</a></li>
 			</ul>
 
 		</td>
