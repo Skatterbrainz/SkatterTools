@@ -33,22 +33,27 @@ function Find-ResultCounts {
         switch ($target) {
             'cmdevices' {
                 $tname = "ConfigMgr Devices"
+                $xlink = $tname
                 break;
             }
             'cmusers' {
                 $tname = "ConfigMgr Users"
+                $xlink = $tname
                 break;
             }
             'cmcolls' {
                 $tname = "ConfigMgr Collections"
+                $xlink = $tname
                 break;
             }
             'cmproducts' {
                 $tname = "ConfigMgr Software Products"
+                $xlink = $tname
                 break;
             }
             'cmfiles' {
                 $tname = "ConfigMgr Software Files"
+                $xlink = $tname
                 break;
             }
             'adusers' {
