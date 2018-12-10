@@ -2,7 +2,7 @@
 '****************************************************************
 ' Filename..: stlight.css
 ' Purpose...: light theme CSS stylesheet for SkatterTools
-' Version...: 2018.12.15
+' Version...: 1812.09
 '****************************************************************
 */
 body {
@@ -110,6 +110,13 @@ h1,h2,h3 {
     text-align: center;
     background-color: #eee;
     color: #000;
+}
+
+.lastrow {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: #eee;
+    color: #00;
 }
 
 #table2 {

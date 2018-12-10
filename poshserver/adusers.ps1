@@ -5,7 +5,8 @@ $SortField   = Get-PageParam -TagName 's' -Default 'UserName'
 $SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
 $TabSelected = Get-PageParam -TagName 'tab' -Default $DefaultUsersTab
 $Detailed    = Get-PageParam -TagName 'zz' -Default ""
-
+$CustomName  = Get-PageParam -TagName 'n' -Default ""
+$IsFiltered  = $False
 $PageTitle   = "AD Users"
 $PageCaption = "AD Users"
 $content     = ""
@@ -30,15 +31,26 @@ try {
         $users = Get-ADsUsers | Sort-Object $SortField -Descending
     }
     if (![string]::IsNullOrEmpty($SearchValue)) {
-        if ($SearchType -eq 'like') {
-            $users = $users | Where-Object {$_."$SearchField" -like "$SearchValue*"}
-        }
-        else {
-            $users = $users | Where-Object {$_."$SearchField" -eq $SearchValue}
+        switch ($SearchType) {
+            'like' {
+                $users = $users | Where-Object {$_."$SearchField" -like "*$SearchValue*"}
+                break;
+            }
+            'begins' {
+                $users = $users | Where-Object {$_."$SearchField" -like "$SearchValue*"}
+                break;
+            }
+            'ends' {
+                $users = $users | Where-Object {$_."$SearchField" -like "*$SearchValue"}
+                break;
+            }
+            default {
+                $users = $users | Where-Object {$_."$SearchField" -eq $SearchValue}
+            }
         }
         $IsFiltered = $True
     }
-    $usercount = $users.Count
+    $usercount = 0
     $columns = @('UserName','DisplayName','Title','Department','Email')
     $content = '<table id=table1><tr>'
     $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "adusers.ps1?f=$SearchField&v=$SearchValue&x=$SearchType" -SortDirection $SortOrder
@@ -58,9 +70,10 @@ try {
             $content += '<td>'+$fvx+'</td>'
         }
         $content += '</tr>'
+        $usercount++
     }
     $content += '<tr>'
-    $content += '<th colspan='+$($columns.Count)+'>'+$usercount+' users found'
+    $content += '<td colspan='+$($columns.Count)+' class=lastrow>'+$(Write-RowCount -ItemName 'user' -RowCount $usercount)
     if ($IsFiltered -eq $True) {
         $content += ' - <a href="adusers.ps1" title="Show All">Show All</a>'
     }
@@ -70,7 +83,7 @@ catch {
     $content = "Error: $($Error[0].Exception.Message)"
 }
 
-$tabset = New-MenuTabSet -BaseLink 'adusers.ps1?x=like&f=username&v=' -DefaultID $TabSelected
+$tabset = New-MenuTabSet -BaseLink 'adusers.ps1?x=begins&f=username&v=' -DefaultID $TabSelected
 
 $content += Write-DetailInfo -PageRef "adusers.ps1" -Mode $Detailed
 

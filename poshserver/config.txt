@@ -1,5 +1,7 @@
 ﻿; SkatterTools Configuration Settings
 STTheme=stdark.css
+CMEnabled=true
+ADenabled=true
 CmDBHost=cm02.contoso.local
 CmSMSProvider=cm02.contoso.local
 CmSiteCode=P02

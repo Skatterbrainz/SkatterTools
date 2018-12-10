@@ -2,7 +2,7 @@
 '****************************************************************
 ' Filename..: stdark.css
 ' Purpose...: dark theme CSS stylesheet for SkatterTools
-' Version...: 2018.12.15
+' Version...: 1812.09
 '****************************************************************
 */
 body {
@@ -108,6 +108,13 @@ h1,h2,h3 {
     padding-top: 8px;
     padding-bottom: 8px;
     text-align: center;
+    background-color: #343e4f;
+    color: #fff;
+}
+
+.lastrow {
+    padding-top: 5px;
+    padding-bottom: 5px;
     background-color: #343e4f;
     color: #fff;
 }

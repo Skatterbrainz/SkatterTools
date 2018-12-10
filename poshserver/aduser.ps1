@@ -1,9 +1,10 @@
 ﻿$SearchField = Get-PageParam -TagName 'f' -Default ""
 $SearchValue = Get-PageParam -TagName 'v' -Default ""
-$SearchType  = Get-PageParam -TagName 'x' -Default "exact"
+$SearchType  = Get-PageParam -TagName 'x' -Default "equals"
 $SortField   = Get-PageParam -TagName 's' -Default ""
 $Detailed    = Get-PageParam -TagName 'zz' -Default ""
-$TabSelected = Get-PageParam -TagName 'tab' -Default 'general'
+$TabSelected = Get-PageParam -TagName 'tab' -Default 'General'
+$CustomName  = Get-PageParam -TagName 'n' -Default ""
 
 $PageTitle   = "AD User"
 $PageCaption = "AD User"
@@ -17,7 +18,7 @@ $PageCaption = $PageTitle
 switch ($TabSelected) {
     'General' {
         try {
-            $user = Get-ADsUsers | Where-Object {$_.UserName -eq $SearchValue}
+            $user = Get-ADsUsers | Where-Object {$_.UserName -eq "$SearchValue"}
             $columns = $user.psobject.properties | Select-Object -ExpandProperty Name
             $content = '<table id=table2><tr>'
             foreach ($col in $columns) {
@@ -33,14 +34,32 @@ switch ($TabSelected) {
         catch {
             $content = "Error: $($Error[0].Exception.Message)"
         }
-        break
+        break;
     }
     'Groups' {
-        $content = "<p>Group Memberships</p>"
-        break
+        $content = "<table id=table1>"
+        $content += "<tr><th>Name</th><th>LDAP Path</th></tr>"
+        try {
+            $groups = Get-ADsUserGroups -UserName "$SearchValue"
+            $rowcount = 0
+            $groups | ForEach-Object {
+                $content += "<tr>"
+                $xlink = "<a href=`"adgroup.ps1?f=name&v=$($_.Name)&x=equals`" title=`"Details`">$($_.Name)</a>"
+                $content += "<td style=`"width:250px`">$xlink</td>"
+                $content += "<td>$($_.DN)</td>"
+                $content += "</tr>"
+                $rowcount++
+            }
+            $content += "<tr><td colspan=2 class=lastrow>$rowcount groups found</td></tr>"
+        }
+        catch {}
+        finally {
+            $content += "</table>"
+        }
+        break;
     }
     'Notes' {
-        $notes = Get-NoteAttachments -ObjectType "aduser" -ObjectID $SearchValue
+        $notes = Get-NoteAttachments -ObjectType "aduser" -ObjectID "$SearchValue"
         $content = "<table id=table1>"
         $content += "<tr><th style=`"width:200px`">Date</th>"
         $content += "<th style=`"width:200px`">Author</th><th>Comment</th></tr>"
@@ -62,15 +81,15 @@ switch ($TabSelected) {
         $content += "<input type='hidden' name='retlink' id='retlink' value='$retlink' />"
         $content += "<input type='submit' class='button1' name='ok' id='ok' value='Add Note' />"
         $content += "</form>"
-        break
+        break;
     }
 }
 
 if ($SkNotesEnable -eq 'true') {
-    $tabs = @('General','Groups','Notes')
+    $tabs = @('General','Groups','Devices','Notes')
 }
 else {
-    $tabs = @('General','Groups')
+    $tabs = @('General','Groups','Devices')
 }
 $tabset = New-MenuTabSet2 -MenuTabs $tabs -BaseLink "aduser.ps1"
 

@@ -1,4 +1,7 @@
-﻿$SearchScoping = $PoshQuery.g
+﻿$PageTitle = "Search"
+$PageCaption = "Search"
+
+$SearchScoping = $PoshQuery.g
 $chk1 = ""
 $chk2 = ""
 if ($SearchScoping -eq 'cm') {
@@ -7,6 +10,25 @@ if ($SearchScoping -eq 'cm') {
 if ($SearchScoping -eq 'ad') {
     $chk2 = "checked"
 }
+
+$content = ""
+
+if ($CMEnabled -ne 'false') {
+    $content += @"
+<input type='checkbox' name='c01' id='c01' value='cmdevices' $chk1 /> ConfigMgr Devices<br/>
+<input type='checkbox' name='c02' id='c02' value='cmusers' $chk1 /> ConfigMgr Users<br/>
+<input type='checkbox' name='c03' id='c03' value='cmcolls' $chk1 /> ConfigMgr Collections<br/>
+<input type='checkbox' name='c04' id='c04' value='cmproducts' $chk1 /> ConfigMgr Software Products<br/>
+"@
+}
+if ($ADEnabled -ne 'false') {
+    $content += @"
+<input type='checkbox' name='c05' id='c05' value='adusers' $chk2 /> Active Directory Users<br/>
+<input type='checkbox' name='c06' id='c06' value='adgroups' $chk2 /> Active Directory Groups<br/>
+<input type='checkbox' name='c07' id='c07' value='adcomputers' $chk2 /> Active Directory Computers<br/>
+"@
+}
+
 @"
 <html>
 <head>
@@ -15,7 +37,7 @@ if ($SearchScoping -eq 'ad') {
 
 <body onLoad='document.form1.qtext.focus();'>
 
-<h1>Search the #$@&*^% out It</h1>
+<h1>$PageCaption</h1>
 
 <form name='form1' id='form1' method='post' action='searchresults.ps1'>
 <table id=table2>
@@ -42,13 +64,7 @@ if ($SearchScoping -eq 'ad') {
             <table id=table3>
                 <tr>
                     <td style='vertical-align: top; width:250px'>
-                        <input type='checkbox' name='c01' id='c01' value='cmdevices' $chk1 /> ConfigMgr Devices<br/>
-                        <input type='checkbox' name='c02' id='c02' value='cmusers' $chk1 /> ConfigMgr Users<br/>
-                        <input type='checkbox' name='c03' id='c03' value='cmcolls' $chk1 /> ConfigMgr Collections<br/>
-                        <input type='checkbox' name='c04' id='c04' value='cmproducts' $chk1 /> ConfigMgr Software Products<br/>
-                        <input type='checkbox' name='c05' id='c05' value='adusers' $chk2 /> Active Directory Users<br/>
-                        <input type='checkbox' name='c06' id='c06' value='adgroups' $chk2 /> Active Directory Groups<br/>
-                        <input type='checkbox' name='c07' id='c07' value='adcomputers' $chk2 /> Active Directory Computers<br/>
+                        $content
                     </td>
                     <td style='vertical-align:top;'>
                     </td>

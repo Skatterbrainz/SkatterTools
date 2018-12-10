@@ -49,10 +49,10 @@ switch ($TabSelected) {
             foreach ($member in $members) {
                 $uname = $member.UserName
                 if ($member.Type -eq 'User') {
-                    $xlink = "aduser.ps1?f=username&v=$uname"
+                    $xlink = "aduser.ps1?f=UserName&v=$uname&x=equals&tab=general"
                 }
                 else {
-                    $xlink = "adgroup.ps1?f=name&v=$uname"
+                    $xlink = "adgroup.ps1?f=name&v=$uname&x=equals&tab=general"
                 }
                 $content += "<tr><td><a href=`"$xlink`" title=`"Details`">$uname</a></td>"
                 $content += "<td>$($member.Title)</td>"
@@ -60,7 +60,7 @@ switch ($TabSelected) {
                 $content += "<td>$($member.DN)</td></tr>"
                 $rowcount++
             }
-            $content += "<tr><td colspan=4>$rowcount members</td></tr>"
+            $content += "<tr><td colspan=4 class=lastrow>$(Write-RowCount -ItemName 'member' -RowCount $rowcount)</td></tr>"
             $content += "</table>"
         }
         catch {

@@ -21,7 +21,7 @@ else {
         $PageCaption = $PageTitle
     }
 }
-
+$subcap = ""
 try {
     if ($SortOrder -eq 'Asc') {
         $groups = Get-ADsGroups | Sort-Object $SortField
@@ -33,18 +33,22 @@ try {
         switch ($SearchType) {
             'like' {
                 $groups = $groups | Where-Object {$_."$SearchField" -like "*$SearchValue*"}
+                $subcap = "$SearchField contains $SearchValue"
                 break;
             }
             'begins' {
                 $groups = $groups | Where-Object {$_."$SearchField" -like "$SearchValue*"}
+                $subcap = "$SearchField begins with $SearchValue"
                 break;
             }
             'ends' {
                 $groups = $groups | Where-Object {$_."$SearchField" -like "*$SearchValue"}
+                $subcap = "$SearchField ends with $SearchValue"
                 break;
             }
             default {
                 $groups = $groups | Where-Object {$_."$SearchField" -eq "$SearchValue"}
+                $subcap = "$SearchField equals $SearchValue"
                 break;
             }
         }
@@ -96,6 +100,7 @@ $tabset = New-MenuTabSet -BaseLink 'adgroups.ps1?x=begins&f=name&v=' -DefaultID 
 <body>
 
 <h1>$PageCaption</h1>
+<h3>$subcap</h3>
 
 $tabset
 $content

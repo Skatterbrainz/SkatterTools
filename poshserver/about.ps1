@@ -13,6 +13,8 @@ $STPageCaption = "About SkatterTools"
 
 <table id=table2>
 	<tr><td style='width:200px'>Version</td><td>$SkToolsVersion</td></tr>
+    <tr><td>CM Tools Enabled</td><td>$CMEnabled</td></tr>
+    <tr><td>AD Tools Enabled</td><td>$ADenabled</td></tr>
     <tr><td>ConfigMgr DB Host</td><td>$CmDBHost</td></tr>
     <tr><td>ConfigMgr Site</td><td>$CmSiteCode</td></tr>
 	<tr><td>Current User</td><td>$PoshUserName</td></tr>

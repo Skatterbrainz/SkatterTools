@@ -7,6 +7,7 @@ $TabSelected = Get-PageParam -TagName 'tab' -Default 'all'
 $Detailed    = Get-PageParam -TagName 'zz' -Default ""
 $CustomName  = ""
 $CollectionType = Get-PageParam -TagName 't' -Default '2'
+$IsFiltered  = $False
 
 if ($CollectionType -eq '2') {
     $Ctype = "Device"
