@@ -1,8 +1,29 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 1812.09.06
+## Latest: 1812.09.14
 
+### Updates 1812.09.14 (12/9/2018)
+
+* AD OU Explorer
+  * (just started on it) barely there
+* AD Computers / Computer:
+	* Storage (Disks)
+	* Software (Installed)
+	* Ping Computer
+* AD Reports:
+	* User last logons
+	* Workstation last logons
+	* Users with no-expire passwords
+* AD Forest:
+	* (just started on it) shows Forest Schema version so far
+* API changes:
+  * Moved code out of sktools.ps1 to /lib/sktools-xxx.ps1 files (dot-source on first load)
+  * This is to prepare for performance tuning later, more to come
+* Notes:
+  * I am aware that my code is rough and inconsisten across files.
+  * I want to get the car driving first, then refactor the shit out of it later.
+  
 ### Updates 1812.09.06 (12/9/2018)
 
 * CM Device (detail) - filtering and sorting fully done
