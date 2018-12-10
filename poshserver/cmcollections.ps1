@@ -35,25 +35,37 @@ else {
 
 $query = 'SELECT DISTINCT 
     dbo.v_Collection.Name as CollectionName, 
-    dbo.v_FullCollectionMembership.CollectionID, 
+    dbo.v_Collection.CollectionID, 
     dbo.v_Collection.Comment, 
     dbo.v_Collection.MemberCount as Members, 
     dbo.v_Collection.CollectionType as [Type], 
     dbo.v_Collections.CollectionVariablesCount as Variables, 
     dbo.v_Collections.LimitToCollectionID as LimitedTo
 FROM 
-    dbo.v_FullCollectionMembership INNER JOIN
+    dbo.v_FullCollectionMembership Right outer JOIN
     dbo.v_Collection ON 
     dbo.v_FullCollectionMembership.CollectionID = dbo.v_Collection.CollectionID 
     INNER JOIN dbo.v_Collections ON 
     dbo.v_Collection.Name = dbo.v_Collections.CollectionName'
 
 if (![string]::IsNullOrEmpty($SearchValue)) {
-    if ($SearchType -eq 'like') {
-        $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField like '$SearchValue%')"
-    }
-    else {
-        $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField = '$SearchValue')"
+    switch ($SearchType) {
+        'like' {
+            $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField like '%$SearchValue%')"
+            break;
+        }
+        'begins' {
+            $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField like '%$SearchValue')"
+            break;
+        }
+        'ends' {
+            $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField like '%$SearchValue')"
+            break;
+        }
+        default {
+            $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField = '$SearchValue')"
+            break;
+        }
     }
     $IsFiltered = $True
 }

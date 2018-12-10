@@ -17,15 +17,16 @@ if ($CMEnabled -ne 'false') {
     $content += @"
 <input type='checkbox' name='c01' id='c01' value='cmdevices' $chk1 /> ConfigMgr Devices<br/>
 <input type='checkbox' name='c02' id='c02' value='cmusers' $chk1 /> ConfigMgr Users<br/>
-<input type='checkbox' name='c03' id='c03' value='cmcolls' $chk1 /> ConfigMgr Collections<br/>
-<input type='checkbox' name='c04' id='c04' value='cmproducts' $chk1 /> ConfigMgr Software Products<br/>
+<input type='checkbox' name='c03' id='c03' value='cmdevcolls' $chk1 /> ConfigMgr Device Collections<br/>
+<input type='checkbox' name='c04' id='c04' value='cmusercolls' $chk1 /> ConfigMgr User Collections<br/>
+<input type='checkbox' name='c05' id='c05' value='cmproducts' $chk1 /> ConfigMgr Software Products<br/>
 "@
 }
 if ($ADEnabled -ne 'false') {
     $content += @"
-<input type='checkbox' name='c05' id='c05' value='adusers' $chk2 /> Active Directory Users<br/>
-<input type='checkbox' name='c06' id='c06' value='adgroups' $chk2 /> Active Directory Groups<br/>
-<input type='checkbox' name='c07' id='c07' value='adcomputers' $chk2 /> Active Directory Computers<br/>
+<input type='checkbox' name='a01' id='a01' value='adusers' $chk2 /> Active Directory Users<br/>
+<input type='checkbox' name='a02' id='a02' value='adgroups' $chk2 /> Active Directory Groups<br/>
+<input type='checkbox' name='a03' id='a03' value='adcomputers' $chk2 /> Active Directory Computers<br/>
 "@
 }
 

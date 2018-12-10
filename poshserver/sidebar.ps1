@@ -12,7 +12,6 @@ if ($ADEnabled -ne 'false') {
 		<li class="limenu"><a href="adsites.ps1" target="main" title="AD Sites">Sites</a></li>
 		<li class="limenu"><a href="adbrowser.ps1" target="main" title="AD OU Explorer">OU Explorer</a></li>
         <li class="limenu"><a href="adreps.ps1" target="main">AD Reports</a></li>
-        <li class="limenu"><a href="search.ps1?g=ad" title="Search" target="main">Search</a></li>
 	</ul>
 </div>
 "@
@@ -27,7 +26,6 @@ if ($CmEnabled -ne 'false') {
 		<li class="limenu"><a href="cmdevices.ps1" title="Devices" target="main">Devices</a></li>
 		<li class="limenu"><a href="cmcollections.ps1?t=1" title="User Collections" target="main">User Collections</a></li>
 		<li class="limenu"><a href="cmcollections.ps1?t=2" title="Device Collections" target="main">Device Collections</a></li>
-        <li class="limenu"><a href="search.ps1?g=cm" title="Search" target="main">Search</a></li>
 	</ul>
 </div>
 
@@ -41,7 +39,6 @@ if ($CmEnabled -ne 'false') {
 		<li class="limenu">Boot Images</li>
 		<li class="limenu">Task Sequences</li>
 		<li class="limenu">Scripts</li>
-        <li class="limenu"><a href="search.ps1?g=cm" title="Search" target="main">Search</a></li>
 	</ul>
 </div>
 

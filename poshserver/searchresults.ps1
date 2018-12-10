@@ -1,14 +1,18 @@
 ﻿$SearchPhrase = $($PoshPost.qtext).Trim()
 $SearchScope  = $PoshPost.scope
-$x1 = $PoshPost.c01
-$x2 = $PoshPost.c02
-$x3 = $PoshPost.c03
-$x4 = $PoshPost.c04
-$x5 = $PoshPost.c05
-$x6 = $PoshPost.c06
-$x7 = $PoshPost.c07
+$c1 = $PoshPost.c01
+$c2 = $PoshPost.c02
+$c3 = $PoshPost.c03
+$c4 = $PoshPost.c04
+$c5 = $PoshPost.c05
+#$c6 = $PoshPost.c06
 
-$targets = @($x1,$x2,$x3,$x4,$x5,$x6,$x7)
+$a1 = $PoshPost.a01
+$a2 = $PoshPost.a02
+$a3 = $PoshPost.a03
+#$a4 = $PoshPost.a04
+
+$targets = @($c1,$c2,$c3,$c4,$c5,$a1,$a2,$a3)
 
 switch ($SearchScope) {
     'like'   { $sscope = 'Contains'; break; }
@@ -27,23 +31,138 @@ function Find-ResultCounts {
         [string[]] $SearchTargets
     )
     foreach ($target in $SearchTargets) {
-        $output  = 0
         $results = $null
-        #Write-Verbose "target: $target"
         switch ($target) {
             'cmdevices' {
                 $tname = "ConfigMgr Devices"
-                $xlink = $tname
+                $output = 0
+                try {
+                    $query = "select count(*) as QTY from dbo.v_R_System"
+                    switch ($SearchType) {
+                        'equals' { $query += " where (name0 = '$SearchText')"; break; }
+                        'begins' { $query += " where (name0 like '$SearchText%')"; break; }
+                        'ends'   { $query += " where (name0 like '%$SearchText')"; break; }
+                        'like'   { $query += " where (name0 like '%$SearchText%')"; break; }
+                    }
+                    $connection = New-Object -ComObject "ADODB.Connection"
+                    $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+                    $connection.Open($connString);
+                    $rs = New-Object -ComObject "ADODB.RecordSet"
+                    $rs.Open($query, $connection)
+                    $output = $rs.Fields("QTY").Value
+                }
+                catch {
+                    $output = 0
+                }
+                finally {
+                    [void]$rs.Close()
+                    [void]$connection.Close()
+                }
+                if ($output -gt 0) {
+                    $xlink = "<a href=`"cmdevices.ps1?f=name&v=$SearchText&x=$SearchScope`">$tname</a><br/><span style=`"font-size:8pt`">$query</span>"
+                }
+                else {
+                    $xlink = "$tname<br/><span style=`"font-size:8pt`">$query</span>"
+                }
                 break;
             }
             'cmusers' {
                 $tname = "ConfigMgr Users"
-                $xlink = $tname
+                $output = 0
+                try {
+                    $query = "select count(*) as QTY from dbo.v_R_User"
+                    switch ($SearchType) {
+                        'equals' { $query += " where (user_name0 = '$SearchText') or (full_user_name0 = '$SearchText')"; break; }
+                        'begins' { $query += " where (user_name0 like '$SearchText%') or (full_user_name0 like '$SearchText%')"; break; }
+                        'ends'   { $query += " where (user_name0 like '%$SearchText') or (full_user_name0 like '%$SearchText')"; break; }
+                        'like'   { $query += " where (user_name0 like '%$SearchText%') or (full_user_name0 like '%$SearchText%')"; break; }
+                    }
+                    $connection = New-Object -ComObject "ADODB.Connection"
+                    $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+                    $connection.Open($connString);
+                    $rs = New-Object -ComObject "ADODB.RecordSet"
+                    $rs.Open($query, $connection)
+                    $output = $rs.Fields("QTY").Value
+                }
+                catch {
+                    $output = 0
+                }
+                finally {
+                    [void]$rs.Close()
+                    [void]$connection.Close()
+                }
+                if ($output -gt 0) {
+                    $xlink = "<a href=`"cmusers.ps1?f=user_name0&v=$SearchText&x=$SearchScope`">$tname</a><br/><span style=`"font-size:8pt`">$query</span>"
+                }
+                else {
+                    $xlink = "$tname<br/><span style=`"font-size:8pt`">$query</span>"
+                }
                 break;
             }
-            'cmcolls' {
-                $tname = "ConfigMgr Collections"
-                $xlink = $tname
+            'cmdevcolls' {
+                $tname = "ConfigMgr Device Collections"
+                $output = 0
+                try {
+                    $query = "select count(*) as QTY from dbo.v_Collection"
+                    switch ($SearchType) {
+                        'equals' { $query += " where ((collectiontype=2) and (name = '$SearchText'))"; break; }
+                        'begins' { $query += " where ((collectiontype=2) and (name like '$SearchText%'))"; break; }
+                        'ends'   { $query += " where ((collectiontype=2) and (name like '%$SearchText'))"; break; }
+                        'like'   { $query += " where ((collectiontype=2) and (name like '%$SearchText%'))"; break; }
+                    }
+                    $connection = New-Object -ComObject "ADODB.Connection"
+                    $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+                    $connection.Open($connString);
+                    $rs = New-Object -ComObject "ADODB.RecordSet"
+                    $rs.Open($query, $connection)
+                    $output = $rs.Fields("QTY").Value
+                }
+                catch {
+                    $output = 0
+                }
+                finally {
+                    [void]$rs.Close()
+                    [void]$connection.Close()
+                }
+                if ($output -gt 0) {
+                    $xlink = "<a href=`"cmcollections.ps1?f=CollectionName&v=$SearchText&x=$SearchScope&t=2`">$tname</a><br/><span style=`"font-size:8pt`">$query</span>"
+                }
+                else {
+                    $xlink = "$tname<br/><span style=`"font-size:8pt`">$query</span>"
+                }
+                break;
+            }
+            'cmusercolls' {
+                $tname = "ConfigMgr User Collections"
+                $output = 0
+                try {
+                    $query = "select count(*) as QTY from dbo.v_Collection"
+                    switch ($SearchType) {
+                        'equals' { $query += " where ((collectiontype=1) and (name = '$SearchText'))"; break; }
+                        'begins' { $query += " where ((collectiontype=1) and (name like '$SearchText%'))"; break; }
+                        'ends'   { $query += " where ((collectiontype=1) and (name like '%$SearchText'))"; break; }
+                        'like'   { $query += " where ((collectiontype=1) and (name like '%$SearchText%'))"; break; }
+                    }
+                    $connection = New-Object -ComObject "ADODB.Connection"
+                    $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+                    $connection.Open($connString);
+                    $rs = New-Object -ComObject "ADODB.RecordSet"
+                    $rs.Open($query, $connection)
+                    $output = $rs.Fields("QTY").Value
+                }
+                catch {
+                    $output = 0
+                }
+                finally {
+                    [void]$rs.Close()
+                    [void]$connection.Close()
+                }
+                if ($output -gt 0) {
+                    $xlink = "<a href=`"cmcollections.ps1?f=CollectionName&v=$SearchText&x=$SearchScope&t=1`">$tname</a><br/><span style=`"font-size:8pt`">$query</span>"
+                }
+                else {
+                    $xlink = "$tname<br/><span style=`"font-size:8pt`">$query</span>"
+                }
                 break;
             }
             'cmproducts' {
