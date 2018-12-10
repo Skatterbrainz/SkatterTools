@@ -1,9 +1,9 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 1812.09.14
+## Latest: 1812.09.15
 
-### Updates 1812.09.14 (12/9/2018)
+### Updates 1812.09.15 (12/9/2018)
 
 * AD OU Explorer
   * (just started on it) barely there
@@ -17,9 +17,15 @@ Skattered tools from Skatterbrainz
 	* Users with no-expire passwords
 * AD Forest:
 	* (just started on it) shows Forest Schema version so far
+* Search:
+  * Moved to top of sidebar (removed duplicate links)
+  * Fixed CM search (device, user, collections (both), but not yet products)
+  * Still a bug in the AD search items (working on it)
 * API changes:
   * Moved code out of sktools.ps1 to /lib/sktools-xxx.ps1 files (dot-source on first load)
   * This is to prepare for performance tuning later, more to come
+* Bug Fixes:
+  * Collections were not showing all results correctly if the collection has no members (fixed)
 * Notes:
   * I am aware that my code is rough and inconsisten across files.
   * I want to get the car driving first, then refactor the shit out of it later.
