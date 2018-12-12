@@ -107,7 +107,7 @@ foreach ($target in $targets) {
         }
         'adusers' { 
             $tscope = "Users"; 
-            $xlink  = "adusers.ps1";
+            $xlink  = "adusers.ps1?f=username&v=$SearchPhrase&x=$SearchType";
             break;
         }
         'adgroups' { 
@@ -150,6 +150,103 @@ foreach ($target in $targets) {
             [void]$rs.Close()
             if ($IsOpen -eq $True) {
                 [void]$connection.Close()
+            }
+        }
+    }
+    else {
+        switch ($tgroup) {
+            'adusers' {
+                try {
+                    switch ($SearchType) {
+                        'like' { 
+                            $users = Get-ADsUsers | ?{$_.UserName -like "*$SearchPhrase*"}
+                            $query = "get-adusers where {username like '*$SearchPhrase*'}"
+                            break;
+                        }
+                        'begins' {
+                            $users = Get-ADsUsers | ?{$_.UserName -like "$SearchPhrase*"}
+                            $query = "get-adusers where {username like '$SearchPhrase*'}"
+                            break;
+                        }
+                        'ends' {
+                            $users = Get-ADsUsers | ?{$_.UserName -like "*$SearchPhrase"}
+                            $query = "get-adusers where {username like '*$SearchPhrase'}"
+                            break;
+                        }
+                        default {
+                            $users = Get-ADsUsers | ?{$_.UserName -eq "$SearchPhrase"}
+                            $query = "get-adusers where {username = '$SearchPhrase'}"
+                            break;
+                        }
+                    }
+                    $qty = $users.count
+                }
+                catch {
+                    $qty = 0
+                }
+                break;
+            }
+            'adgroups' {
+                try {
+                    switch ($SearchType) {
+                        'like' { 
+                            $groups = Get-ADsGroups | ?{$_.Name -like "*$SearchPhrase*"}
+                            $query = "get-adgroups where {name like '*$SearchPhrase*'}"
+                            break;
+                        }
+                        'begins' {
+                            $groups = Get-ADsGroups | ?{$_.Name -like "$SearchPhrase*"}
+                            $query = "get-adgroups where {name like '$SearchPhrase*'}"
+                            break;
+                        }
+                        'ends' {
+                            $groups = Get-ADsGroups | ?{$_.Name -like "*$SearchPhrase"}
+                            $query = "get-adgroups where {name like '*$SearchPhrase'}"
+                            break;
+                        }
+                        default {
+                            $groups = Get-ADsGroups | ?{$_.UserName -eq "$SearchPhrase"}
+                            $query = "get-adgroups where {name = '$SearchPhrase'}"
+                            break;
+                        }
+                    }
+                    $qty = $groups.count
+                }
+                catch {
+                    $qty = 0
+                }
+                break;
+            }
+            'adcomputers' {
+                try {
+                    switch ($SearchType) {
+                        'like' { 
+                            $comps = Get-ADsComputers | ?{$_.Name -like "*$SearchPhrase*"}
+                            $query = "get-adcomputers where {name like '*$SearchPhrase*'}"
+                            break;
+                        }
+                        'begins' {
+                            $comps = Get-ADsComputers | ?{$_.Name -like "$SearchPhrase*"}
+                            $query = "get-adcomputers where {name like '$SearchPhrase*'}"
+                            break;
+                        }
+                        'ends' {
+                            $comps = Get-ADsComputers | ?{$_.Name -like "*$SearchPhrase"}
+                            $query = "get-adcomputers where {name like '*$SearchPhrase'}"
+                            break;
+                        }
+                        default {
+                            $comps = Get-ADsComputers | ?{$_.UserName -eq "$SearchPhrase"}
+                            $query = "get-adcomputers where {name = '$SearchPhrase'}"
+                            break;
+                        }
+                    }
+                    $qty = $comps.count
+                }
+                catch {
+                    $qty = 0
+                }
+                break;
             }
         }
     }

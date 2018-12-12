@@ -21,23 +21,36 @@ if ($SearchValue -eq 'all') {
 else {
     if ($SearchField -eq 'Name') {
         $TabSelected = $SearchValue
-        $PageTitle += " ($SearchValue)"
-        $PageCaption = $PageTitle
     }
-}
-if ([string]::IsNullOrEmpty($SortOrder)) {
-    $SortOrder = 'Asc'
 }
 
 try {
     $computers = Get-ADsComputers | Sort-Object $SortField
     if (![string]::IsNullOrEmpty($SearchValue)) {
-        if ($SearchType -eq 'like') {
-            $computers = $computers | Where-Object {$_."$SearchField" -like "$SearchValue*"}
+        switch ($SearchType) {
+            'like' {
+                $computers = $computers | Where-Object {$_.$SearchField -like "*$SearchValue*"}
+                $cap = 'contains'
+                break;
+            }
+            'begins' {
+                $computers = $computers | Where-Object {$_.$SearchField -like "$SearchValue*"}
+                $cap = 'begins with'
+                break;
+            }
+            'ends' {
+                $computers = $computers | Where-Object {$_.$SearchField -like "*$SearchValue"}
+                $cap = 'ends with'
+                break;
+            }
+            default {
+                $computers = $computers | Where-Object {$_.$SearchField -eq $SearchValue}
+                $cap = '='
+                break;
+            }
         }
-        else {
-            $computers = $computers | Where-Object {$_."$SearchField" -eq $SearchValue}
-        }
+        $PageTitle += " ($cap $SearchValue)"
+        $PageCaption = $PageTitle
         $IsFiltered = $True
     }
     $columns = @('Name','OS','OSVer','Created','LastLogon')
