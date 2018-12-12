@@ -2,8 +2,8 @@
 $PageCaption = "Search"
 
 $SearchScoping = $PoshQuery.g
-$chk1 = ""
-$chk2 = ""
+$chk1 = "false"
+$chk2 = "false"
 if ($SearchScoping -eq 'cm') {
     $chk1 = "checked"
 }
@@ -14,26 +14,31 @@ if ($SearchScoping -eq 'ad') {
 $content = ""
 
 if ($CMEnabled -ne 'false') {
-    $content += @"
-<input type='checkbox' name='c01' id='c01' value='cmdevices' $chk1 /> ConfigMgr Devices<br/>
-<input type='checkbox' name='c02' id='c02' value='cmusers' $chk1 /> ConfigMgr Users<br/>
-<input type='checkbox' name='c03' id='c03' value='cmdevcolls' $chk1 /> ConfigMgr Device Collections<br/>
-<input type='checkbox' name='c04' id='c04' value='cmusercolls' $chk1 /> ConfigMgr User Collections<br/>
-<input type='checkbox' name='c05' id='c05' value='cmproducts' $chk1 /> ConfigMgr Software Products<br/>
-"@
+    $chklist  = ('cmdevices:v_r_system:name0','cmusers:v_r_user:user_name0','cmdevcolls:v_collection:name:collectiontype:2','cmusercolls:v_collection:name:collectiontype:1','cmproducts:v_gs_installed_software_categorized:productname0','cmfiles:v_gs_softwarefile:filename','cmts:v_TaskSequencePackage:name')
+    $chknames = ('Devices','Users','Device Collections','User Collections','Software Products','Software Files','Task Sequences')
+    for ($i = 0; $i -lt $chklist.Count; $i++) {
+        $content += "<input type=`"checkbox`" name=`"c$($i+1)`" id=`"c$($i+1)`" value=`"$($chklist[$i])`" class=`"checkbox`" />&nbsp;ConfigMgr $($chknames[$i])<br/>"
+    }
 }
+
 if ($ADEnabled -ne 'false') {
-    $content += @"
-<input type='checkbox' name='a01' id='a01' value='adusers' $chk2 /> Active Directory Users<br/>
-<input type='checkbox' name='a02' id='a02' value='adgroups' $chk2 /> Active Directory Groups<br/>
-<input type='checkbox' name='a03' id='a03' value='adcomputers' $chk2 /> Active Directory Computers<br/>
-"@
+    $chklist  = ('adusers','adgroups','adcomputers')
+    $chknames = ('Users','Groups','Computers')
+    for ($i = 0; $i -lt $chklist.Count; $i++) {
+        $content += "<input type=`"checkbox`" name=`"a$($i+1)`" id=`"a$($i+1)`" value=`"$($chklist[$i])`" class=`"checkbox`" />&nbsp;Active Directory $($chknames[$i])<br/>"
+    }
 }
 
 @"
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="$STTheme"/>
+<style>
+.checkbox {
+    height: 18px;
+    width: 18px;
+}
+</style>
 </head>
 
 <body onLoad='document.form1.qtext.focus();'>
@@ -47,12 +52,12 @@ if ($ADEnabled -ne 'false') {
             Search Phrase ($SearchScoping)
         </td>
         <td>
-            <input type='text' name='qtext' id='qtext' size='20' style='padding:5px;width:400px;' title='Enter a Search Phrase' />
-            <select name='scope' id='scope' size='1' style='padding:5px;width:200px'>
+            <input type='text' name='qtext' id='qtext' size='20' style='padding:5px;width:400px;font-family:verdana;' title='Enter a Search Phrase' />
+            <select name='scope' id='scope' size='1' style='padding:5px;width:200px;font-family:verdana;'>
                 <option value=''></option>
                 <option value='equals'>Equals</option>
                 <option value='like' selected>Contains</option>
-                <option value='begins'>Starts With</option>
+                <option value='begins'>Begins With</option>
                 <option value='ends'>Ends With</option>
             </select>
         </td>

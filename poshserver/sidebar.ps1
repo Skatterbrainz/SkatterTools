@@ -34,6 +34,8 @@ if ($CmEnabled -ne 'false') {
 	<ul class="ulmenu">
 		<li class="limenu"><a href="cmapps.ps1" target="main" title="Applications">Applications</a></li>
 		<li class="limenu"><a href="cmpackages.ps1" target="main" title="Packages">Packages</a></li>
+        <li class="limenu"><a href="cmproducts.ps1" target="main" title="Installed Software">Installed Software</a></li>
+        <li class="limenu"><a href="cmfiles.ps1" target="main" title="Software Files">Software Files</a></li>
 		<li class="limenu">Software Updates</li>
 		<li class="limenu">Operating Systems</li>
 		<li class="limenu">Boot Images</li>

@@ -119,7 +119,7 @@ try {
         } # while
     }
     $content += '<tr>'
-    $content += '<td colspan='+$($colcount-1)+'>'+$rowcount+' rows returned'
+    $content += '<td colspan='+$($colcount-1)+' class=lastrow>'+$rowcount+' rows returned'
     if ($IsFiltered -eq $true) {
         $content += " - <a href=`"cmusers.ps1`" title=`"Show All`">Show All</a>"
     }
