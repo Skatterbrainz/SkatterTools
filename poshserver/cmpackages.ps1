@@ -7,8 +7,8 @@ $TabSelected = Get-PageParam -TagName 'tab' -Default 'all'
 $Detailed    = Get-PageParam -TagName 'zz' -Default ""
 $CustomName  = Get-PageParam -TagName 'n' -Default ""
 $IsFiltered  = $False
-$PageTitle   = "CM Packages"
-$PageCaption = "CM Packages"
+$PageTitle   = "CM Software"
+$PageCaption = "CM Software"
 $content     = ""
 $tabset      = ""
 $outree      = $null
@@ -24,9 +24,22 @@ try {
     $query = 'select distinct 
         PackageID,
         Name, 
-        PackageType, 
+        PackageType as [Type],
+        Case 
+	        When PackageType = 0   Then ''Software Distribution Package'' 
+	        When PackageType = 3   Then ''Driver Package'' 
+	        When PackageType = 4   Then ''Task Sequence Package''
+	        When PackageType = 5   Then ''Software Update Package''
+	        When PackageType = 6   Then ''Device Settings Package''
+	        When PackageType = 7   Then ''Virtual Package''
+	        When PackageType = 8   Then ''Application''
+	        When PackageType = 257 Then ''OS Image Package''
+	        When PackageType = 258 Then ''Boot Image Package''
+	        When PackageType = 259 Then ''OS Upgrade Package''
+	        WHEN PackageType = 260 Then ''VHD Package''
+	        End as PkgType,
         Description, 
-        SourceVersion  
+        SourceVersion as Version 
         from dbo.v_Package'
     if (![string]::IsNullOrEmpty($SearchValue)) {
         switch ($SearchType) {
@@ -84,6 +97,20 @@ try {
                     'Name' {
                         $fvx = "<a href=`"cmpackage.ps1?f=packageid&v=$pkid&x=equals&n=$fv`" title=`"Details`">$fv</a>"
                         $content += "<td>$fvx</td>"
+                        break;
+                    }
+                    'Type' {
+                        $content += "<td style=`"text-align:center`">$fv</td>"
+                        $ptype = $fv
+                        break;
+                    }
+                    'PkgType' {
+                        $fvx = "<a href=`"cmpackages.ps1?f=packagetype&v=$ptype&x=equals`" title=`"Filter on $fv`">$fv</a>"
+                        $content += "<td>$fvx</td>"
+                        break;
+                    }
+                    'Version' {
+                        $content += "<td style=`"text-align:center`">$fv</td>"
                         break;
                     }
                     default {
