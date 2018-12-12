@@ -112,12 +112,12 @@ foreach ($target in $targets) {
         }
         'adgroups' { 
             $tscope = "Groups"; 
-            $xlink  = "adgroups.ps1";
+            $xlink  = "adgroups.ps1?f=name&v=$SearchPhrase&x=$SearchType";
             break;
         }
         'adcomputers' { 
             $tscope = "Computers"; 
-            $xlink  = "adcomputers.ps1";
+            $xlink  = "adcomputers.ps1?f=name&v=$SearchPhrase&x=$SearchType";
             break;
         }
         'adsites' { 
@@ -210,7 +210,12 @@ foreach ($target in $targets) {
                             break;
                         }
                     }
-                    $qty = $groups.count
+                    if ($qty.count -gt 1) {
+                        $qty = $groups.count
+                    }
+                    elseif ($qty.Name -ne "") {
+                        $qty = 1
+                    }
                 }
                 catch {
                     $qty = 0
