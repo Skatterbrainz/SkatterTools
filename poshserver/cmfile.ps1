@@ -21,10 +21,14 @@ try {
     from dbo.v_GS_SoftwareFile INNER JOIN 
     dbo.v_R_System ON dbo.v_GS_SoftwareFile.ResourceID = dbo.v_R_System.ResourceID 
     where 
-      (dbo.v_GS_SoftwareFile.FileName = '''+$FileName+''') AND 
-      (dbo.v_GS_SoftwareFile.FileVersion = '''+$FileVersion+''') AND 
-      (dbo.v_GS_SoftwareFile.FileSize = '+$FileSize+') 
-    order by name0'
+      (dbo.v_GS_SoftwareFile.FileName = '''+$FileName+''')'
+    if (![string]::IsNullOrEmpty($FileVersion)) {
+        $query += ' AND (dbo.v_GS_SoftwareFile.FileVersion = '''+$FileVersion+''')'
+    }
+    if (![string]::IsNullOrEmpty($FileSize)) {
+        $query += ' AND (dbo.v_GS_SoftwareFile.FileSize = '+$FileSize+')'
+    }
+    $query += ' order by name0'
 
     $connection = New-Object -ComObject "ADODB.Connection"
     $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"

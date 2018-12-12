@@ -97,7 +97,7 @@ foreach ($target in $targets) {
         }
         'cmfiles' { 
             $tscope = "Software Files"; 
-            $xlink  = "cmfiles.ps1"
+            $xlink  = "cmfiles.ps1?f=filename&v=$SearchPhrase&x=$SearchType"
             break; 
         }
         'cmts' { 

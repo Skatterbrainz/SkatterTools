@@ -28,13 +28,13 @@ from v_gs_softwarefile'
 
 if (![string]::IsNullOrEmpty($SearchValue)) {
     switch ($SearchType) {
-        'like'   { $query += " where ($SearchField like '%SearchValue%')"; break; }
-        'begins' { $query += " where ($SearchField like '$SearchValue%')"; break; }
-        'ends'   { $query += " where ($SearchField like '%$SearchValue')"; break; }
-        default  { $query += " where ($SearchField = '$SearchValue')"; break; }
+        'like'   { $query += " where ($SearchField like '%SearchValue%')"; $cap = 'contains'; break; }
+        'begins' { $query += " where ($SearchField like '$SearchValue%')"; $cap = 'begins with'; break; }
+        'ends'   { $query += " where ($SearchField like '%$SearchValue')"; $cap = 'ends with'; break; }
+        default  { $query += " where ($SearchField = '$SearchValue')"; $cap = '='; break; }
     }
     $IsFiltered = $True
-    $PageTitle += " ($SearchValue)"
+    $PageTitle += " ($cap $SearchValue)"
     $PageCaption = $PageTitle
 }
 $query += " group by filename, fileversion, filesize, filedescription"
@@ -62,22 +62,24 @@ try {
         }
         $content += '</tr>'
         $rowcount = 0
+        $tcopies = 0
         while (!$rs.EOF) {
             $content += '<tr>'
             $fn = $rs.Fields("FileName").Value
             $fv = $rs.Fields("FileVersion").Value
             $fs = $rs.Fields("FileSize").Value
             $qx = $rs.Fields("Copies").Value
+            $tcopies += $qx
             $fnx = "<a href=`"cmfile.ps1?n=$fn&v=$fv&s=$fs`" title=`"Find Computers with this Instance`">$fn</a>"
-            $content += "<tr><td>$fnx</td><td>$fv</td><td>$fs</td><td>$qx</td></tr>"
+            $content += "<tr><td>$fnx</td><td>$fv</td><td style=`"text-align:right`">$fs</td><td style=`"text-align:right`">$qx</td></tr>"
             [void]$rs.MoveNext()
             $rowcount++
         }
-        $content += '<tr><td colspan='+$($colcount)+' class=lastrow>'+$rowcount+' files returned'
+        $content += '<tr><td colspan='+$($colcount-1)+' class=lastrow>'+$rowcount+' files returned'
         if ($IsFiltered -eq $true) {
             $content += " - <a href=`"cmfiles.ps1`" title=`"Show All`">Show All</a>"
         }
-        $content += '</td></tr></table>'
+        $content += "</td><td style=`"text-align:right`" class=lastrow>$tcopies</td></tr></table>"
     }
 }
 catch {
