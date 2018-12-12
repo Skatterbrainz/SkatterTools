@@ -13,10 +13,13 @@ Skattered tools from Skatterbrainz
 * Built from PowerShell to run on PoSH Server (http://www.poshserver.net)
 * Open-source, Fully-Customizable
 * THIS IS STILL IN DEVELOPMENT - Enjoy!
+* IMPORTANT: "master" is currently "development" channel until all base features are done
   
 * Check back frequently, or click the Star above to be notified of updates
-
-## Installation / Configuration
+
+
+## Installation / Configuration
+
 
 
 
@@ -48,7 +51,8 @@ Skattered tools from Skatterbrainz
 
 
 
-## Release History
+## Release History
+
 
 ### Updates 1812.12.02 (12/12/2018)
 
@@ -57,7 +61,8 @@ Skattered tools from Skatterbrainz
 * Packages / Programs
 * Improved page cross-links (ongoing work)
 * Universal Search has been rewritten entirely
-* About page shows more detail
+* About page shows more detail
+
 
 
 
