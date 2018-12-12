@@ -1,4 +1,4 @@
-$Global:SkToolsLibADS = "1.0.0"
+﻿$Global:SkToolsLibADS = "1.0.0"
 
 function Get-AdsUsers {
     [CmdletBinding()]
