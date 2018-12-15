@@ -1,4 +1,4 @@
-﻿$Global:SkToolsLibCM = "1.0.0"
+﻿$Global:SkToolsLibCM = "1.0.1"
 
 function Get-CmCollectionsList {
     [CmdletBinding()]
@@ -59,5 +59,25 @@ function Get-CmCollectionsList {
     finally {
         Write-Verbose "closing connection"
         if ($IsOpen -eq $True) { [void]$connection.Close() }
+    }
+}
+
+function Get-CmPackageTypeName {
+    param (
+        [parameter(Mandatory=$True)]
+        [int] $PkgType
+    )
+    switch ($PkgType) {
+          0 { return 'Software Distribution Package'; break; }
+          3 { return 'Driver Package'; break; }
+          4 { return 'Task Sequence Package'; break; }
+          5 { return 'Software Update Package'; break; }
+          6 { return 'Device Settings Package'; break; }
+          7 { return 'Virtual Package'; break; }
+          8 { return 'Application'; break; }
+        257 { return 'OS Image Package'; break; }
+        258 { return 'Boot Image Package'; break; }
+        259 { return 'OS Upgrade Package'; break; }
+        260 { return 'VHD Package'; break; }
     }
 }
