@@ -3,7 +3,7 @@ Skattered tools from Skatterbrainz
 
 
 
-## Latest: 1812.12.02
+## Latest: 1812.14.01
 
 
 ## Overview
@@ -14,28 +14,17 @@ Skattered tools from Skatterbrainz
 * Open-source, Fully-Customizable
 * THIS IS STILL IN DEVELOPMENT - Enjoy!
 * IMPORTANT: "master" is currently "development" channel until all base features are done
-  
 * Check back frequently, or click the Star above to be notified of updates
 
-
 ## Installation / Configuration
-
-
-
-
-* Download PoSHServer from: http://www.poshserver.net/ 
-
-* Run the full installation (haven't tested with portable version yet)
-
-* Download the SkatterTools "PoshServer" folder only / Extract somewhere
- (e.g. x:\sktools)
-* Edit the "config.txt" file (specify your SCCM site server, etc.)
-* Open a PowerShell console using Run as Administrator
-
-* Type: Start-PoshServer -HomeDirectory "<path to skattertools>"
-
+  * Download PoSHServer from: http://www.poshserver.net/ 
+  * Run the full installation (haven't tested with portable version yet)
+  * Download the SkatterTools "PoshServer" folder only / Extract somewhere (e.g. x:\sktools)
+  * Edit the "config.txt" file (specify your SCCM site server, etc.)
+  * Open a PowerShell console using Run as Administrator
+  * Type: Start-PoshServer -HomeDirectory "<path to skattertools>"
   * e.g. "Start-PoSHServer -HomeDirectory "x:\sktools"
-* Open SkatterTools at http://localhost:8080/
+  * Open SkatterTools at http://localhost:8080/
 
 
 ## Test Notes
@@ -45,7 +34,15 @@ Skattered tools from Skatterbrainz
    * ConfigMgr 1806, 1810, 1811
 
 ## Release History
-
+   ### 1812.14.01
+   * Shit man, my brain is melting, I need a vacation
+   * AD sidebar is done, CM Software sidebar is done, so is CM Assets
+   * my brain is about done
+   * Site boundary groups and boundaries
+   * Site Certificates
+   * Site Status
+   * AD OU Explorer updated (still working on it)
+   
    ### 1812.12.02 (12/12/2018)
    * Installed Software
    * Software Files
