@@ -32,14 +32,17 @@ if ($CmEnabled -ne 'false') {
 <button class="accordion" title="Configuration Manager Software">CM Software</button>
 <div class="panel">
 	<ul class="ulmenu">
-		<li class="limenu"><a href="cmpackages.ps1" target="main" title="Software Deployments">Software</a></li>
-        <li class="limenu"><a href="cmproducts.ps1" target="main" title="Software Products Inventory">Software Products</a></li>
+		<li class="limenu"><a href="cmpackages.ps1" target="main" title="Software Deployments">Software - All</a></li>
+		<li class="limenu"><a href="cmpackages.ps1?f=packagetype&v=8&x=equals" target="main" title="Software Applications">Applications</a></li>
+		<li class="limenu"><a href="cmpackages.ps1?f=packagetype&v=0&x=equals" target="main" title="Software Packages">Packages</a></li>
+		<li class="limenu"><a href="cmpackages.ps1?f=packagetype&v=257&x=equals" target="main" title="Operating System Images">OS Images</a></li>
+		<li class="limenu"><a href="cmpackages.ps1?f=packagetype&v=259&x=equals" target="main" title="Operating System Upgrade Packages">OS Upgrades</a></li>
+		<li class="limenu"><a href="cmpackages.ps1?f=packagetype&v=258&x=equals" target="main" title="Boot Images">Boot Images</a></li>
+		<li class="limenu"><a href="cmpackages.ps1?f=packagetype&v=5&x=equals" target="main" title="Software Updates">Software Updates</a></li>
+		<li class="limenu"><a href="cmpackages.ps1?f=packagetype&v=4&x=equals" target="main" title="Task Sequences">Task Sequences</a></li>
+        <li class="limenu"><a href="cmproducts.ps1" target="main" title="Software Products Inventory">Software Inventory</a></li>
         <li class="limenu"><a href="cmfiles.ps1" target="main" title="Software Files">Software Files</a></li>
-		<li class="limenu">Software Updates</li>
-		<li class="limenu">Operating Systems</li>
-		<li class="limenu">Boot Images</li>
-		<li class="limenu">Task Sequences</li>
-		<li class="limenu">Scripts</li>
+		<li class="limenu"><a href="cmscripts.ps1" target="main" title="Scripts">Scripts</a></li>
 	</ul>
 </div>
 
@@ -48,7 +51,7 @@ if ($CmEnabled -ne 'false') {
 	<ul class="ulmenu">
 		<li class="limenu">Queries</li>
 		<li class="limenu">Reporting</li>
-		<li class="limenu">System Status</li>
+		<li class="limenu"><a href="cmsitestatus.ps1" target="main" title="Site Status">Site Status</a></li>
 		<li class="limenu">Component Status</li>
 		<li class="limenu">SQL Status</li>
 	</ul>
@@ -59,10 +62,10 @@ if ($CmEnabled -ne 'false') {
 	<ul class="ulmenu">
 		<li class="limenu">Hierarchy</li>
 		<li class="limenu">Discovery Methods</li>
-		<li class="limenu">Boundaries</li>
-		<li class="limenu">Boundary Groups</li>
+		<li class="limenu"><a href="cmbgroups.ps1" target="main" title="Boundary Groups">Boundary Groups</a></li>
 		<li class="limenu">Site Systems</li>
 		<li class="limenu">Site Components</li>
+        <li class="limenu"><a href="cmcerts.ps1" target="main" title="Certificates">Certificates</a></li>
 		<li class="limenu">Client Settings</li>
 		<li class="limenu">Maintenance Tasks</li>
 		<li class="limenu">Accounts</li>

@@ -42,6 +42,7 @@ try {
         SourceVersion as Version 
         from dbo.v_Package'
     if (![string]::IsNullOrEmpty($SearchValue)) {
+        $IsFiltered = $True
         switch ($SearchType) {
             'equals' {
                 $query += " where ($SearchField = '$SearchValue')"
@@ -59,6 +60,11 @@ try {
                 $query += " where ($SearchField like '%$SearchValue')"
                 break;
             }
+        }
+        if ($SearchField -eq 'PackageType') {
+            $cap = Get-CmPackageTypeName -PkgType $SearchValue
+            $PageTitle += ": $cap"
+            $PageCaption = $PageTitle
         }
     }
     $query += " order by $SortField $SortOrder"
@@ -124,6 +130,11 @@ try {
             [void]$rs.MoveNext()
             $rowcount++
         }
+        $content += "<tr><td colspan=`"$($colcount)`" class=lastrow>$rowcount items returned"
+        if ($IsFiltered -eq $true) {
+            $content += " - <a href=`"cmpackages.ps1`" title=`"Show All`">Show All</a>"
+        }
+        $content += "</td></tr>"
         $content += "</table>"
         [void]$rs.Close()
     }
@@ -140,10 +151,6 @@ finally {
 
 $tabset = New-MenuTabSet -BaseLink 'cmpackages.ps1?x=begins&f=name&v=' -DefaultID $TabSelected
 $content += Write-DetailInfo -PageRef "cmpackages.ps1" -Mode $Detailed
-
-
-#$content = "<table id=table2><tr><td style=`"height:200px;text-align:center`">"
-#$content += "Coming soon</td></tr></table>"
 
 @"
 <html>

@@ -133,8 +133,7 @@ try {
     if ($IsFiltered -eq $true) {
         $content += " - <a href=`"cmcollections.ps1?t=$CollectionType`" title=`"Show All`">Show All</a>"
     }
-    $content += "</td></tr>"
-    $content += "</table>"
+    $content += "</td></tr></table>"
 }
 catch {
     $xxx += $Error[0].InnerException
