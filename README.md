@@ -11,6 +11,7 @@ Skattered tools from Skatterbrainz
 
 * A portable web console for viewing and managing AD and CM features
 * Built from PowerShell to run on PoSH Server (http://www.poshserver.net)
+  * (similar capability to how Microsoft Windows Admin Center works / local web app)
 * Open-source, Fully-Customizable
 * THIS IS STILL IN DEVELOPMENT - Enjoy!
 * IMPORTANT: "master" is currently "development" channel until all base features are done
