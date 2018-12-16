@@ -15,7 +15,7 @@ Skattered tools from Skatterbrainz
 * Open-source, Fully-Customizable
 * THIS IS STILL IN DEVELOPMENT - Enjoy!
 * IMPORTANT: "master" is currently "development" channel until all base features are done
-* Check back frequently, or click the Star above to be notified of updates
+* Check back frequently, or click "watch" above to be notified of updates
 
 ## Installation / Configuration
   * Download PoSHServer from: http://www.poshserver.net/ 
