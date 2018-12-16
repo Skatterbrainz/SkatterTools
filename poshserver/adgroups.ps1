@@ -62,6 +62,7 @@ try {
     $rowcount = 0
     foreach ($group in $groups) {
         $content += '<tr>'
+        #$members = $members = Get-ADsGroupMembers -GroupName $group.name
         foreach ($col in $columns) {
             $fv = $($group."$col")
             switch ($col) {

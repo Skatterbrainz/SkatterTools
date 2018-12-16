@@ -14,6 +14,8 @@ $tabset      = ""
 $xxx         = ""
 
 $links = @(
+    'https://docs.microsoft.com/en-us/powershell/module/configurationmanager/?view=sccm-ps',
+    'https://www.petri.com/managing-active-directory-groups-adsi-powershell',
     'https://stackoverflow.com',
     'https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/?view=powershell-5.1',
     'https://lazywinadmin.com/2014/04/powershell-get-list-of-my-domain.html',

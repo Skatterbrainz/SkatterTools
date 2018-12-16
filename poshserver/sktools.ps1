@@ -1,6 +1,6 @@
 ﻿# SkatterTools Site Configuration
 
-$Global:SkToolsVersion = "1812.14.01"
+$Global:SkToolsVersion = "1812.15.02"
 
 $configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
 if (!(Test-Path $configFile)) {
