@@ -49,7 +49,7 @@ if ($CmEnabled -ne 'false') {
 <button class="accordion" title="Configuration Manager Monitoring">CM Monitoring</button>
 <div class="panel">
 	<ul class="ulmenu">
-		<li class="limenu">Queries</li>
+		<li class="limenu"><a href="cmqueries.ps1" target="main" title="Queries">Queries</a></li>
 		<li class="limenu">Reporting</li>
 		<li class="limenu"><a href="cmsitestatus.ps1" target="main" title="Site Status">Site Status</a></li>
 		<li class="limenu">Component Status</li>
