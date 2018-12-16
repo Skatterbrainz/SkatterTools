@@ -1,4 +1,4 @@
-﻿$Global:SkToolsLibUtil = "1.0.1"
+﻿$Global:SkToolsLibUtil = "1.0.3"
 
 function Get-OSBuildName {
     param (
@@ -25,6 +25,21 @@ function Get-PageParam {
         [string] $Default = ""
     )
     $output = $PoshQuery."$TagName"
+    if ([string]::IsNullOrEmpty($output)) {
+        $output = $Default
+    }
+    return $output
+}
+
+function Get-FormParam {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ElementID,
+        [parameter(Mandatory=$False)]
+        [string] $Default = ""
+    )
+    $output = $PoshPost."$ElementID"
     if ([string]::IsNullOrEmpty($output)) {
         $output = $Default
     }
@@ -111,5 +126,21 @@ function Get-CheapDecode {
         $ascii = [convert]::ToUInt16($chunk)
         $output += [char]$ascii
     }
+    return $output
+}
+
+function Write-HtmlButton {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Label,
+        [int] $Id = 1,
+        [string] $Link,
+        [string] $PropertySet = ""
+    )
+    $output = "<form name='form$Id' id='form$Id' method='post' action='$Link'>"
+    $output += $PropertySet
+    $output += "<input type='submit' class='button1' name='skb1' id='skb1' value='$Label' />"
+    $output += "</form>"
     return $output
 }
