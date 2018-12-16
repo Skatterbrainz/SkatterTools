@@ -3,7 +3,7 @@ Skattered tools from Skatterbrainz
 
 
 
-## Latest: 1812.14.01
+## Latest: 1812.15.01
 
 
 ## Overview
@@ -34,6 +34,15 @@ Skattered tools from Skatterbrainz
    * ConfigMgr 1806, 1810, 1811
 
 ## Release History
+   ### 1812.15.01
+   * Where was I?  Oh yeah.
+   * Just fire it up and see.
+   * AD user/group add/remove tools are done
+   * AD explorer seems to be working
+   * CM AD forest discovery
+   * Search seems to be working
+   * My brain seems to be working
+   
    ### 1812.14.01
    * Shit man, my brain is melting, I need a vacation
    * AD sidebar is done, CM Software sidebar is done, so is CM Assets
