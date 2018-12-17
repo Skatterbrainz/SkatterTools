@@ -12,8 +12,6 @@ $PageCaption = "AD Forest"
 $content     = ""
 $tabset      = ""
 
-$forest = [System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest()
-
 $schemaVersion = $(
     #https://blogs.msmvps.com/richardsiddaway/2016/12/14/active-directory-schema-versions/
     $sch = [System.DirectoryServices.ActiveDirectory.ActiveDirectorySchema]::GetCurrentSchema()
@@ -31,15 +29,71 @@ $schemaVersion = $(
     }
 )
 
+$forest = [System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest()
+
+switch ($forest.ForestModeLevel) {
+    0 { $flvl = 'Windows Server 2000'; break; }
+    1 { $flvl = 'Windows Server 2003 Interim'; break; }
+    2 { $flvl = 'Windows Server 2003'; break; }
+    3 { $flvl = 'Windows Server 2008'; break; }
+    4 { $flvl = 'Windows Server 2008 R2'; break; }
+    5 { $flvl = 'Windows Server 2012'; break; }
+    6 { $flvl = 'Windows Server 2012 R2'; break; }
+    7 { $flvl = 'Windows Server 2016'; break; }
+    default { $flvl = 'Windows Server 2000'; break; }
+}
+
+$rootDom = $forest.RootDomain
+#$rootDom.DomainControllers
+switch ($rootDom.DomainModeLevel) {
+    0 { $dlvl = 'Windows Server 2000 mixed'; break; }
+    1 { $dlvl = 'Windows Server 2003 Interim'; break; }
+    2 { $dlvl = 'Windows Server 2003'; break; }
+    3 { $dlvl = 'Windows Server 2008'; break; }
+    4 { $dlvl = 'Windows Server 2008 R2'; break; }
+    5 { $dlvl = 'Windows Server 2012'; break; }
+    6 { $dlvl = 'Windows Server 2012 R2'; break; }
+    7 { $dlvl = 'Windows Server 2016'; break; }
+    default { $dlvl = 'Windows Server 2000'; break; }
+}
+
+$im = $rootDom.InfrastructureRoleOwner
+$pdc = $rootDom.PdcRoleOwner
+$rid = $rootDom.RidRoleOwner
+
+$pdcName = $pdc.Name
+$pdcIP   = $pdc.IPAddress
+$pdcOS   = $pdc.OSVersion
+$pdcSite = $pdc.SiteName
+$pdcGC   = $pdc.IsGlobalCatalog()
+$pdcx    = $pdc.GetAllReplicationNeighbors()
+
+$imName  = $im.Name
+$imIP    = $im.IPAddress
+$imOS    = $im.OSVersion
+$imSite  = $im.SiteName
+$imGC    = $im.IsGlobalCatalog()
+$imx     = $im.GetAllReplicationNeighbors()
+
+$ridName = $rid.Name
+$ridIP   = $rid.IPAddress
+$ridOS   = $rid.OSVersion
+$ridSite = $rid.SiteName
+$ridGC   = $rid.IsGlobalCatalog()
+$ridx    = $rid.GetAllReplicationNeighbors()
+
 $content = "<table id=table2>"
 $content += "<tr><td>Active Directory Forest</td><td>$($forest.Name)</td></tr>"
 $content += "<tr><td>Forest Schema</td><td>$schemaVersion</td></tr>"
-$content += "<tr><td>Forest Model Level</td><td>$($forest.ForestModeLevel)</td></tr>"
+$content += "<tr><td>Forest Mode Level</td><td>$flvl</td></tr>"
+$content += "<tr><td>Root Domain Level</td><td>$dlvl</td></tr>"
+$content += "<tr><td>FSMO - PDC emulator</td><td>$pdcName ($pdcIP - $pdcOS)</td></tr>"
+$content += "<tr><td>FSMO - Infrastructure master</td><td>$imName ($imIP - $imOS)</td></tr>"
+$content += "<tr><td>FSMO - RID master</td><td>$ridName ($ridIP - $ridOS)</td></tr>"
 $content += "<tr><td>FSMO - Schema master</td><td>$($forest.SchemaRoleOwner)</td></tr>"
 $content += "<tr><td>FSMO - Naming master</td><td>$($forest.NamingRoleOwner)</td></tr>"
 $content += "<tr><td>Global Catalogs</td><td><ul>$($forest.GlobalCatalogs | %{"<li>$_</li>"})</ul></td></tr>"
 $content += "<tr><td>Partitions</td><td><ul>$($forest.ApplicationPartitions | %{"<li>$_</li>"})</ul></td></tr>"
-$content += "<tr><td>FSMO - </td><td></td></tr>"
 $content += "</table>"
 
 @"
