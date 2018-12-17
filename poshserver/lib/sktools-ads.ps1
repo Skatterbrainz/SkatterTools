@@ -1,4 +1,4 @@
-﻿$Global:SkToolsLibADS = "1.0.2"
+﻿$Global:SkToolsLibADS = "1.0.3"
 
 function Get-AdsUsers {
     [CmdletBinding()]
@@ -322,28 +322,33 @@ function Get-AdOuObjects {
     param (
         [parameter(Mandatory=$True)]
         [ValidateNotNullOrEmpty()]
-        [string] $ou
+        [string] $ou,
+        [parameter(Mandatory=$False)]
+        [string] $ObjectType = ""
     )
     $root = [ADSI]"LDAP://$ou"
     $search = [adsisearcher]$root
-    #$search.Filter = "(&(objectclass=user)(objectcategory=user))"
+    if ($ObjectType -ne "") {
+        $search.Filter = "(&(objectclass=$ObjectType)(objectcategory=$ObjectType))"
+    }
     $search.SizeLimit = 3000
     $results = $search.FindAll()
     foreach ($result in $results) {
         $props = $result.Properties
         foreach ($p in $props) {
             $itemName = ($p.name | Out-String).Trim()
+            $objName  = ($p.samaccountname | Out-String).Trim()
             $itemPath = ($p.distinguishedname | Out-String).Trim()
             $itemPth  = $itemPath -replace "CN=$itemName,", ''
             $itemType = (($p.objectcategory -split ',')[0]) -replace 'CN=', ''
             $output = [ordered]@{
                 Name = $itemName
+                ObjName = $objName
                 DN   = $itemPath
                 Path = $itemPth
                 Type = $itemType
             }
             New-Object PSObject -Property $output
-            #select @{N="Name"; E={$_.name}}, @{N="DistinguishedName"; E={$_.distinguishedname}}, @{N="Class"; E={($_.objectcategory -split ',')[0]}}
         }
     }
 }
