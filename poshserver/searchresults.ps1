@@ -18,7 +18,7 @@ $a3 = $PoshPost.a3
 
 $targets = ($a1, $a2, $a3, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8)
 $rowcount = 0
-$targets = $targets | ?{if($_) {$_}}
+$targets = $targets | Where-Object{if($_) {$_}}
 
 $content = "<h1>$PageCaption</h1><table id=table1><tr>"
 $content += "<th>Category</th><th>Scope</th><th>Query</th><th>Hits</th></tr>"
@@ -179,7 +179,12 @@ foreach ($target in $targets) {
                             break;
                         }
                     }
-                    $qty = $users.count
+                    if ($qty.count -gt 1) {
+                        $qty = $groups.count
+                    }
+                    elseif ($qty.Name -ne "") {
+                        $qty = 1
+                    }
                 }
                 catch {
                     $qty = 0

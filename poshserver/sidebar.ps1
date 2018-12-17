@@ -9,6 +9,7 @@ if ($ADEnabled -ne 'false') {
 		<li class="limenu"><a href="adgroups.ps1" target="main" title="AD Groups">Groups</a></li>
 		<li class="limenu"><a href="adcomputers.ps1" target="main" title="AD Computers">Computers</a></li>
 		<li class="limenu"><a href="adforest.ps1" target="main" title="AD Forest">Forest</a></li>
+        <li class="limenu"><a href="addomain.ps1" target="main" title="AD Domain">Domain</a></li>
 		<li class="limenu"><a href="adsites.ps1" target="main" title="AD Sites">Sites</a></li>
 		<li class="limenu"><a href="adbrowser.ps1" target="main" title="AD OU Explorer">OU Explorer</a></li>
         <li class="limenu"><a href="adreps.ps1" target="main">AD Reports</a></li>

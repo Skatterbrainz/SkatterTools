@@ -1,13 +1,13 @@
 ﻿# SkatterTools Site Configuration
 
-$Global:SkToolsVersion = "1812.15.02"
+$Global:SkToolsVersion = "1812.17.01"
 
 $configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
 if (!(Test-Path $configFile)) {
     Write-Warning "Config.txt was not found. Shit just got real."
     break
 }
-$cdata = Get-Content $configFile | ?{$_ -notlike ';*'}
+$cdata = Get-Content $configFile | Where-Object{$_ -notlike ';*'}
 foreach ($line in $cdata) {
     $varset = $line -split '='
     if ($varset.Count -gt 1) {

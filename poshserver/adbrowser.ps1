@@ -24,10 +24,10 @@ else {
 }
 $rowcount = 0
 if ($SearchValue -ne "") {
-    $content = "<h4>$SearchValue</h4>"
+    $content = "<table id=table2><tr><td><h4>$SearchValue</h4></td></tr></table>"
 }
 else {
-    $content = "<h4>root:</h4>"
+    $content = "<table id=table2><tr><td><h4>root:</h4></td><tr></table>"
 }
 $content += "<table style=`"width:100%; border=0`"><tr>"
 $content += "<td style=`"width:250px;vertical-align:top`">"
@@ -66,11 +66,32 @@ try {
     $oupath  = "$tailset,$domset"
     $items = Get-AdOuObjects -ou $oupath
     $content += "<table id=table1>"
+    $content += "<tr><th>Name</th><th>Class</th></tr>"
     $xlist = @('Organizational-Unit','Service-Connection-Point')
     foreach ($item in $items) {
-        if ($item.path -eq $oupath) {
-#        if ($item.name -ne $ouname -and $item.type -notin $xlist) {
-            $content += "<tr><td>$($item.name)</td><td>$($item.type)</td></tr>"
+        if ($item.path -eq $oupath -and ($item.name -ne $ouname -and $item.type -notin $xlist)) {
+            $itemName = $item.name
+            $objName  = ($item.ObjName).TrimEnd('$')
+            $itemTypeName = $item.type
+            switch ($itemTypeName) {
+                'person' {
+                    $tlink = "<a href=`"aduser.ps1?f=username&v=$objName&x=equals&n=$itemName`">$itemName</a>"
+                    break;
+                }
+                'computer' {
+                    $tlink = "<a href=`"adcomputer.ps1?f=name&v=$objName&x=equals&n=$itemName`">$itemName</a>"
+                    break;
+                }
+                'group' {
+                    $tlink = "<a href=`"adgroup.ps1?f=name&v=$objName&x=equals&n=$itemName`">$itemName</a>"
+                    break;
+                }
+                default {
+                    $tlink = $itemName
+                    break;
+                }
+            }
+            $content += "<tr><td>$tlink</td><td>$itemTypeName</td></tr>"
         }
     }
     $content += "</table>"

@@ -12,6 +12,8 @@ $PageCaption = "AD Forest"
 $content     = ""
 $tabset      = ""
 
+$forest = [System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest()
+
 $schemaVersion = $(
     #https://blogs.msmvps.com/richardsiddaway/2016/12/14/active-directory-schema-versions/
     $sch = [System.DirectoryServices.ActiveDirectory.ActiveDirectorySchema]::GetCurrentSchema()
@@ -29,8 +31,15 @@ $schemaVersion = $(
     }
 )
 
-$content = "<table id=table1>"
+$content = "<table id=table2>"
+$content += "<tr><td>Active Directory Forest</td><td>$($forest.Name)</td></tr>"
 $content += "<tr><td>Forest Schema</td><td>$schemaVersion</td></tr>"
+$content += "<tr><td>Forest Model Level</td><td>$($forest.ForestModeLevel)</td></tr>"
+$content += "<tr><td>FSMO - Schema master</td><td>$($forest.SchemaRoleOwner)</td></tr>"
+$content += "<tr><td>FSMO - Naming master</td><td>$($forest.NamingRoleOwner)</td></tr>"
+$content += "<tr><td>Global Catalogs</td><td><ul>$($forest.GlobalCatalogs | %{"<li>$_</li>"})</ul></td></tr>"
+$content += "<tr><td>Partitions</td><td><ul>$($forest.ApplicationPartitions | %{"<li>$_</li>"})</ul></td></tr>"
+$content += "<tr><td>FSMO - </td><td></td></tr>"
 $content += "</table>"
 
 @"
