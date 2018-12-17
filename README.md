@@ -3,7 +3,7 @@ Skattered tools from Skatterbrainz
 
 
 
-## Latest: 1812.15.01
+## Latest: 1812.17.01
 
 
 ## Overview
@@ -35,6 +35,11 @@ Skattered tools from Skatterbrainz
    * ConfigMgr 1806, 1810, 1811
 
 ## Release History
+   ### 1812.17.01
+   * AD domain and AD forest pages
+   * Search results bugfix (ad users)
+   * AD OU explorer object links added
+   
    ### 1812.15.01
    * Where was I?  Oh yeah.
    * Just fire it up and see.
