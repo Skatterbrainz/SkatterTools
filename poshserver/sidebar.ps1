@@ -62,7 +62,7 @@ if ($CmEnabled -ne 'false') {
 <div class="panel">
 	<ul class="ulmenu">
 		<li class="limenu">Hierarchy</li>
-		<li class="limenu">Discovery Methods</li>
+		<li class="limenu"><a href="cmdiscs.ps1" target="main" title="Discovery Methods">Discovery Methods</a></li>
         <li class="limenu"><a href="cmforestdisc.ps1" target="main" title="AD Forest Discovery and Publishing">AD Forest</a></li>
 		<li class="limenu"><a href="cmbgroups.ps1" target="main" title="Boundary Groups">Boundary Groups</a></li>
 		<li class="limenu">Site Systems</li>
