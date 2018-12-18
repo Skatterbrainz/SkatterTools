@@ -33,28 +33,9 @@ switch ($TabSelected) {
                 SiteSystemCount,
                 Shared 
                 FROM vSMS_BoundaryGroup"
+            $query = Get-SkDbQuery -QueryText $query
+            if (![string]::IsNullOrEmpty($SearchValue)) {$IsFiltered = $True}
 
-            if (![string]::IsNullOrEmpty($SearchValue)) {
-                $IsFiltered = $True
-                switch ($SearchType) {
-                    'equals' {
-                        $query += " where ($SearchField = '$SearchValue')"
-                        break;
-                    }
-                    'like' {
-                        $query += " where ($SearchField like '%$SearchValue%')"
-                        break;
-                    }
-                    'begins' {
-                        $query += " where ($SearchField like '$SearchValue%')"
-                        break;
-                    }
-                    'ends' {
-                        $query += " where ($SearchField like '%$SearchValue')"
-                        break;
-                    }
-                }
-            }    
             $connection = New-Object -ComObject "ADODB.Connection"
             $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
             $connection.Open($connString);
@@ -142,11 +123,7 @@ switch ($TabSelected) {
                     [void]$rs.MoveNext()
                     $rowcount++
                 }
-                $content += "<tr><td colspan=`"$($colcount)`" class=lastrow>$rowcount items returned"
-                if ($IsFiltered -eq $true) {
-                    $content += " - <a href=`"___.ps1`" title=`"Show All`">Show All</a>"
-                }
-                $content += "</td></tr>"
+                $content += "<tr><td colspan=`"$($colcount)`" class=lastrow>$rowcount items returned</td></tr>"
                 $content += "</table>"
                 [void]$rs.Close()
             }

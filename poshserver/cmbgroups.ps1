@@ -26,30 +26,9 @@ try {
         MemberCount as Boundaries,
         SiteSystemCount as SiteSystems
         FROM vSMS_BoundaryGroup'
+    $query = Get-SkDbQuery -QueryText $query
+    if (![string]::IsNullOrEmpty($SearchValue)) {$IsFiltered = $True}
 
-    if (![string]::IsNullOrEmpty($SearchValue)) {
-        $IsFiltered = $True
-        switch ($SearchType) {
-            'equals' {
-                $query += " where ($SearchField = '$SearchValue')"
-                break;
-            }
-            'like' {
-                $query += " where ($SearchField like '%$SearchValue%')"
-                break;
-            }
-            'begins' {
-                $query += " where ($SearchField like '$SearchValue%')"
-                break;
-            }
-            'ends' {
-                $query += " where ($SearchField like '%$SearchValue')"
-                break;
-            }
-        }
-    }
-    $query += " order by $SortField $SortOrder"
-    
     $connection = New-Object -ComObject "ADODB.Connection"
     $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
     $connection.Open($connString);
