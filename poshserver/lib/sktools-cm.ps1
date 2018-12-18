@@ -1,4 +1,4 @@
-﻿$Global:SkToolsLibCM = "1.0.1"
+﻿$Global:SkToolsLibCM = "1812.17.02"
 
 function Get-CmCollectionsList {
     [CmdletBinding()]
@@ -47,10 +47,10 @@ function Get-CmCollectionsList {
                 CollectionType = $($rs.Fields("CollectionType").value | Out-String).Trim()
             }
             New-Object PSObject -Property $props
-            $rs.MoveNext()
+            [void]$rs.MoveNext()
         }
         Write-Verbose "closing recordset"
-        $rs.Close
+        [void]$rs.Close()
     }
     catch {
         if ($IsOpen -eq $True) { [void]$connection.Close() }

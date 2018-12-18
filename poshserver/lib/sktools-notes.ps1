@@ -1,4 +1,4 @@
-﻿$Global:SkToolsLibNotes = "1.0.0"
+﻿$Global:SkToolsLibNotes = "1812.11.01"
 
 function New-NoteAttachment {
     param (

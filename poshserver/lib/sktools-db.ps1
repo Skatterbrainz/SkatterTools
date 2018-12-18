@@ -1,6 +1,4 @@
-﻿$Global:SkToolsLibDB = "1.0.0"
-
-function Get-CmAdoConnection {
+﻿function Get-CmAdoConnection {
     [CmdletBinding(SupportsShouldProcess=$True)]
     param (
         [parameter(Mandatory=$True, HelpMessage="ConfigMgr SQL Server hostname")]
@@ -14,15 +12,14 @@ function Get-CmAdoConnection {
         [parameter(Mandatory=$False, HelpMessage="SQL query timeout value")]
         [int]$QueryTimeout = 120
     )
-    $conn = New-Object System.Data.SqlClient.SQLConnection
-    $ConnectionString = "Server={0};Database={1};Integrated Security=True;Connect Timeout={2}" -f $SQLServerName,$DatabaseName,$ConnectionTimeout
-    $conn.ConnectionString = $ConnectionString
     try {
-        $conn.Open()
-        Write-Output $conn
+        $connection = New-Object -ComObject "ADODB.Connection"
+        $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+        $connection.Open($connString);
+        Write-Output $connection
     }
     catch {
-        Write-Error $Error[0].Exception.Message
+        Write-Error "get-cmadoconnection-error: $($Error[0].Exception.Message)"
         break
     }
 }
@@ -44,3 +41,80 @@ function Get-CmSqlQueryData {
     $rows = $($ds.Tables).Rows.Count
     Write-Output $($ds.Tables).Rows
 }
+
+function Get-SqlRowCount {
+    [CmdletBinding()]
+    param (
+        $ServerName,
+        $Database,
+        $Query,
+        $ReturnColumn = "QTY"
+    )
+    $output = 0
+    try {
+        $connection = New-Object -ComObject "ADODB.Connection"
+        $connString = "Data Source=$ServerName;Initial Catalog=$Database;Integrated Security=SSPI;Provider=SQLOLEDB"
+        $connection.Open($connString);
+        Write-Verbose "connection opened"
+        $IsOpen = $True
+        $rs = New-Object -ComObject "ADODB.RecordSet"
+        $rs.Open($query, $connection)
+        Write-Verbose "recordset opened"
+        if (!$rs.BOF -and !$rs.EOF) {
+            Write-Verbose "more than 0 rows returned"
+            $output = $rs.Fields($ReturnColumn).Value
+        }
+        else {
+            Write-Verbose "no rows returned"
+        }
+        [void]$rs.Close()
+        Write-Verbose "recordset closed"
+    }
+    catch {
+        Write-Host $connstring
+        Write-Host "xxx = $xxx"
+        $output = -1
+    }
+    finally {
+        if ($IsOpen -eq $True) {
+            Write-Verbose "connection closed"
+            [void]$connection.Close()
+        }
+        Write-Output $output
+    }
+}
+
+function Get-SkDbQuery {
+    param (
+        [parameter(Mandatory=$True)]
+            [ValidateNotNullOrEmpty()]
+            [string] $QueryText
+    )
+    $output = $QueryText
+    if (![string]::IsNullOrEmpty($SearchValue)) {
+        switch ($SearchType) {
+            'like' {
+                $output += " where ($SearchField like '%$SearchValue%')"
+                break;
+            }
+            'begins' {
+                $output += " where ($SearchField like '$SearchValue%')"
+                break;
+            }
+            'ends' {
+                $output += " where ($SearchField like '%$SearchValue')"
+                break;
+            }
+            default {
+                $output += " where ($SearchField = '$SearchValue')"
+                break;
+            }
+        }
+    }
+    if (![string]::IsNullOrEmpty($SortField)) {
+        $output += " order by $SortField $SortOrder"
+    }
+    Write-Output $output
+}
+
+$Global:SkToolsLibDB = "1812.18.02"

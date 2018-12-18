@@ -1,4 +1,4 @@
-﻿$Global:SkToolsLibUtil = "1.0.3"
+﻿$Global:SkToolsLibUtil = "1812.17.01"
 
 function Get-OSBuildName {
     param (
