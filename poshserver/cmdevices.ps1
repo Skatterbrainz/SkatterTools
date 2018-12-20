@@ -110,7 +110,8 @@ try {
                         break;
                     }
                     'OsBuild' {
-                        $content += '<td>'+$fv+'</td>'
+                        $fvx = "<a href=`"cmdevices.ps1?f=OSbuild&v=$fv&x=equals&n=$fv`" title=`"Filter`">$fv</a>"
+                        $content += '<td style=`"text-align:center`">'+$fvx+'</td>'
                         break;
                     }
                     'ResourceID' {

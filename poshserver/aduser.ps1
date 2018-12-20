@@ -64,6 +64,95 @@ switch ($TabSelected) {
         finally {}
         break;
     }
+    'Devices' {
+        try {
+            $query = "SELECT DISTINCT
+                dbo.v_R_System.Name0 AS Computer, 
+                dbo.v_GS_USER_PROFILE.LocalPath0 AS LocalPath, 
+                dbo.v_R_System.AD_Site_Name0 AS ADSite, 
+                dbo.v_GS_COMPUTER_SYSTEM.Model0 AS Model, 
+                dbo.v_GS_OPERATING_SYSTEM.Caption0 AS OperatingSystem, 
+                dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 AS OSBuild, 
+                dbo.v_GS_USER_PROFILE.TimeStamp
+                FROM 
+                dbo.v_GS_USER_PROFILE INNER JOIN
+                dbo.v_R_System ON dbo.v_GS_USER_PROFILE.ResourceID = dbo.v_R_System.ResourceID INNER JOIN
+                dbo.v_GS_COMPUTER_SYSTEM ON 
+                dbo.v_GS_USER_PROFILE.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
+                dbo.v_GS_OPERATING_SYSTEM ON 
+                dbo.v_GS_USER_PROFILE.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
+                WHERE (dbo.v_GS_USER_PROFILE.LocalPath0 LIKE '%$SearchValue')
+                ORDER BY dbo.v_GS_USER_PROFILE.TimeStamp DESC"
+            $connection = New-Object -ComObject "ADODB.Connection"
+            $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+            $connection.Open($connString);
+            $IsOpen = $True
+            $rs = New-Object -ComObject "ADODB.RecordSet"
+            $rs.Open($query, $connection)
+            $rowcount = 0
+            $colcount = $rs.Fields.Count
+            $rs.MoveFirst()
+            $content = "<table id=table1><tr>"
+            for ($i = 0; $i -lt $colcount; $i++) {
+                $fn = $rs.Fields($i).Name
+                $content += "<th>$fn</th>"
+            }
+            $content += "</tr>"
+            while (!$rs.EOF) {
+                $content += "<tr>"
+                for ($i = 0; $i -lt $colcount; $i++) {
+                    $fn = $rs.Fields($i).Name
+                    $fv = $rs.Fields($i).Value
+                    switch($fn) {
+                        'Computer' {
+                            $devname = $fv
+                            $fvx = "<a href=`"adcomputer.ps1?f=name&v=$fv&x=equals&n=$fv`" title=`"Computer Details`">$fv</a>"
+                            break;
+                        }
+                        'LocalPath' {
+                            $fpath = $fv -replace 'C:', $("\\$devname\c`$")
+                            $fvx = "<a href=`"showfiles.ps1?f=folderpath&v=$fpath&x=equals`">$fv</a>"
+                            break;
+                        }
+                        'ADSite' {
+                            $fvx = "<a href=`"cmdevices.ps1?f=ADSite&v=$fv&x=equals&n=$fv`" title=`"Computers in site $fv`">$fv</a>"
+                            break;
+                        }
+                        'Model' {
+                            $fvx = "<a href=`"cmdevices.ps1?f=Model&v=$fv&x=equals&n=$fv`" title=`"Computers by model $fv`">$fv</a>"
+                            break;
+                        }
+                        'OperatingSystem' {
+                            $fvx = "<a href=`"cmdevices.ps1?f=OperatingSystem&v=$fv&x=equals&n=$fv`" title=`"Computers running $fv`">$fv</a>"
+                            break;
+                        }
+                        'OSBuild' {
+                            $fvx = "<a href=`"cmdevices.ps1?f=OSBuild&v=$fv&x=equals&n=$fv`" title=`"Computers running $fv`">$fv</a>"
+                            break;
+                        }
+                        default {
+                            $fvx = $fv
+                            break;
+                        }
+                    }
+                    $content += "<td>$fvx</td>"
+                }
+                $content += "</tr>"
+                $rowcount++
+                [void]$rs.MoveNext()
+            }
+            [void]$rs.Close()
+            $content += "<tr><td colspan=$colcount class=lastrow>$rowcount rows returned</td></tr>"
+            $content += "</table>"
+        }
+        catch {}
+        finally {
+            if ($IsOpen -eq $True) {
+                [void]$connection.Close()
+            }
+        }
+        break;
+    }
     'Notes' {
         $notes = Get-NoteAttachments -ObjectType "aduser" -ObjectID "$SearchValue"
         $content = "<table id=table1>"

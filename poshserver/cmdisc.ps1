@@ -23,7 +23,7 @@ try {
         Value2,
         Value3,
         SourceTable 
-        FROM SC_Properties
+        FROM dbo.SC_Properties
         WHERE (ItemType = '''+$SearchValue+''')' 
     $connection = New-Object -ComObject "ADODB.Connection"
     $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
