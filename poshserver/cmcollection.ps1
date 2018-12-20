@@ -30,22 +30,19 @@ $xxx = ""
 switch ($TabSelected) {
     'General' {
         try {
-            $query = ""
-            $query = 'SELECT TOP 1  
-                dbo.v_Collection.Name as CollectionName, 
-                dbo.v_FullCollectionMembership.CollectionID, 
+            $query = 'SELECT TOP (1) 
+                dbo.v_Collection.Name AS CollectionName, 
+                dbo.v_Collection.CollectionID, 
                 dbo.v_Collection.Comment, 
-                dbo.v_Collection.MemberCount as Members, 
-                dbo.v_Collection.CollectionType as [Type], 
-                dbo.v_Collections.CollectionVariablesCount as Variables, 
-                dbo.v_Collections.LimitToCollectionID as LimitedTo
-            FROM 
-                dbo.v_FullCollectionMembership INNER JOIN
-                dbo.v_Collection ON 
-                dbo.v_FullCollectionMembership.CollectionID = dbo.v_Collection.CollectionID 
-                INNER JOIN dbo.v_Collections ON 
-                dbo.v_Collection.Name = dbo.v_Collections.CollectionName
-            WHERE (dbo.v_Collection.CollectionID='''+$SearchValue+''')'
+                dbo.v_Collection.MemberCount AS Members, 
+                dbo.v_Collection.CollectionType AS Type, 
+                dbo.v_Collections.CollectionVariablesCount AS Variables, 
+                dbo.v_Collections.LimitToCollectionID AS LimitedTo
+                FROM 
+                dbo.v_Collections INNER JOIN
+                dbo.v_Collection ON dbo.v_Collections.CollectionName = dbo.v_Collection.Name
+                WHERE (dbo.v_Collection.CollectionID = '''+$SearchValue+''')'
+
             $xxx += "<br/>query: $query"
             $connection = New-Object -ComObject "ADODB.Connection"
             $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"

@@ -67,6 +67,7 @@ if ($CmEnabled -ne 'false') {
 		<li class="limenu"><a href="cmbgroups.ps1" target="main" title="Boundary Groups">Boundary Groups</a></li>
 		<li class="limenu">Site Systems</li>
 		<li class="limenu">Site Components</li>
+        <li class="limenu"><a href="cmsumtasks.ps1" target="main" title="Summary Tasks">Summary Tasks</a></li>
         <li class="limenu"><a href="cmcerts.ps1" target="main" title="Certificates">Certificates</a></li>
 		<li class="limenu">Client Settings</li>
 		<li class="limenu">Maintenance Tasks</li>
