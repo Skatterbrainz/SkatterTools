@@ -88,25 +88,32 @@ function Get-SkDbQuery {
     param (
         [parameter(Mandatory=$True)]
             [ValidateNotNullOrEmpty()]
-            [string] $QueryText
+            [string] $QueryText,
+            [switch] $Extend
     )
     $output = $QueryText
     if (![string]::IsNullOrEmpty($SearchValue)) {
+        if ($Extend) {
+            $opword = 'and'
+        }
+        else {
+            $opword = 'where'
+        }
         switch ($SearchType) {
             'like' {
-                $output += " where ($SearchField like '%$SearchValue%')"
+                $output += " $opword ($SearchField like '%$SearchValue%')"
                 break;
             }
             'begins' {
-                $output += " where ($SearchField like '$SearchValue%')"
+                $output += " $opword ($SearchField like '$SearchValue%')"
                 break;
             }
             'ends' {
-                $output += " where ($SearchField like '%$SearchValue')"
+                $output += " $opword ($SearchField like '%$SearchValue')"
                 break;
             }
             default {
-                $output += " where ($SearchField = '$SearchValue')"
+                $output += " $opword ($SearchField = '$SearchValue')"
                 break;
             }
         }
@@ -117,4 +124,4 @@ function Get-SkDbQuery {
     Write-Output $output
 }
 
-$Global:SkToolsLibDB = "1812.18.02"
+$Global:SkToolsLibDB = "1812.18.03"

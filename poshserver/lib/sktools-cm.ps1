@@ -1,6 +1,4 @@
-﻿$Global:SkToolsLibCM = "1812.17.02"
-
-function Get-CmCollectionsList {
+﻿function Get-CmCollectionsList {
     [CmdletBinding()]
     param (
         [parameter(Mandatory=$False)]
@@ -62,6 +60,71 @@ function Get-CmCollectionsList {
     }
 }
 
+function Get-CmResourcesList {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateSet('device','user')]
+        [string] $ResourceType,
+        [parameter(Mandatory=$False)]
+        [string] $ExcludeCollectionID = ""
+    )
+    switch ($ResourceType) {
+        'device' {
+            $query = "SELECT ResourceID, Name FROM v_ClientMachines WHERE (v_ClientMachines.IsClient = 1)"
+            if ($ExcludeCollectionID -ne "") {
+                $query += " AND (ResourceID NOT IN (
+                    SELECT DISTINCT ResourceID 
+                    FROM v_CollectionRuleDirect 
+                    WHERE (CollectionID = '$ExcludeCollectionID')))"
+            }
+            $query += " ORDER BY Name"
+            break;
+        }
+        'user' {
+            $query = "SELECT ResourceID, User_Name0 as ResourceName FROM v_R_User"
+            if ($ExcludeCollectionID -ne "") {
+                $query += " WHERE ResourceID NOT IN (
+	                SELECT DISTINCT ResourceID
+	                FROM v_CollectionRuleDirect
+	                WHERE (CollectionID = '$ExcludeCollectionID'))"
+            }
+            $query += " ORDER BY ResourceName"
+            break;
+        }
+    } # switch
+    try {
+        $connection = New-Object -ComObject "ADODB.Connection"
+        $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+        $connection.Open($connString);
+        $IsOpen = $True
+        Write-Verbose "connection is opened"
+        $rs = New-Object -ComObject "ADODB.RecordSet"
+        $rs.Open($query, $connection)
+        Write-Verbose "recordset opened"
+        [void]$rs.MoveFirst()
+        while (!$rs.EOF) {
+            Write-Verbose "reading recordset row..."
+            $props = [ordered]@{
+                ResourceID   = $($rs.Fields("ResourceID").value | Out-String).Trim()
+                ResourceName = $($rs.Fields("Name").value | Out-String).Trim()
+            }
+            New-Object PSObject -Property $props
+            [void]$rs.MoveNext()
+        }
+        Write-Verbose "closing recordset"
+        [void]$rs.Close()
+    }
+    catch {
+        if ($IsOpen -eq $True) { [void]$connection.Close() }
+        throw "Error: $($Error[0].Exception.Message)"
+    }
+    finally {
+        Write-Verbose "closing connection"
+        if ($IsOpen -eq $True) { [void]$connection.Close() }
+    }
+}
+
 function Get-CmPackageTypeName {
     param (
         [parameter(Mandatory=$True)]
@@ -81,3 +144,5 @@ function Get-CmPackageTypeName {
         260 { return 'VHD Package'; break; }
     }
 }
+
+$Global:SkToolsLibCM = "1812.22.03"
