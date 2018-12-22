@@ -10,31 +10,56 @@ $content = ""
 $query   = ""
 $tabset  = ""
 
+if ($ResourceID.IndexOf(':') -gt 0) {
+    $xx = $ResourceID -split ':'
+    $ResourceID = $xx[0]
+    $ResourceName = $xx[1]
+}
+
 switch ($ResourceType) {
     5 {
         $TargetLink = "cmdevice.ps1?f=resourceid&v=$ResourceID&x=equals&n=$ResourceName&tab=Collections"
+        $laststep = "defined targetlink: device"
         break;
     }
     4 {
         $TargetLink = "cmuser.ps1?f=resourceid&v=$ResourceID&x=equals&n=$ResourceName&tab=Collections"
+        $laststep = "defined targetlink: user"
         break;
     }
 }
 
 #$result = Add-CMCollectionMemberDirect -CollectionName $CollectionName -ResourceName $ResourceName
 try {
-    [string]$SmsResourceID = $(Get-WmiObject -ComputerName $CmSMSProvider -Namespace "Root\Sms\Site_$CmSiteCode" -Query "Select * From SMS_R_System Where Name='$($ResourceName)'").ResourceID
-    $SmsNewRule = $([wmiclass]$("\\$($CmSMSProvider)\root\sms\site_$($CmSiteCode):SMS_CollectionRuleDirect")).CreateInstance()
-    $SmsCollection = Get-WmiObject -ComputerName $CmSMSProvider -Namespace "Root\Sms\Site_$CmSiteCode" -Query "Select * From SMS_Collection Where Name='$($CollectionName)'"
-    [void]$SmsCollection.Get()
-    $SmsNewRule.ResourceClassName = "SMS_R_System"
-    $SmsNewRule.ResourceID = $SmsResourceID
-    $SmsNewRule.RuleName = $ResourceName
-    [System.Management.ManagementBaseObject[]]$SmsRules = $SmsCollection.CollectionRules
-    $SmsRules += $SmsNewRule
-    $SmsCollection.CollectionRules = $SmsRules
-    [void]$SmsCollection.Put()
-    $result = "Success"
+    switch ($ResourceType) {
+        5 {
+            if ($ResourceID -eq "") {
+                $laststep = "getting resourceid"
+                [string]$ResourceID = $(Get-WmiObject -ComputerName $CmSMSProvider -Namespace "Root\Sms\Site_$CmSiteCode" -Query "Select * From SMS_R_System Where Name='$($ResourceName)'").ResourceID
+            }
+            $laststep = "defining new rule object"
+            $SmsNewRule = $([wmiclass]$("\\$($CmSMSProvider)\root\sms\site_$($CmSiteCode):SMS_CollectionRuleDirect")).CreateInstance()
+            $laststep = "getting collection object"
+            $SmsCollection = Get-WmiObject -ComputerName $CmSMSProvider -Namespace "Root\Sms\Site_$CmSiteCode" -Query "Select * From SMS_Collection Where Name='$($CollectionName)'"
+            [void]$SmsCollection.Get()
+            $SmsNewRule.ResourceClassName = "SMS_R_System"
+            $SmsNewRule.ResourceID = $ResourceID
+            $SmsNewRule.RuleName = $ResourceName
+            $laststep = "adding rule to collection"
+            [System.Management.ManagementBaseObject[]]$SmsRules = $SmsCollection.CollectionRules
+            $SmsRules += $SmsNewRule
+            $SmsCollection.CollectionRules = $SmsRules
+            $laststep = "updating collection"
+            [void]$SmsCollection.Put()
+            $laststep = "update completed"
+            $result = "Success"
+            break;
+        }
+        4 {
+            $result = "NotImplemented"
+            break;
+        }
+    } # switch
 }
 catch {
     $result = "Error: $($Error[0].Exception.Message)"
@@ -48,8 +73,9 @@ $content += "<tr><td>Collection Name</td><td>$CollectionName</td></tr>"
 $content += "<tr><td>SMS Provider</td><td>$CmSMSProvider</td></tr>"
 $content += "<tr><td>SMS Site Code</td><td>$CmSiteCode</td></tr>"
 $content += "<tr><td>Request Status</td><td>$result</td></tr>"
-$content += "<tr><td>Return Link</td><td><a href=`"$TargetLink`">$TargetLink</a></td></tr>"
+$content += "<tr><td>Last step</td><td>$laststep</td></tr>"
 
+$content += "<tr><td>Return Link</td><td><a href=`"$TargetLink`">$TargetLink</a></td></tr>"
 $content += "<tr><td colspan=2 style=`"heigh:150px;text-align:center`">"
 $content += "<h3>Adding to collection...</h3>"
 $content += "<img src=`"graphics\301.gif`" border=0 /></td></tr>"

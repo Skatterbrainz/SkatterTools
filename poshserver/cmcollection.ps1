@@ -11,9 +11,11 @@ $IsFiltered  = $False
 
 if ($CollectionType -eq '2') {
     $Ctype = "Device"
+    $ResType = 5
 }
 else {
     $Ctype = "User"
+    $ResType = 4
 }
 $PageTitle   = "CM $CType Collection: $CustomName"
 $PageCaption = "CM $CType Collection: $CustomName"
@@ -82,82 +84,113 @@ switch ($TabSelected) {
         break;
     }
     'DirectRules' {
-        try {
-            $query = 'SELECT DISTINCT 
-            dbo.v_CollectionRuleDirect.RuleName, 
-            dbo.v_CollectionRuleDirect.ResourceID, 
-            dbo.v_CollectionRuleDirect.ResourceType, 
-            dbo.v_R_System.AD_Site_Name0 AS ADSite, 
-            dbo.v_GS_COMPUTER_SYSTEM.Model0 AS Model, 
-            dbo.v_GS_OPERATING_SYSTEM.Caption0 AS OSName, 
-            dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 AS OSBuild
-            FROM 
-            dbo.v_CollectionRuleDirect INNER JOIN
-            dbo.v_Collection ON dbo.v_CollectionRuleDirect.CollectionID = dbo.v_Collection.CollectionID INNER JOIN
-            dbo.v_R_System ON dbo.v_CollectionRuleDirect.ResourceID = dbo.v_R_System.ResourceID INNER JOIN
-            dbo.v_GS_COMPUTER_SYSTEM ON dbo.v_CollectionRuleDirect.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
-            dbo.v_GS_OPERATING_SYSTEM ON dbo.v_CollectionRuleDirect.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
-            WHERE 
-            (dbo.v_CollectionRuleDirect.CollectionID = '''+$SearchValue+''')
-            ORDER BY dbo.v_CollectionRuleDirect.RuleName'
-            $xxx += "<br/>query: $query"
-            $connection = New-Object -ComObject "ADODB.Connection"
-            $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-            $connection.Open($connString);
-            $IsOpen = $True
-            $xxx += "<br/>connection opened"
-            $rs = New-Object -ComObject "ADODB.RecordSet"
-            $rs.Open($query, $connection)
-            $xxx += "<br/>recordset defined"
-            $colcount = $rs.Fields.Count
-            $rowcount = 0
-            $xxx += "<br/>$colcount columns returned"
-            if ($rs.BOF -and $rs.EOF) {
-                $content = "<table id=table2><tr><td style=`"text-align:center`">No Direct Membership Rules found</td></tr>"
-            }
-            else {
-                [void]$rs.MoveFirst()
-                $content = "<table id=table1><tr>"
-                foreach ($fn in ('RuleName','ResourceType','ADSite','Model','OSName','OSBuild')) {
-                    $content += "<th>$fn</th>"
+        if ($SearchValue -notlike 'SMS*') {
+            try {
+                $query = 'SELECT DISTINCT 
+                dbo.v_CollectionRuleDirect.RuleName, 
+                dbo.v_CollectionRuleDirect.ResourceID, 
+                dbo.v_CollectionRuleDirect.ResourceType, 
+                dbo.v_R_System.AD_Site_Name0 AS ADSite, 
+                dbo.v_GS_COMPUTER_SYSTEM.Model0 AS Model, 
+                dbo.v_GS_OPERATING_SYSTEM.Caption0 AS OSName, 
+                dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 AS OSBuild
+                FROM 
+                dbo.v_CollectionRuleDirect INNER JOIN
+                dbo.v_Collection ON dbo.v_CollectionRuleDirect.CollectionID = dbo.v_Collection.CollectionID INNER JOIN
+                dbo.v_R_System ON dbo.v_CollectionRuleDirect.ResourceID = dbo.v_R_System.ResourceID INNER JOIN
+                dbo.v_GS_COMPUTER_SYSTEM ON dbo.v_CollectionRuleDirect.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
+                dbo.v_GS_OPERATING_SYSTEM ON dbo.v_CollectionRuleDirect.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
+                WHERE 
+                (dbo.v_CollectionRuleDirect.CollectionID = '''+$SearchValue+''')
+                ORDER BY dbo.v_CollectionRuleDirect.RuleName'
+                $xxx += "<br/>query: $query"
+                $connection = New-Object -ComObject "ADODB.Connection"
+                $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
+                $connection.Open($connString);
+                $IsOpen = $True
+                $xxx += "<br/>connection opened"
+                $rs = New-Object -ComObject "ADODB.RecordSet"
+                $rs.Open($query, $connection)
+                $xxx += "<br/>recordset defined"
+                $colcount = $rs.Fields.Count
+                $rowcount = 0
+                $xxx += "<br/>$colcount columns returned"
+                if ($rs.BOF -and $rs.EOF) {
+                    $content = "<table id=table2><tr><td style=`"text-align:center`">No Direct Membership Rules found</td></tr>"
                 }
-                $content += "</tr>"
-                while (!$rs.EOF) {
-                    $rulename = $rs.Fields("RuleName").Value
-                    $resID    = $rs.Fields("ResourceID").Value
-                    $resType  = $rs.Fields("ResourceType").Value
-                    switch ($resType) {
-                        4 { $resTypeName = 'User'; break; }
-                        5 { $resTypeName = 'Device'; break; }
+                else {
+                    $members = @()
+                    [void]$rs.MoveFirst()
+                    $content = "<table id=table1><tr>"
+                    foreach ($fn in ('RuleName','ResourceType','ADSite','Model','OSName','OSBuild')) {
+                        $content += "<th>$fn</th>"
                     }
-                    $adsite  = $rs.Fields("ADSite").Value
-                    $model   = $rs.Fields("Model").Value
-                    $osname  = $rs.Fields("OSName").Value
-                    $osbuild = $rs.Fields("OSBuild").Value
-                    $content += "<tr>"
-                    $content += "<td><a href=`"cmdevice.ps1?f=resourceid&v=$resID&x=equals&n=$ruleName`" title=`"Details`">$rulename</a></td>"
-                    $content += "<td>$resTypeName</td>"
-                    $content += "<td><a href=`"cmdevices.ps1?f=adsite&v=$adsite&x=equals`" title=`"Find Other Devices`">$adsite</a></td>"
-                    $content += "<td><a href=`"cmdevices.ps1?f=model&v=$model&x=equals`" title=`"Find Other Devices`">$model</a></td>"
-                    $content += "<td><a href=`"cmdevices.ps1?f=OperatingSystem&v=$osname&x=equals`" title=`"Find Other Devices`">$osname</a></td>"
-                    $content += "<td>$osbuild</td>"
                     $content += "</tr>"
-                    $rowcount++
-                    [void]$rs.MoveNext()
+                    while (!$rs.EOF) {
+                        $rulename = $rs.Fields("RuleName").Value
+                        $resID    = $rs.Fields("ResourceID").Value
+                        $resType  = $rs.Fields("ResourceType").Value
+                        switch ($resType) {
+                            4 { $resTypeName = 'User'; break; }
+                            5 { $resTypeName = 'Device'; break; }
+                        }
+                        $adsite  = $rs.Fields("ADSite").Value
+                        $model   = $rs.Fields("Model").Value
+                        $osname  = $rs.Fields("OSName").Value
+                        $osbuild = $rs.Fields("OSBuild").Value
+                        $members += $rulename
+                        $content += "<tr>"
+                        $content += "<td><a href=`"cmdevice.ps1?f=resourceid&v=$resID&x=equals&n=$ruleName`" title=`"Details`">$rulename</a></td>"
+                        $content += "<td>$resTypeName</td>"
+                        $content += "<td><a href=`"cmdevices.ps1?f=adsite&v=$adsite&x=equals`" title=`"Find Other Devices`">$adsite</a></td>"
+                        $content += "<td><a href=`"cmdevices.ps1?f=model&v=$model&x=equals`" title=`"Find Other Devices`">$model</a></td>"
+                        $content += "<td><a href=`"cmdevices.ps1?f=OperatingSystem&v=$osname&x=equals`" title=`"Find Other Devices`">$osname</a></td>"
+                        $content += "<td>$osbuild</td>"
+                        $content += "</tr>"
+                        $rowcount++
+                        [void]$rs.MoveNext()
+                    }
+                    $content += "<tr><td colspan=`"$($colcount)`">$rowcount rules returned</td></tr>"
+                    $content += "</table>"
+                    [void]$rs.Close()
+                    $xxx += "<br/>recordset closed"
                 }
-                $content += "<tr><td colspan=`"$($colcount)`">$rowcount rules returned</td></tr>"
-                $content += "</table>"
-                [void]$rs.Close()
-                $xxx += "<br/>recordset closed"
+            }
+            catch {
+                $xxx += "<br/>Error: $($Error[0].Exception.Message)"
+            }
+            finally {
+                if ($IsOpen -eq $true) {
+                    [void]$connection.Close()
+                }
+            }
+            #----------------- form for adding members -----------------
+            try {
+                $laststep = "requesting resource list"
+                $resources = Get-CmResourcesList -ResourceType $ResType -ExcludeCollectionID $SearchValue
+                $laststep = "building form table"
+                $content += "<form name='form1' id='form1' method='post' action='addmember.ps1'>"
+                $content += "<input type='hidden' name='collid' id='collid' value='$CustomName' />"
+                $content += "<input type='hidden' name='restype' id='restype' value='$ResType' />"
+                $content += "<table id=table2><tr><td>"
+                $content += "<select name='resid' id='resid' size=1 style='width:500px;padding:5px'>"
+                $content += "<option value=`"`"></option>"
+                $laststep = "building listbox"
+                foreach ($row in $resources) {
+                    $rid = $row.ResourceID
+                    $rnn = $row.ResourceName
+                    $content += "<option value=`"$rid`:$rnn`">$rnn</option>"
+                }
+                $content += "</select> <input type='submit' name='ok' id='ok' value='Add' class='button1' />"
+                $content += " (direct membership collections only)</td></tr></table></form>"
+                $laststep = "form table completed"
+            }
+            catch {
+                $content += "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)<br/>Last Step: $laststep</td></tr></table>"
             }
         }
-        catch {
-            $xxx += "<br/>Error: $($Error[0].Exception.Message)"
-        }
-        finally {
-            if ($IsOpen -eq $true) {
-                [void]$connection.Close()
-            }
+        else {
+            $content = "<table id=table2><tr><td style=`"height:200px;text-align:center`">Direct Membership Rules do not apply</td></tr></table>"
         }
         break;
     }
@@ -252,7 +285,7 @@ switch ($TabSelected) {
     }
 } # switch
 
-$tabset = New-MenuTabSet2 -MenuTabs $tabs -BaseLink "cmcollection.ps1"
+$tabset = New-MenuTabSet2 -MenuTabs $tabs -BaseLink "cmcollection.ps1?t=$CollectionType"
 
 $content += Write-DetailInfo -PageRef "cmcollection.ps1" -Mode $Detailed
 

@@ -46,33 +46,11 @@ FROM
     dbo.v_Collection ON 
     dbo.v_FullCollectionMembership.CollectionID = dbo.v_Collection.CollectionID 
     INNER JOIN dbo.v_Collections ON 
-    dbo.v_Collection.Name = dbo.v_Collections.CollectionName'
+    dbo.v_Collection.Name = dbo.v_Collections.CollectionName
+    WHERE (dbo.v_Collection.CollectionType='+$CollectionType+')'
 
-if (![string]::IsNullOrEmpty($SearchValue)) {
-    switch ($SearchType) {
-        'like' {
-            $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField like '%$SearchValue%')"
-            break;
-        }
-        'begins' {
-            $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField like '%$SearchValue')"
-            break;
-        }
-        'ends' {
-            $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField like '%$SearchValue')"
-            break;
-        }
-        default {
-            $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType) and ($SearchField = '$SearchValue')"
-            break;
-        }
-    }
-    $IsFiltered = $True
-}
-else {
-    $query += " WHERE (dbo.v_Collection.CollectionType=$CollectionType)"
-}
-$query += " ORDER BY $SortField $SortOrder"
+$query = Get-SkDbQuery -QueryText $query -Extend
+
 $xxx = "query: $query"
 
 try {
@@ -144,7 +122,7 @@ finally {
     }
 }
 
-$tabset = New-MenuTabSet -BaseLink "cmcollections.ps1?t=$CollectionType&x=like&f=collectionname&v=" -DefaultID $TabSelected
+$tabset = New-MenuTabSet -BaseLink "cmcollections.ps1?t=$CollectionType&x=begins&f=collectionname&v=" -DefaultID $TabSelected
 $content += Write-DetailInfo -PageRef "cmcollections.ps1" -Mode $Detailed
 
 @"
