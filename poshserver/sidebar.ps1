@@ -53,7 +53,7 @@ if ($CmEnabled -ne 'false') {
 		<li class="limenu"><a href="cmqueries.ps1" target="main" title="Queries">Queries</a></li>
 		<li class="limenu">Reporting</li>
 		<li class="limenu"><a href="cmsitestatus.ps1" target="main" title="Site Status">Site Status</a></li>
-		<li class="limenu">Component Status</li>
+		<li class="limenu"><a href="cmcompstat.ps1" target="main" title="Component Status">Site Components</a></li>
 		<li class="limenu">SQL Status</li>
 	</ul>
 </div>
