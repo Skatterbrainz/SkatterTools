@@ -1,13 +1,9 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-
-
 ## Latest: 1812.23.01
 
-
 ## Overview
-
 
 * A portable web console for viewing and managing AD and CM features
 * Built from PowerShell to run on PoSH Server (http://www.poshserver.net)
@@ -17,25 +13,25 @@ Skattered tools from Skatterbrainz
 * IMPORTANT: "master" is currently "development" channel until all base features are done
 * Check back frequently, or click "watch" above to be notified of updates
 
-## Installation / Configuration
-  * Download PoSHServer from: http://www.poshserver.net/ 
-  * Run the full installation (haven't tested with portable version yet)
-  * Download the SkatterTools "PoshServer" folder only / Extract somewhere (e.g. x:\sktools)
-  * Edit the "config.txt" file (specify your SCCM site server, etc.)
-  * Open a PowerShell console using Run as Administrator
-  * Type: Start-PoshServer -HomeDirectory "<path to skattertools>"
-  * e.g. "Start-PoSHServer -HomeDirectory "x:\sktools"
-  * Open SkatterTools at http://localhost:8080/
-
+## Installation / Configuration (updated as of 1812.23.01)
+   * Download the SkatterTools repo (big green download button, zip option)
+   * Extract it to a folder
+   * Open the folder and run "Setup-Skattertools.ps1"
+   * Edit the "config.txt" file in Notepad (should appear during setup)
+   * Save and close config.txt
+   * Right-click "Start SkatterTools Web Service" / Run as Administrator
+   * Minimize that window
+   * Double-click the other shortcut "SkatterTools"
+   * Change your underwear :)
 
 ## Test Notes
-   
    * Tested with IE 11, Chrome 70
    * SQL Server 2016, 2017
    * ConfigMgr 1806, 1810, 1811
 
 ## Release History
    ### 1812.23.01
+   * new installer / setup script added!!! (finally!)
    * added site component status report
    * fixed a bug with device collections
    * fixed a but with add device to collection
