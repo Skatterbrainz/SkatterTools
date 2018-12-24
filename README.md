@@ -3,7 +3,7 @@ Skattered tools from Skatterbrainz
 
 
 
-## Latest: 1812.17.01
+## Latest: 1812.23.01
 
 
 ## Overview
@@ -35,6 +35,16 @@ Skattered tools from Skatterbrainz
    * ConfigMgr 1806, 1810, 1811
 
 ## Release History
+   ### 1812.23.01
+   * added site component status report
+   * fixed a bug with device collections
+   * fixed a but with add device to collection
+   * still need to work on the add user to user collection code
+   * started testing WMI vs SQL as an alt means for fetching data
+   
+   ### 1812.22.01
+   * I forgot what happened with that one
+   
    ### 1812.17.01
    * AD domain and AD forest pages
    * Search results bugfix (ad users)
