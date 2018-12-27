@@ -1,6 +1,6 @@
 ﻿# SkatterTools Site Configuration
 
-$Global:SkToolsVersion = "1812.23.01"
+$Global:SkToolsVersion = "1812.27.02"
 
 $configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
 if (!(Test-Path $configFile)) {
@@ -12,6 +12,13 @@ foreach ($line in $cdata) {
     $varset = $line -split '='
     if ($varset.Count -gt 1) {
         Set-Variable -Name $varset[0] -Value $($varset[1]).Trim() -Scope Global | Out-Null
+    }
+}
+
+foreach ($m in @('sqlserver','dbatools','carbon')) {
+    if (Get-Module -Name $m) {
+        #Write-Host "importing powershell module: $m" -ForegroundColor Cyan
+        Import-Module -Name $m
     }
 }
 

@@ -1,4 +1,8 @@
-﻿[CmdletBinding()]
+﻿<#
+.NOTES
+2018.27.02 - DS
+#>
+[CmdletBinding()]
 param ()
 
 function New-DesktopShortcut {
@@ -79,10 +83,22 @@ function Get-Shortcut {
 }
 
 try {
-    start "notepad.exe" -ArgumentList (Join-Path $PSScriptRoot -ChildPath "config.txt")
-    $poshexe = Join-Path $PSScriptRoot -ChildPath "PoSHServer-Standalone.exe"
-    New-DesktopShortcut -Name "Start SkatterTools Web Service" -Target $poshexe -Arguments " -HomeDirectory `"$PSScriptRoot`" -CustomConfig `"$PSScriptRoot\sktools.ps1`""
+    Write-Host "unblocking scripts in skattertools folder..." -ForegroundColor Cyan
+    Get-ChildItem -Path $PSScriptRoot -Filter "*.ps1" -Recurse | Unblock-File -Confirm:$False
+    $configFile  = (Join-Path $PSScriptRoot -ChildPath "config.txt")
+    $sktoolsfile = (Join-Path $PSScriptRoot -ChildPath "Start-SkatterTools.ps1")
+    Write-Host "opening config.txt for user customization..." -ForegroundColor Cyan
+    Start-Process "notepad.exe" -ArgumentList $configFile -Wait
+    foreach ($m in @('sqlserver','dbatools','carbon')) {
+        if (!(Get-Module -Name $m -ListAvailable)) {
+            Write-Host "installing powershell module: $m" -ForegroundColor Cyan
+            Install-Module -Name $m -AllowClobber
+        }
+    }
+    Write-Host "creating desktop shortcuts..." -ForegroundColor Cyan
+    New-DesktopShortcut -Name "Start SkatterTools Web Service" -Target "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -Arguments $sktoolsfile
     New-DesktopShortcut -Name "SkatterTools" -Target "http://localhost:8080/" -ShortcutType web
+    Write-Host "skattertools setup complete!" -ForegroundColor Cyan
 }
 catch {
     Write-Warning "Welcome to pukeville! Something just puked and died"
