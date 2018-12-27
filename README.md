@@ -1,7 +1,7 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 1812.23.01
+## Latest: 1812.27.01
 
 ## Overview
 
@@ -13,7 +13,12 @@ Skattered tools from Skatterbrainz
 * IMPORTANT: "master" is currently "development" channel until all base features are done
 * Check back frequently, or click "watch" above to be notified of updates
 
-## Installation / Configuration (updated as of 1812.23.01)
+## Installation / Configuration (updated as of 1812.27.01)
+### Update: Do not use the portable version of PoSH Server. Use the full installation version.
+
+   * Download PoSH Server from here: http://www.poshserver.net/ (http://www.poshserver.net/files/PoSHServer.v3.7.zip)
+   * Extract the ZIP contents somewhere (e.g. %TEMP%)
+   * Install PoSH Server by launching the PoshServer.exe file and following the prompts.
    * Download the SkatterTools repo (big green download button, zip option)
    * Extract it to a folder
    * Open the folder and run "Setup-Skattertools.ps1"
@@ -30,6 +35,10 @@ Skattered tools from Skatterbrainz
    * ConfigMgr 1806, 1810, 1811
 
 ## Release History
+   ### 1812.27.01
+   * Performance updates, bug fixes
+   * Updated the Help page contents
+   
    ### 1812.23.01
    * new installer / setup script added!!! (finally!)
    * added site component status report
