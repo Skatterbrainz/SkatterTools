@@ -50,7 +50,7 @@ $content += "Be patient. I'm still working on it. :)</td></tr></table>"
             </ul>
             That's it.</p>
 
-            <p>Last updated: 2018.12.08.01:59</p>
+            <p>Last updated: 2018.12.27.13:03</p>
         </td>
     </tr>
     <tr>
@@ -61,28 +61,28 @@ $content += "Be patient. I'm still working on it. :)</td></tr></table>"
             release, so keep that in mind.</p>
 
             <p>Once you've downloaded this garbage and extracted it into a folder somewhere, you should 
-            find a file in that folder named "config.ps1".  Open that in your favorite PowerShell editor. Scroll down 
-            until you see a section (near the top, actually) for SkatterTools.  Modify the variables to suit your
-            needs and preferences.</p>
+            find a file in that folder named "config.txt".  Open that in your favorite text editor. 
+            Modify the settings to suit your needs.  After saving the changes, restart the PoSH Server instance.</p>
 
             <h2>Options and Variables</h2>
 
             <ul>
-                <li>`$SkWebPath     = "e:\web"</li>
-                <li>`$STTheme       = "stdark.css"</li>
-                <li>`$CmDBHost      = "cm01.contoso.local"</li>
-                <li>`$CmSMSProvider = "cm01.contoso.local"</li>
-                <li>`$CmSiteCode    = "P02"</li>
-                <li>`$SkNotesEnable = "false"</li>
-                <li>`$SkNotesDBHost = ""</li>
-                <li>`$SkDBDatabase  = ""</li>
-                <li>`$SkNotesPath   = "notes\notes.xml"</li>
-                <li>`$DefaultGroupsTab    = "all"</li>
-                <li>`$DefaultUsersTab     = "all"</li>
-                <li>`$DefaultComputersTab = "all"</li>
+                <li>STTheme = CSS stylesheet theme to apply. (stdark.css or stlight.css)</li>
+                <li>CMEnabled = Enable Configuration Manager features (true or false)</li>
+                <li>ADenabled = Enable Active Directory features (true or false)</li>
+                <li>CmDBHost = Configuration Manager SQL Server hostname</li>
+                <li>CmSMSProvider = Configuration Manager SMS Provider hostname</li>
+                <li>CmSiteCode = Configuration Manager site code</li>
+                <li>SkNotesEnable = (currently not used)</li>
+                <li>SkNotesDBHost = (currently not used)</li>
+                <li>SkDBDatabase = (currently not used)</li>
+                <li>SkNotesPath = (currently not used)</li>
+                <li>DefaultGroupsTab = Default menubar index tab for Groups</li>
+                <li>DefaultUsersTab = Default menubar index tab for Users</li>
+                <li>DefaultComputersTab = Default menubar index tab for Computers/Devices</li>
             </ul>
 
-            <p>NOTE: Always keep a copy of your config.ps1 file somewhere, in case you download a new
+            <p>NOTE: Always keep a copy of your config.txt file somewhere, in case you download a new
             update and it whacks your existing copy.  <a href="https://www.merriam-webster.com/dictionary/whack">Whacks</a> 
             is a real word. I looked it up. Don't confuse "wax" with "whacks".  You can "wax on" and "wax off", but if you 
             get caught doing a "whacks off" you might end up in jail.</p>

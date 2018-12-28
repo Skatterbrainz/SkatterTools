@@ -1,164 +1,33 @@
-$SearchField = Get-PageParam -TagName 'f' -Default ""
-$SearchValue = Get-PageParam -TagName 'v' -Default ""
-$SearchType  = Get-PageParam -TagName 'x' -Default 'like'
-$SortField   = Get-PageParam -TagName 's' -Default 'Name'
-$SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
-$TabSelected = Get-PageParam -TagName 'tab' -Default $DefaultComputersTab
-$Detailed    = Get-PageParam -TagName 'zz' -Default ""
+﻿$Script:SearchField = Get-PageParam -TagName 'f' -Default ""
+$Script:SearchValue = Get-PageParam -TagName 'v' -Default ""
+$Script:SearchType  = Get-PageParam -TagName 'x' -Default 'like'
+$Script:SortField   = Get-PageParam -TagName 's' -Default 'Name'
+$Script:SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
+$Script:TabSelected = Get-PageParam -TagName 'tab' -Default $DefaultComputersTab
+$Script:Detailed    = Get-PageParam -TagName 'zz' -Default ""
+$Script:PageFile    = "cmdevices.ps1"
 
-$PageTitle   = "CM Devices"
-$PageCaption = "CM Devices"
-$IsFiltered  = $False
+$Script:PageTitle   = "CM Devices"
+$Script:PageCaption = "CM Devices"
+$Script:IsFiltered  = $False
+
 $content = ""
 
-if ($SearchField -eq 'name') {
-    $TabSelected = $SearchValue
+if ($Script:SearchField -eq 'name') {
+    $Script:TabSelected = $SearchValue
 }
 
-if ($SearchValue -eq 'all') {
-    $SearchValue = ""
+if ($Script:SearchValue -eq 'all') {
+    $Script:SearchValue = ""
+    $Caption = "All"
+}
+else {
+    $Caption = $Script:SearchValue
 }
 
-$query = @"
-SELECT
-	ResourceID,
-	[Name],
-	Manufacturer,
-	Model,
-	OperatingSystem,
-	OSBuild,
-	ADSite 
-FROM (
-SELECT 
-	dbo.v_R_System.ResourceID, 
-	dbo.v_R_System.Name0 as [Name], 
-	dbo.v_GS_COMPUTER_SYSTEM.Manufacturer0 as Manufacturer, 
-	dbo.v_GS_COMPUTER_SYSTEM.Model0 as Model, 
-	dbo.v_GS_SYSTEM_ENCLOSURE.SerialNumber0 as SerialNumber, 
-	dbo.vWorkstationStatus.ClientVersion, 
-	dbo.vWorkstationStatus.LastHardwareScan as LastHwScan, 
-	dbo.vWorkstationStatus.LastPolicyRequest, 
-	dbo.vWorkstationStatus.LastDDR,
-	dbo.v_R_System.AD_Site_Name0 as ADSite, 
-	dbo.v_GS_OPERATING_SYSTEM.Caption0 as OperatingSystem, 
-	dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 as OSBuild
-FROM 
-	dbo.v_R_System INNER JOIN
-    dbo.v_GS_COMPUTER_SYSTEM ON 
-	dbo.v_R_System.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
-    dbo.v_GS_SYSTEM_ENCLOSURE ON 
-	dbo.v_R_System.ResourceID = dbo.v_GS_SYSTEM_ENCLOSURE.ResourceID INNER JOIN
-    dbo.vWorkstationStatus ON 
-	dbo.v_R_System.ResourceID = dbo.vWorkstationStatus.ResourceID INNER JOIN
-    dbo.v_GS_OPERATING_SYSTEM ON 
-	dbo.v_R_System.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
-) AS T1
-"@
+$content = Get-SkQueryTable -QueryFile "cmdevices.sql" -PageLink "cmdevices2.ps1" -Columns ('ResourceID','Name','Manufacturer','Model','OSName','OSBuild','ADSiteName')
 
-if (![string]::IsNullOrEmpty($SearchField)) {
-    if ($SearchType -eq 'like') {
-        $query += " where ($SearchField like '$SearchValue%')"
-    }
-    else {
-        $query += " where ($SearchField = '$SearchValue')"
-    }
-    $PageCaption += " ($SearchValue)"
-    $IsFiltered = $True
-}
-$query += " order by $SortField $SortOrder"
-$xxx = "query: $query"
-
-try {
-    $connection = New-Object -ComObject "ADODB.Connection"
-    $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-    $connection.Open($connString);
-    $xxx += "<br/>connection opened"
-    $IsOpen = $True
-    $rs = New-Object -ComObject "ADODB.RecordSet"
-    $rs.Open($query, $connection);
-    $xxx += "<br/>recordset defined"
-    $rowcount = 0
-    if ($rs.BOF -and $rs.EOF) {
-        $content = "<table id=table1><tr><td>No records found</td></tr></table>"
-    }
-    else {
-        $colcount = $rs.Fields.Count
-        $rs.MoveFirst()
-    
-        $content = '<table id=table1><tr>'
-        $columns = @()
-        for ($i = 0; $i -lt $colcount; $i++) {
-            $fn = $rs.Fields($i).Name
-            if ($fn -ne 'ResourceID') {
-                $columns += $fn
-            }
-        }
-
-        $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "cmdevices.ps1?f=$SearchField&v=$SearchValue&x=$SearchType" -SortDirection $SortOrder
-        $content += "</tr>"
-        $xxx += "<br/>column headings defined"
-        while (!$rs.EOF) {
-            $content += '<tr>'
-            $rid = $rs.Fields('ResourceID').value
-            for ($i = 0; $i -lt $colcount; $i++) {
-                $fn = $rs.Fields($i).Name
-                $fv = $rs.Fields($i).Value
-                switch ($fn) {
-                    'Name' {
-                        $fvx = '<a href="cmdevice.ps1?f=ResourceID&v='+$rid+'&n='+$fv+'" title="Details">'+$fv+'</a>'
-                        $content += '<td>'+$fvx+'</td>'
-                        break;
-                    }
-                    'OsBuild' {
-                        $fvx = "<a href=`"cmdevices.ps1?f=OSbuild&v=$fv&x=equals&n=$fv`" title=`"Filter`">$fv</a>"
-                        $content += '<td style=`"text-align:center`">'+$fvx+'</td>'
-                        break;
-                    }
-                    'ResourceID' {
-                        break;
-                    }
-                    default {
-                        if (![string]::IsNullOrEmpty($fv)) {
-                            $fvx = '<a href="cmdevices.ps1?f='+$fn+'&v='+$fv+'" title="Filter">'+$fv+'</a>'
-                        }
-                        else {
-                            $fvx = ""
-                        }
-                        $content += '<td>'+$fvx+'</td>'
-                        break;
-                    }
-                }
-            }
-            $content += '</tr>'
-            $rs.MoveNext()
-            $rowcount++
-        } # while
-        $content += '<tr>'
-        $content += '<td colspan='+$($colcount-1)+'>'+$rowcount+' rows returned'
-        if ($IsFiltered -eq $true) {
-            $content += ' - <a href="cmdevices.ps1" title="Show All">Show All</a>'
-        }
-        $content += '</td></tr>'
-        $content += '</table>'
-    }
-    $rs.Close()
-    $xxx += "<br/>recordset closed"       
-}
-catch {
-    $content += "Error: $($Error[0].Exception.Message)"
-    $content += "<br/>SearchField: $SearchField"
-    $content += "<br/>SearchValue: $SearchValue"
-    $content += "<br/>Query: $query"
-}
-finally {
-    if ($isopen -eq $true) {
-        $connection.Close()
-    }
-}
-
-$tabset = New-MenuTabSet -BaseLink "cmdevices.ps1?x=like&f=name&v=" -DefaultID $TabSelected
-
-$content += Write-DetailInfo -PageRef "cmdevices.ps1" -Mode $Detailed
+$tabset = New-MenuTabSet -BaseLink "$Script:PageFile`?x=begins&f=name&v=" -DefaultID $Script:TabSelected
 
 @"
 <html>
