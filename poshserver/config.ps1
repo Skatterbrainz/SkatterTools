@@ -42,7 +42,7 @@ $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
 # SkatterTools Site Configuration
 
-$Global:SkToolsVersion = "1812.27.03"
+$Global:SkToolsVersion = "1812.29.01"
 
 $configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
 if (!(Test-Path $configFile)) {
@@ -57,26 +57,11 @@ foreach ($line in $cdata) {
     }
 }
 
-foreach ($m in @('sqlserver','dbatools','carbon')) {
+foreach ($m in @('dbatools','carbon')) {
     if (Get-Module -Name $m) {
-        #Write-Host "importing powershell module: $m" -ForegroundColor Cyan
         Import-Module -Name $m
     }
 }
-
-<#
-if ($Global:SkToolsLoaded -ne 1) {
-    try {
-        Get-ChildItem (Join-Path -Path $HomeDirectory -ChildPath "lib") -Filter "*.ps1" -ErrorAction Stop | ForEach-Object { . $_.FullName }
-        $Global:SkToolsLoaded = 1
-        $Global:LastLoadTime = Get-Date
-    }
-    catch {
-        Write-Error "OMFG - something smells really bad in here?!"
-        break
-    }
-}
-#>
 
 #---------------------------------------------------------------------
 
@@ -206,7 +191,48 @@ function Get-SkDbQuery {
     Write-Output $output
 }
 
-function Get-SkQueryTable {
+function Get-SkQueryTable2 {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $QueryFile,
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $PageLink,
+        [parameter(Mandatory=$False)]
+        [string[]] $Columns = ""
+    )
+    $output = ""
+    try {
+        $qpath  = $(Join-Path -Path $PSScriptRoot -ChildPath "queries")
+        $qfile  = $(Join-Path -Path $qpath -ChildPath "$QueryFile")
+        $result = @(Invoke-DbaQuery -SqlInstance $CmDbHost -Database "CM_$CmSiteCode" -File $qfile)
+        $result = $result | Where-Object {$_."$Script:SearchField" -eq $Script:SearchValue}
+        if ($Columns -ne "") {
+            $result = $result | Select $Columns
+        }
+        #$Script:IsFiltered = $True
+        $output   = "<table id=table2>"
+        foreach ($rs in $result) {
+            for ($i = 0; $i -lt $rs.psobject.Properties.Name.Count; $i++) {
+                $fn  = $rs.psobject.Properties.Name[$i]
+                $fv  = $rs.psobject.Properties.Value[$i]
+                $fvx = Get-SKDbValueLink -ColumnName $fn -Value $fv
+                #$align = Get-SKDbCellTextAlign -ColumnName $fn
+                $output += "<tr><td style=`"width:200px;background-color:#435168`">$fn</td><td>$fvx</td></tr>"
+            }
+        }
+        $output += "</table>"
+    }
+    catch {
+        $output = "<table id=table2><tr><td>No matching items found<br/>queryfile: $qfile</td></tr></table>"
+    }
+    finally {
+        Write-Output $output
+    }
+}
+
+function Get-SkQueryTable3 {
     param (
         [parameter(Mandatory=$True)]
         [ValidateNotNullOrEmpty()]
@@ -217,13 +243,15 @@ function Get-SkQueryTable {
         [parameter(Mandatory=$False)]
         [string[]] $Columns = "",
         [parameter(Mandatory=$False)]
-        [string] $Sorting = ""
+        [string] $Sorting = "",
+        [switch] $ColumnSorting,
+        [switch] $NoUnFilter
     )
     $output = ""
     try {
         $qpath  = $(Join-Path -Path $PSScriptRoot -ChildPath "queries")
         $qfile  = $(Join-Path -Path $qpath -ChildPath "$QueryFile")
-        $result = @(Invoke-Sqlcmd -ServerInstance $CmDbHost -Database "CM_$CmSiteCode" -InputFile $qfile)
+        $result = @(Invoke-DbaQuery -SqlInstance $CmDbHost -Database "CM_$CmSiteCode" -File $qfile)
         if (![string]::IsNullOrEmpty($Script:SearchField)) {
             switch ($Script:SearchType) {
                 'like' {
@@ -242,7 +270,9 @@ function Get-SkQueryTable {
                     $result = $result | Where-Object {$_."$Script:SearchField" -eq $Script:SearchValue}
                 }
             }
-            $Script:PageCaption += " ($Caption)"
+            if (!$NoUnFilter) {
+                $Script:PageCaption += " ($Caption)"
+            }
             $Script:IsFiltered = $True
         }
         if ($Sorting -ne "") {
@@ -261,7 +291,12 @@ function Get-SkQueryTable {
         }
         $colcount = $Columns.Count
         $output = "<table id=table1><tr>"
-        $columns | %{ $output += "<th>$_</th>" }
+        if ($ColumnSorting) {
+            $output += New-ColumnSortRow -ColumnNames $Columns -BaseLink "$PageLink`?f=$Script:SearchField&v=$Script:SearchValue&x=$Script:SearchType" -SortDirection $Script:SortOrder
+        }
+        else {
+            $columns | %{ $output += "<th>$_</th>" }
+        }
         $output += "</tr>"
         $rowcount = 0
         foreach ($rs in $result) {
@@ -270,66 +305,8 @@ function Get-SkQueryTable {
                 $fn = $rs.psobject.Properties.Name[$i]
                 $fv = $rs.psobject.Properties.Value[$i]
                 $align = ""
-                switch ($fn) {
-                    'Name' {
-                        $itemname = $fv
-                        $fvx = "<a href=`"cmdevice.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Details for $fv`">$fv</a>"
-                        break;
-                    }
-                    'OSName' {
-                        $fvx = "<a href=`"cmdevices.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Filter on $fv`">$fv</a>"
-                        break;
-                    }
-                    'ADSiteName' {
-                        $fvx = "<a href=`"cmdevices.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Filter on $fv`">$fv</a>"
-                        break;
-                    }
-                    'CollectionName' {
-                        $fvx = $fv
-                        $collname = $fv
-                        break;
-                    }
-                    'CollectionID' {
-                        $fvx = "<a href=`"cmcollection.ps1?f=$fn&v=$fv&t=$CollectionType&n=$collname`" title=`"Details`">$fv</a>"
-                        break;
-                    }
-                    'LimitedTo' {
-                        $fvx = "<a href=`"cmcollection.ps1?f=$fn&v=$fv&t=$CollectionType`" title=`"Details`">$fv</a>"
-                        $align = 'center'
-                        break;
-                    }
-                    'Members' {
-                        $fvx = $fv
-                        $align = 'center'
-                        break;
-                    }
-                    'Variables' {
-                        $fvx = $fv
-                        $align = 'center'
-                        break;
-                    }
-                    'Type' {
-                        $fvx = $fv
-                        $align = 'center'
-                        break;
-                    }
-                    'UserName' {
-                        $fvx = $fv
-                        break;
-                    }
-                    'Manufacturer' {
-                        $fvx = "<a href=`"cmdevices.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Filter on $fv`">$fv</a>"
-                        break;
-                    }
-                    'Model' {
-                        $fvx = "<a href=`"cmdevices.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Filter on $fv`">$fv</a>"
-                        break;
-                    }
-                    default {
-                        $fvx = $fv
-                        break;
-                    }
-                } # switch
+                $fvx   = Get-SKDbValueLink -ColumnName $fn -Value $fv
+                $align = Get-SKDbCellTextAlign -ColumnName $fn
                 if ($align -ne "") {
                     $output += "<td style=`"text-align`: $align`">$fvx</td>"
                 }
@@ -341,7 +318,7 @@ function Get-SkQueryTable {
             $rowcount++
         } # foreach
         $output += "<tr><td colspan=$colcount class=lastrow>$rowcount items"
-        if ($Script:IsFiltered -eq $True) {
+        if ((!$NoUnFilter) -and ($Script:IsFiltered -eq $True)) {
             $output += " - <a href=`"$PageLink`" title=`"Show All`">Show All</a>"
         }
         $output += "</td></tr></table>"
@@ -360,97 +337,161 @@ function Get-SkQueryTable {
     }
 }
 
-function Get-SkQueryTable2 {
+function Get-SKDbValueLink {
     param (
         [parameter(Mandatory=$True)]
         [ValidateNotNullOrEmpty()]
-        [string] $QueryFile,
-        [parameter(Mandatory=$True)]
-        [ValidateNotNullOrEmpty()]
-        [string] $PageLink,
+        [string] $ColumnName,
         [parameter(Mandatory=$False)]
-        [string[]] $Columns = ""
+        [string] $Value = ""
     )
     $output = ""
-    try {
-        $qpath  = $(Join-Path -Path $PSScriptRoot -ChildPath "queries")
-        $qfile  = $(Join-Path -Path $qpath -ChildPath "$QueryFile")
-        $result = @(Invoke-Sqlcmd -ServerInstance $CmDbHost -Database "CM_$CmSiteCode" -InputFile $qfile)
-        if ($Columns -ne "") {
-            $result = $result | Select $Columns
+    switch ($ColumnName) {
+        'Name' {
+            $output = "<a href=`"cmdevice.ps1?f=$ColumnName&v=$Value&x=equals&n=$Value`" title=`"Details for $Value`">$Value</a>"
+            break;
         }
-        $result = $result | Where-Object {$_."$Script:SearchField" -eq $Script:SearchValue}
-        $Script:IsFiltered = $True
-
-        $output   = "<table id=table2>"
-        foreach ($rs in $result) {
-            for ($i = 0; $i -lt $rs.psobject.Properties.Name.Count; $i++) {
-                $fn = $rs.psobject.Properties.Name[$i]
-                $fv = $rs.psobject.Properties.Value[$i]
-                switch ($fn) {
-                    'Name' {
-                        $fvx = "<a href=`"cmdevice.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Details for $fv`">$fv</a>"
-                        break;
-                    }
-                    'OSName' {
-                        $fvx = "<a href=`"cmdevices.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Filter on $fv`">$fv</a>"
-                        break;
-                    }
-                    'ADSiteName' {
-                        $fvx = "<a href=`"cmdevices.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Filter on $fv`">$fv</a>"
-                        break;
-                    }
-                    'CollectionID' {
-                        $fvx = "<a href=`"cmcollection.ps1?f=$fn&v=$fv&t=$CollectionType&n=$cn`" title=`"Details`">$fv</a>"
-                        break;
-                    }
-                    'LimitedTo' {
-                        $fvx = "<a href=`"cmcollection.ps1?f=$fn&v=$fv&t=$CollectionType`" title=`"Details`">$fv</a>"
-                        break;
-                    }
-                    'Members' {
-                        $fvx = $fv
-                        break;
-                    }
-                    'Variables' {
-                        $fvx = $fv
-                        break;
-                    }
-                    'Type' {
-                        $fvx = $fv
-                        break;
-                    }
-                    'UserName' {
-                        $fvx = $fv
-                        break;
-                    }
-                    'Manufacturer' {
-                        $fvx = "<a href=`"cmdevices.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Filter on $fv`">$fv</a>"
-                        break;
-                    }
-                    'Model' {
-                        $fvx = "<a href=`"cmdevices.ps1?f=$fn&v=$fv&x=equals&n=$fv`" title=`"Filter on $fv`">$fv</a>"
-                        break;
-                    }
-                    default {
-                        $fvx = $fv
-                        break;
-                    }
-                }
-                $output += "<tr><td style=`"width:200px`">$fn</td><td>$fvx</td></tr>"
+        'ComputerName' {
+            $output = "<a href=`"cmdevice.ps1?f=name&v=$Value&n=$Value&x=equals`" title=`"Details for $Value`">$Value</a>"
+            break;
+        }
+        'OSName' {
+            $output = "<a href=`"cmdevices.ps1?f=$ColumnName&v=$Value&x=equals&n=$Value`" title=`"Filter on $Value`">$Value</a>"
+            break;
+        }
+        'ADSiteName' {
+            $output = "<a href=`"cmdevices.ps1?f=$ColumnName&v=$Value&x=equals&n=$Value`" title=`"Filter on $Value`">$Value</a>"
+            break;
+        }
+        'CollectionID' {
+            $output = "<a href=`"cmcollection.ps1?f=$ColumnName&v=$Value&t=$CollectionType&n=$collname`" title=`"Details`">$Value</a>"
+            break;
+        }
+        'LimitedTo' {
+            $output = "<a href=`"cmcollection.ps1?f=$ColumnName&v=$Value&t=$CollectionType`" title=`"Details`">$Value</a>"
+            break;
+        }
+        'UserName' {
+            $output = "<a href=`"cmuser.ps1?f=UserName&v=$Value&n=$Value`" title=`"Details`">$Value</a>"
+            break;
+        }
+        'Department' {
+            if (![string]::IsNullOrEmpty($Value)) {
+                $output = "<a href=`"cmusers.ps1?f=Department&v=$Value&x=equals`" title=`"Filter`">$Value</a>"
             }
+            break;
         }
-        $output += "</table>"
-    }
-    catch {
-        $output = "<table id=table2><tr><td>No matching items found<br/>queryfile: $qfile</td></tr></table>"
-    }
-    finally {
-        Write-Output $output
-    }
+        'Title' {
+            if (![string]::IsNullOrEmpty($Value)) {
+                $output = "<a href=`"cmusers.ps1?f=Title&v=$Value&x=equals`" title=`"Filter`">$Value</a>"
+            }
+            break;
+        }
+        'Manufacturer' {
+            $output = "<a href=`"cmdevices.ps1?f=$ColumnName&v=$Value&x=equals&n=$Value`" title=`"Filter on $Value`">$Value</a>"
+            break;
+        }
+        'Model' {
+            $output = "<a href=`"cmdevices.ps1?f=$ColumnName&v=$Value&x=equals&n=$Value`" title=`"Filter on $Value`">$Value</a>"
+            break;
+        }
+        'PackageID' {
+            $output = "<a href=`"cmpackage.ps1?f=packageid&v=$Value&x=equals`" title=`"Details`">$Value</a>"
+            break;
+        }
+        'PackageType' {
+            $output = "<a href=`"cmpackages2.ps1?f=packagetype&v=$Value&x=equals`" title=`"Filter on $Value`">$Value</a>"
+            break;
+        }
+        'PkgSourcePath' {
+            $output = "<a href=`"file://$Value`" target=`"_new`" title=`"Open Folder`">$Value</a>"
+            break;
+        }
+        'ItemType' {
+            $output = "<a href=`"cmdisc.ps1?f=itemtype&v=$Value&x=equals&n=$Value`" title=`"Details`">$Value</a>"
+            break;
+        }
+        'BGName' {
+            $output = "<a href=`"cmbgroup.ps1?f=bgname&v=$Value&x=equals&n=$Value`" title=`"Details`">$Value</a>"
+            break;
+        }
+        'SiteStatus' {
+            $output = "<table style=`"width:100%;border:0;`"><tr><td style=`"background:$Value`"> </td></tr></table>"
+            break;
+        }
+        'Status' {
+            $output = "<table style=`"width:100%;border:0;`"><tr><td style=`"background:$Value`"> </td></tr></table> "
+            break;
+        }
+        'State' {
+            $output = Get-SKDbCellTextColor -ColumnName $ColumnName -Value $Value 
+            break;
+        }
+        'SiteSystem' {
+            $output = ($Value -split '\\')[2]
+            break;
+        }
+        'QueryID' {
+            $output = "<a href=`"cmquery.ps1?f=querykey&v=$Value&x=equals&n=$Value`" title=`"Details`">$Value</a>"
+            break;
+        }
+        'SQL' {
+            $output = $($Value -replace ' from', '<br/>from') -replace ' where','<br/>where'
+            break;
+        }
+        'WQL' {
+            $output = $($Value -replace ' from', '<br/>from') -replace ' where','<br/>where'
+            break;
+        }
+        'Error' {
+            if ($Value -gt 0) {
+                $output = "<span style=`"color:red`">$Value</span>"
+            }
+            else {
+                $output = $Value
+            }
+            break;
+        }
+        default {
+            $output = $Value
+            break;
+        }
+    } # switch
+    Write-Output $output
 }
 
-$Global:SkToolsLibDB = "1812.27.09"
+function Get-SKDbCellTextAlign {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ColumnName
+    )
+    $output = ""
+    $centerlist = ('LimitedTo','Members','Variables','Type','PackageID','LastContacted',
+        'SiteCode','SiteSystem','TimeReported',
+        'PackageType','PkgType','SiteStatus','Status','State','Info','Warning','Error')
+    if ($centerlist -contains $ColumnName) {
+        $output = 'center'
+    } 
+    Write-Output $output
+}
+
+function Get-SKDbCellTextColor {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ColumnName,
+        [parameter(Mandatory=$False)]
+        $Value
+    )
+    $output = $Value
+    $redlist = ('State=Stopped')
+    if ($redlist -contains "$ColumnName`=$Value") {
+        $output = "<span style=`"color:red`">$Value</span>"
+    }
+    Write-Output $output
+}
+
 #---------------------------------------------------------------------
 
 function Get-AdsUsers {

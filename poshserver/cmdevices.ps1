@@ -25,9 +25,9 @@ else {
     $Caption = $Script:SearchValue
 }
 
-$content = Get-SkQueryTable -QueryFile "cmdevices.sql" -PageLink "cmdevices2.ps1" -Columns ('ResourceID','Name','Manufacturer','Model','OSName','OSBuild','ADSiteName')
+$content = Get-SkQueryTable3 -QueryFile "cmdevices.sql" -PageLink "cmdevices.ps1" -Columns ('ResourceID','Name','Manufacturer','Model','OSName','OSBuild','ADSiteName') -ColumnSorting
 
-$tabset = New-MenuTabSet -BaseLink "$Script:PageFile`?x=begins&f=name&v=" -DefaultID $Script:TabSelected
+$tabset = New-MenuTabSet -BaseLink "cmdevices.ps1`?x=begins&f=name&v=" -DefaultID $Script:TabSelected
 
 @"
 <html>

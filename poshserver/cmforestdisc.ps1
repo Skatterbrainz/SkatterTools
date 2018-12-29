@@ -15,57 +15,10 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-try {
-    $query = 'SELECT 
-        ForestID,
-        SMSSiteCode,
-        SMSSiteName,
-        LastDiscoveryTime,
-        LastDiscoveryStatus,
-        LastPublishingTime,
-        case 
-          when (PublishingStatus = 1) then ''Published''
-          else '''' end as PublishingStatus,
-        case 
-          when (DiscoveryEnabled = 1) then ''Yes''
-          else ''No'' end as DiscoveryEnabled,
-        case 
-          when (PublishingEnabled = 1) then ''Yes''
-          else ''No'' end as PublishingEnabled 
-        FROM vActiveDirectoryForestDiscoveryStatus'
-    $connection = New-Object -ComObject "ADODB.Connection"
-    $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-    $connection.Open($connString);
-    $IsOpen = $true
-    $rs = New-Object -ComObject "ADODB.RecordSet"
-    $rowcount = 0
-    $rs.Open($query, $connection)
-    if ($rs.BOF -and $rs.EOF) {
-        $content = "<table id=table2><tr><td>No records found!</td></tr></table>"
-    }
-    else {
-        $colcount = $rs.Fields.Count
-        $content = "<table id=table2>"
-        for ($i = 0; $i -lt $colcount; $i++) {
-            $fn = $rs.Fields($i).Name
-            $fv = $rs.Fields($i).Value
-            $content += "<tr><td style=`"width:200px`">$fn</td><td>$fv</td></tr>"
-        }
-        $content += "</table>"
-        [void]$rs.Close()
-    }
-}
-catch {
-    $content += "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
-}
-finally {
-    if ($IsOpen -eq $true) {
-        [void]$connection.Close()
-    }
-}
+$content = Get-SkQueryTable3 -QueryFile "cmforests.sql" -PageLink "cmforests.ps1" -Columns ('ForestID','SMSSiteCode','SMSSiteName','LastDiscoveryTime','LastDiscoveryStatus','LastPublishingTime','PublishingStatus','DiscoveryEnabled','PublishingEnabled')
 
-#$tabset = New-MenuTabSet -BaseLink 'cmpackages.ps1?x=begins&f=name&v=' -DefaultID $TabSelected
-#$content += Write-DetailInfo -PageRef "___.ps1" -Mode $Detailed
+#$tabset = New-MenuTabSet -BaseLink 'cmforestdisc.ps1' -DefaultID $TabSelected
+$content += Write-DetailInfo -PageRef "cmforestdisc.ps1" -Mode $Detailed
 
 @"
 <html>
