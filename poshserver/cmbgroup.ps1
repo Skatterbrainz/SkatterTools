@@ -17,125 +17,13 @@ $xxx         = ""
 
 switch ($TabSelected) {
     'General' {
-        try {
-            $query = "SELECT 
-                [Name],
-                DefaultSiteCode,
-                GroupID,
-                GroupGUID,
-                [Description],
-                Flags,
-                CreatedBy,
-                CreatedOn,
-                ModifiedBy,
-                ModifiedOn,
-                MemberCount,
-                SiteSystemCount,
-                Shared 
-                FROM vSMS_BoundaryGroup"
-            $query = Get-SkDbQuery -QueryText $query
-            if (![string]::IsNullOrEmpty($SearchValue)) {$IsFiltered = $True}
-
-            $connection = New-Object -ComObject "ADODB.Connection"
-            $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-            $connection.Open($connString);
-            $IsOpen = $true
-            $rs = New-Object -ComObject "ADODB.RecordSet"
-            $rowcount = 0
-            $rs.Open($query, $connection)
-            if ($rs.BOF -and $rs.EOF) {
-                $content = "<table id=table2><tr><td>No records found!</td></tr></table>"
-            }
-            else {
-                $colcount = $rs.Fields.Count
-                $content = "<table id=table2><tr>"
-                for ($i = 0; $i -lt $colcount; $i++) {
-                    $fn = $rs.Fields($i).Name
-                    $fv = $rs.Fields($i).Value
-                    $content += "<tr><td style=`"width:200px`">$fn</td><td>$fv</td></tr>"
-                }
-                $content += "</table>"
-                [void]$rs.Close()
-            }
-        }
-        catch {
-            $content += "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
-        }
-        finally {
-            if ($IsOpen -eq $true) {
-                [void]$connection.Close()
-            }
-        }
+        $xxx += ";queryfile: cmboundarygroup.sql"
+        $content = Get-SkQueryTable2 -QueryFile "cmboundarygroup.sql" -PageLink "cmbgroup.ps1" -Columns ('BGName','DefaultSiteCode','GroupID','GroupGUID','Description','Flags','CreatedBy','CreatedOn','ModifiedBy','ModifiedOn','MemberCount','SiteSystemCount','Shared')
         break;
     }
     'Boundaries' {
-        try {
-            $query = 'SELECT 
-                dbo.vSMS_Boundary.DisplayName, 
-                dbo.vSMS_Boundary.BoundaryID, 
-                dbo.vSMS_Boundary.Value, 
-                case 
-                    when BoundaryType = 0 Then ''IP Subnet''
-                    when BoundaryType = 1 Then ''Active Directory Site''
-                    when BoundaryType = 2 Then ''IPv6 Prefix''
-                    when BoundaryType = 3 Then ''IP Address Range''
-                    else ''UnKnown'' end as BoundaryType,
-                case
-                    when BoundaryFlags = 0 then ''Fast''
-                    when BoundaryFlags = 1 then ''Slow''
-                    end as BoundaryFlags, 
-                dbo.vSMS_Boundary.CreatedBy, 
-                dbo.vSMS_Boundary.CreatedOn, 
-                dbo.vSMS_Boundary.ModifiedBy, 
-                dbo.vSMS_Boundary.ModifiedOn, 
-                dbo.vSMS_BoundaryGroupMembers.GroupID
-                FROM dbo.vSMS_Boundary INNER JOIN
-                dbo.vSMS_BoundaryGroupMembers ON 
-                dbo.vSMS_Boundary.BoundaryID = dbo.vSMS_BoundaryGroupMembers.BoundaryID
-                where (GroupID = '+$SearchValue+')'
-            $connection = New-Object -ComObject "ADODB.Connection"
-            $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-            $connection.Open($connString);
-            $IsOpen = $true
-            $rs = New-Object -ComObject "ADODB.RecordSet"
-            $rowcount = 0
-            $rs.Open($query, $connection)
-            if ($rs.BOF -and $rs.EOF) {
-                $content = "<table id=table2><tr><td>No records found!</td></tr></table>"
-            }
-            else {
-                $colcount = $rs.Fields.Count
-                $content = "<table id=table1><tr>"
-                for ($i = 0; $i -lt $colcount; $i++) {
-                    $fn = $rs.Fields($i).Name
-                    $content += "<th>$fn</th>"
-                }
-                $content += "</tr>"
-                [void]$rs.MoveFirst()
-                while (!$rs.EOF) {
-                    $content += "<tr>"
-                    for ($i = 0; $i -lt $colcount; $i++) {
-                        $fn = $rs.Fields($i).Name
-                        $fv = $rs.Fields($i).Value
-                        $content += "<td>$fv</td>"
-                    }
-                    $content += "</tr>"
-                    [void]$rs.MoveNext()
-                    $rowcount++
-                }
-                $content += "<tr><td colspan=`"$($colcount)`" class=lastrow>$rowcount items returned</td></tr>"
-                $content += "</table>"
-                [void]$rs.Close()
-            }
-        }
-        catch {
-            $content += "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
-        }
-        finally {
-            if ($IsOpen -eq $true) {
-                [void]$connection.Close()
-            }
-        }
+        $xxx += ";queryfile: cmboundaries.sql"
+        $content = Get-SkQueryTable3 -QueryFile "cmboundaries.sql" -PageLink "cmbgroup.ps1" -Columns ('DisplayName','BoundaryID','BValue','BoundaryType','BoundaryFlags','CreatedBy','CreatedOn','ModifiedBy','ModifiedOn','GroupID','BGName') -NoUnFilter
         break;
     }
 }
@@ -147,7 +35,7 @@ else {
     $tabs = @('General','Boundaries','Systems')
 }
 $tabset = New-MenuTabSet2 -MenuTabs $tabs -BaseLink "cmbgroup.ps1"
-#$content += Write-DetailInfo -PageRef "___.ps1" -Mode $Detailed
+$content += Write-DetailInfo -PageRef "cmbgroup.ps1" -Mode $Detailed
 
 @"
 <html>

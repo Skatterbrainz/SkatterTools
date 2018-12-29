@@ -15,52 +15,8 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-try {
-    $query = 'SELECT 
-        Name,
-        Comments,
-        QueryKey,
-        Architecture,
-        Lifetime,
-        QryFmtKey,
-        QueryType,
-        CollectionID,
-        WQL,
-        SQL 
-        FROM Queries 
-        where (QueryKey='''+$SearchValue+''')'
-    $xxx = $query
-    $connection = New-Object -ComObject "ADODB.Connection"
-    $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-    $connection.Open($connString);
-    $IsOpen = $true
-    $rs = New-Object -ComObject "ADODB.RecordSet"
-    $rowcount = 0
-    $rs.Open($query, $connection)
-    if ($rs.BOF -and $rs.EOF) {
-        $content = "<table id=table2><tr><td>No records found!</td></tr></table>"
-    }
-    else {
-        $colcount = $rs.Fields.Count
-        $content = "<table id=table1>"
-        for ($i = 0; $i -lt $colcount; $i++) {
-            $fn = $rs.Fields($i).Name
-            $fv = $rs.Fields($i).Value
-            $content += "<tr><td style=`"width:200px`">$fn</td><td>$fv</td></tr>"
-        }
-        $content += "</table>"
-        [void]$rs.Close()
-    }
-}
-catch {
-    $content += "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
-}
-finally {
-    if ($IsOpen -eq $true) {
-        [void]$connection.Close()
-    }
-}
-
+$content = Get-SkQueryTable2 -QueryFile "cmquery.sql" -PageLink "cmquery.ps1" -Columns ('QueryName','Comments','QueryKey','Architecture','Lifetime','QryFmtKey','QueryType','CollectionID','WQL','SQL')
+        
 #$tabset = New-MenuTabSet -BaseLink 'cmqueries.ps1?x=begins&f=name&v=' -DefaultID $TabSelected
 $content += Write-DetailInfo -PageRef "cmquery.ps1" -Mode $Detailed
 

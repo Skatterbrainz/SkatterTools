@@ -1,22 +1,25 @@
-﻿$SearchField = Get-PageParam -TagName 'f' -Default ""
-$SearchValue = Get-PageParam -TagName 'v' -Default ""
-$SearchType  = Get-PageParam -TagName 'x' -Default 'like'
-$SortField   = Get-PageParam -TagName 's' -Default 'CollectionName'
-$SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
-$TabSelected = Get-PageParam -TagName 'tab' -Default 'all'
-$Detailed    = Get-PageParam -TagName 'zz' -Default ""
-$CustomName  = ""
-$CollectionType = Get-PageParam -TagName 't' -Default '2'
-$IsFiltered  = $False
+﻿$Script:SearchField = Get-PageParam -TagName 'f' -Default ""
+$Script:SearchValue = Get-PageParam -TagName 'v' -Default ""
+$Script:SearchType  = Get-PageParam -TagName 'x' -Default 'like'
+$Script:SortField   = Get-PageParam -TagName 's' -Default 'CollectionName'
+$Script:SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
+$Script:TabSelected = Get-PageParam -TagName 'tab' -Default 'all'
+$Script:Detailed    = Get-PageParam -TagName 'zz' -Default ""
+$Script:CustomName  = ""
+$Script:CollectionType = Get-PageParam -TagName 't' -Default '2'
+$Script:IsFiltered  = $False
+$Script:PageFile    = "cmdevices.ps1"
 
 if ($CollectionType -eq '2') {
     $Ctype = "Device"
+    $qfname = "cmdevicecollections.sql"
 }
 else {
     $Ctype = "User"
+    $qfname = "cmusercollections.sql"
 }
-$PageTitle   = "CM $CType Collections"
-$PageCaption = "CM $CType Collections"
+$Script:PageTitle   = "CM $CType Collections"
+$Script:PageCaption = "CM $CType Collections"
 $content     = ""
 $tabset      = ""
 
@@ -33,97 +36,9 @@ else {
     }
 }
 
-$query = 'SELECT DISTINCT 
-    dbo.v_Collection.Name as CollectionName, 
-    dbo.v_Collection.CollectionID, 
-    dbo.v_Collection.Comment, 
-    dbo.v_Collection.MemberCount as Members, 
-    dbo.v_Collection.CollectionType as [Type], 
-    dbo.v_Collections.CollectionVariablesCount as Variables, 
-    dbo.v_Collections.LimitToCollectionID as LimitedTo
-FROM 
-    dbo.v_FullCollectionMembership Right outer JOIN
-    dbo.v_Collection ON 
-    dbo.v_FullCollectionMembership.CollectionID = dbo.v_Collection.CollectionID 
-    INNER JOIN dbo.v_Collections ON 
-    dbo.v_Collection.Name = dbo.v_Collections.CollectionName
-    WHERE (dbo.v_Collection.CollectionType='+$CollectionType+')'
-
-$query = Get-SkDbQuery -QueryText $query -Extend
-
-$xxx = "query: $query"
-
-try {
-    $connection = New-Object -ComObject "ADODB.Connection"
-    $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-    $connection.Open($connString);
-    $IsOpen = $True
-    $xxx += "<br/>connection opened"
-    $rs = New-Object -ComObject "ADODB.RecordSet"
-    $rs.Open($query, $connection)
-    $xxx += "<br/>recordset defined"
-    $colcount = $rs.Fields.Count
-    $rowcount = 0
-    $xxx += "<br/>$colcount columns returned"
-    if ($rs.BOF -and $rs.EOF) {
-        $content = "<table id=table2><tr><td>No matching records found</td></tr>"
-    }
-    else {
-        $rs.MoveFirst()
-        $content = '<table id=table1><tr>'
-        for ($i = 0; $i -lt $colcount; $i++) {
-            $fn = $rs.Fields($i).Name
-            $content += "<th>$fn</th>"
-        }
-        $content += '</tr>'
-        while (!$rs.EOF) {
-            $content += "<tr>"
-            for ($i = 0; $i -lt $colcount; $i++) {
-                $fn = $rs.Fields($i).Name
-                $fv = $rs.Fields($i).Value
-                switch ($fn) {
-                    'CollectionName' {
-                        $cn = $fv
-                        $fvx = $fv
-                        break;
-                    }
-                    'CollectionID' {
-                        $fvx = "<a href=`"cmcollection.ps1?f=collectionid&v=$fv&t=$CollectionType&n=$cn`" title=`"Details`">$fv</a>"
-                        break;
-                    }
-                    'LimitedTo' {
-                        $fvx = "<a href=`"cmcollection.ps1?f=collectionid&v=$fv&t=$CollectionType`" title=`"Details`">$fv</a>"
-                        break;
-                    }
-                    default {
-                        $fvx = $fv
-                        break;
-                    }
-                } # switch
-                $content += "<td>$fvx</td>"
-            }
-            $content += "</tr>"
-            $rs.MoveNext();
-            $rowcount++
-        } # while
-    }
-    $content += "<tr><td colspan=`"$($colcount)`">$rowcount rows returned"
-    if ($IsFiltered -eq $true) {
-        $content += " - <a href=`"cmcollections.ps1?t=$CollectionType`" title=`"Show All`">Show All</a>"
-    }
-    $content += "</td></tr></table>"
-}
-catch {
-    $xxx += $Error[0].InnerException
-}
-finally {
-    if ($IsOpen) {
-        [void]$connection.Close()
-    }
-}
-
-$tabset = New-MenuTabSet -BaseLink "cmcollections.ps1?t=$CollectionType&x=begins&f=collectionname&v=" -DefaultID $TabSelected
-$content += Write-DetailInfo -PageRef "cmcollections.ps1" -Mode $Detailed
+$content = Get-SkQueryTable -QueryFile $qfname -PageLink "cmcollections.ps1" -Columns ('CollectionID','CollectionName','Comment','Members','Type','Variables','LimitedTo')
+$tabset  = New-MenuTabSet -BaseLink "cmcollections.ps1?t=$CollectionType&f=collectionname&x=begins&v=" -DefaultID $TabSelected
+#$content += Write-DetailInfo -PageRef "$Script:PageFile" -Mode $Detailed
 
 @"
 <html>

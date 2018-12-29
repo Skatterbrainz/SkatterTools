@@ -31,11 +31,11 @@ $STPageCaption = "About SkatterTools"
         </td>
         <td style='vertical-align:top;'>
             <table id=table2>
-                <tr><td>lib-ads</td><td>$SkToolsLibADS</td></tr>
-                <tr><td>lib-cm</td><td>$SkToolsLibCM</td></tr>
-                <tr><td>lib-db</td><td>$SkToolsLibDB</td></tr>
-                <tr><td>lib-util</td><td>$SkToolsLibUtil</td></tr>
-                <tr><td>lib-layout</td><td>$SkToolsLibLayout</td></tr>
+                <tr><td>lib-ads</td><td>$Global:SkToolsLibADS</td></tr>
+                <tr><td>lib-cm</td><td>$Global:SkToolsLibCM</td></tr>
+                <tr><td>lib-db</td><td>$Global:SkToolsLibDB</td></tr>
+                <tr><td>lib-util</td><td>$Global:SkToolsLibUtil</td></tr>
+                <tr><td>lib-layout</td><td>$Global:SkToolsLibLayout</td></tr>
                 <tr><td>Notes Enabled</td><td>$SkNotesEnable</td></tr>
                 <tr><td>Notes Path</td><td>$SkNotesPath</td></tr>
                 <tr><td>Last Load</td><td>$LastLoadTime</td></tr>
