@@ -1,7 +1,7 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 1812.27.01
+## Latest: 1812.28.01
 
 ## Overview
 
@@ -35,6 +35,12 @@ Skattered tools from Skatterbrainz
    * ConfigMgr 1806, 1810, 1811
 
 ## Release History
+   ### 1812.29.01
+   * Rewritted to use dbatools powershell module
+   * Moved legacy ADO code out, replaced with function calls
+   * Moved isolated queries to separate query files
+   * Updated setup script and launch script
+   
    ### 1812.27.01
    * Performance updates, bug fixes
    * Updated the Help page contents
