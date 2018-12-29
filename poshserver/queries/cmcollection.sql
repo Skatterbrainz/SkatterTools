@@ -1,4 +1,4 @@
-SELECT DISTINCT 
+﻿SELECT DISTINCT 
     dbo.v_Collection.Name AS CollectionName, 
     dbo.v_Collection.CollectionID, 
     dbo.v_Collection.Comment, 
