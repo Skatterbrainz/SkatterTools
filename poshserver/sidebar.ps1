@@ -54,7 +54,8 @@ if ($CmEnabled -ne 'false') {
 		<li class="limenu">Reporting</li>
 		<li class="limenu"><a href="cmsitestatus.ps1" target="main" title="Site Status">Site Status</a></li>
 		<li class="limenu"><a href="cmcompstat.ps1" target="main" title="Component Status">Site Components</a></li>
-		<li class="limenu">SQL Status</li>
+		<li class="limenu"><a href="dbstats.ps1" target="main" title="ConfigMgr SQL Status">SQL Status</a></li>
+        <li class="limenu"><a href="dbrecovery.ps1" target="main" title="SQL Server Recovery Models">DB Recovery</a></li>
 	</ul>
 </div>
 

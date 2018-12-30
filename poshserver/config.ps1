@@ -431,6 +431,10 @@ function Get-SKDbValueLink {
             $output = ($Value -split '\\')[2]
             break;
         }
+        'ComponentName' {
+            $output = "<a href=`"cmcompstats.ps1?f=component&v=$Value&x=equals`">$Value</a>"
+            break;
+        }
         'QueryID' {
             $output = "<a href=`"cmquery.ps1?f=querykey&v=$Value&x=equals&n=$Value`" title=`"Details`">$Value</a>"
             break;
@@ -450,6 +454,16 @@ function Get-SKDbValueLink {
             else {
                 $output = $Value
             }
+            break;
+        }
+        'Approver' {
+            ($Value -split '\\') | ForEach-Object {$unn = $_}
+            $output = "<a href=`"aduser.ps1?f=username&v=$unn&x=equals`" title=`"User Account`">$Value</a>"
+            break;
+        }
+        'Author' {
+            ($Value -split '\\') | ForEach-Object {$aun = $_}
+            $output = "<a href=`"cmscripts.ps1?f=author&v=$aun&x=contains`" title=`"Other scripts by $aun`">$Value</a>"
             break;
         }
         default {
