@@ -1,6 +1,6 @@
 ﻿<#
 .NOTES
-2018.27.02 - DS
+2018.31.01 - DS
 #>
 [CmdletBinding()]
 param ()
@@ -89,7 +89,7 @@ try {
     $sktoolsfile = (Join-Path $PSScriptRoot -ChildPath "Start-SkatterTools.ps1")
     Write-Host "opening config.txt for user customization..." -ForegroundColor Cyan
     Start-Process "notepad.exe" -ArgumentList $configFile -Wait
-    foreach ($m in @('sqlserver','dbatools','carbon')) {
+    foreach ($m in @('dbatools','carbon')) {
         if (!(Get-Module -Name $m -ListAvailable)) {
             Write-Host "installing powershell module: $m" -ForegroundColor Cyan
             Install-Module -Name $m -AllowClobber
