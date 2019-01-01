@@ -89,7 +89,7 @@ try {
         $rowcount++
     } # foreach
     $content += '<tr>'
-    $content += '<th colspan='+$($columns.Count)+'>'+$rowcount+' computers found'
+    $content += '<td colspan='+$($columns.Count)+' class=lastrow>'+$rowcount+' computers found'
     if ($IsFiltered -eq $True) {
         $content += " - <a href=`"adcomputers.ps1`" title=`"Show All`">Show All</a>"
     }

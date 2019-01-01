@@ -82,6 +82,12 @@ $ridSite = $rid.SiteName
 $ridGC   = $rid.IsGlobalCatalog()
 $ridx    = $rid.GetAllReplicationNeighbors()
 
+$smdc = $forest.SchemaRoleOwner
+$smnm = $forest.NamingRoleOwner
+
+$smdcx = "<a href=`"adcomputer.ps1?f=Name&v=$($($smdc -split '\.')[0])`">$smdc</a>"
+$smnmx = "<a href=`"adcomputer.ps1?f=Name&v=$($($smnm -split '\.')[0])`">$smnm</a>"
+
 $content = "<table id=table2>"
 $content += "<tr><td>Active Directory Forest</td><td>$($forest.Name)</td></tr>"
 $content += "<tr><td>Forest Schema</td><td>$schemaVersion</td></tr>"
@@ -90,8 +96,8 @@ $content += "<tr><td>Root Domain Level</td><td>$dlvl</td></tr>"
 $content += "<tr><td>FSMO - PDC emulator</td><td>$pdcName ($pdcIP - $pdcOS)</td></tr>"
 $content += "<tr><td>FSMO - Infrastructure master</td><td>$imName ($imIP - $imOS)</td></tr>"
 $content += "<tr><td>FSMO - RID master</td><td>$ridName ($ridIP - $ridOS)</td></tr>"
-$content += "<tr><td>FSMO - Schema master</td><td>$($forest.SchemaRoleOwner)</td></tr>"
-$content += "<tr><td>FSMO - Naming master</td><td>$($forest.NamingRoleOwner)</td></tr>"
+$content += "<tr><td>FSMO - Schema master</td><td>$smdcx</td></tr>"
+$content += "<tr><td>FSMO - Naming master</td><td>$smnmx</td></tr>"
 $content += "<tr><td>Global Catalogs</td><td><ul>$($forest.GlobalCatalogs | %{"<li>$_</li>"})</ul></td></tr>"
 $content += "<tr><td>Partitions</td><td><ul>$($forest.ApplicationPartitions | %{"<li>$_</li>"})</ul></td></tr>"
 $content += "</table>"
