@@ -8,7 +8,7 @@
 
 <h1>Welcome $PoshUserName !</h1>
 
-<img src="graphics/splash3.png" border="0" alt="" />
+<img src="graphics/sktools4.png" border="0" alt="" />
 
 </body>
 </html>
