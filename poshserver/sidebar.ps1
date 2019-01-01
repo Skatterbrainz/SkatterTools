@@ -51,7 +51,6 @@ if ($CmEnabled -ne 'false') {
 <div class="panel">
 	<ul class="ulmenu">
 		<li class="limenu"><a href="cmqueries.ps1" target="main" title="Queries">Queries</a></li>
-		<li class="limenu">Reporting</li>
 		<li class="limenu"><a href="cmsitestatus.ps1" target="main" title="Site Status">Site Status</a></li>
 		<li class="limenu"><a href="cmcompstat.ps1" target="main" title="Component Status">Site Components</a></li>
 		<li class="limenu"><a href="dbstats.ps1" target="main" title="ConfigMgr SQL Status">SQL Status</a></li>
@@ -62,11 +61,14 @@ if ($CmEnabled -ne 'false') {
 <button class="accordion" title="Configuration Manager Site">CM Site</button>
 <div class="panel">
 	<ul class="ulmenu">
-		<li class="limenu">Hierarchy</li>
 		<li class="limenu"><a href="cmdiscs.ps1" target="main" title="Discovery Methods">Discovery Methods</a></li>
         <li class="limenu"><a href="cmforestdisc.ps1" target="main" title="AD Forest Discovery and Publishing">AD Forest</a></li>
 		<li class="limenu"><a href="cmbgroups.ps1" target="main" title="Boundary Groups">Boundary Groups</a></li>
-		<li class="limenu">Site Systems</li>
+		<li class="limenu"><a href="cmservers.ps1?rc=dp" target="main" title="Distribution Points">Distribution Points</a></li>
+        <li class="limenu">Management Points</li>
+        <li class="limenu">Reporting Points</li>
+        <li class="limenu">SW Update Points</li>
+        <li class="limenu">Fallback Status</li>
 		<li class="limenu">Site Components</li>
         <li class="limenu"><a href="cmsumtasks.ps1" target="main" title="Summary Tasks">Summary Tasks</a></li>
         <li class="limenu"><a href="cmcerts.ps1" target="main" title="Certificates">Certificates</a></li>

@@ -42,7 +42,7 @@ $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
 # SkatterTools Site Configuration
 
-$Global:SkToolsVersion = "1812.31.01"
+$Global:SkToolsVersion = "1901.01.01"
 
 $configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
 if (!(Test-Path $configFile)) {
@@ -57,11 +57,8 @@ foreach ($line in $cdata) {
     }
 }
 
-foreach ($m in @('dbatools','carbon')) {
-    if (Get-Module -Name $m) {
-        Import-Module -Name $m
-    }
-}
+$modules = @('dbatools')
+$modules | ForEach-Object { if(!(Get-Module -Name $_)) { Import-Module -Name $_}}
 
 #---------------------------------------------------------------------
 
@@ -429,6 +426,10 @@ function Get-SKDbValueLink {
         }
         'SiteSystem' {
             $output = ($Value -split '\\')[2]
+            break;
+        }
+        'DPName' {
+            $output = "<a href=`"cmserver.ps1?rc=dp&n=$Value`" title=`"Details for $Value`">$Value</a>"
             break;
         }
         'ComponentName' {

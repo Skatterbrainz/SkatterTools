@@ -11,6 +11,8 @@ $PageCaption = "AD Groups"
 $content     = ""
 $tabset      = ""
 
+$laststep = ""
+
 if ($SearchValue -eq 'all') {
     $SearchValue = ""
 }
@@ -21,15 +23,19 @@ else {
         $PageCaption = $PageTitle
     }
 }
+$laststep = "tabselect update"
 $subcap = ""
 try {
     if ($SortOrder -eq 'Asc') {
-        $groups = Get-ADsGroups | Sort-Object $SortField
+        $groups = @(Get-ADsGroups | Sort-Object $SortField)
+        $laststep = "sorting"
     }
     else {
-        $groups = Get-ADsGroups | Sort-Object $SortField -Descending
+        $groups = @(Get-ADsGroups | Sort-Object $SortField -Descending)
+        $laststep = "sorting - descending"
     }
     if (![string]::IsNullOrEmpty($SearchValue)) {
+        $laststep = "filtering"
         switch ($SearchType) {
             'like' {
                 $groups = $groups | Where-Object {$_."$SearchField" -like "*$SearchValue*"}
@@ -52,23 +58,26 @@ try {
                 break;
             }
         }
-
         $IsFiltered = $True
+        $laststep = "filtered"
     }
     $columns = @('Name','Description')
     $content = '<table id=table1><tr>'
-    $content += New-ColumnSortRow -ColumnNames $columns -BaseLink "adgroups.ps1?f=$SearchField&v=$SearchValue&x=$SearchType" -SortDirection $SortOrder
+    $laststep = "setting column headings"
+    #$content += New-ColumnSortRow -ColumnNames $columns -BaseLink "adgroups.ps1?f=$SearchField&v=$SearchValue&x=$SearchType" -SortDirection $SortOrder
     $content += '</tr>'
     $rowcount = 0
+    $laststep = "entering loop: count ($Groups.Count)"
     foreach ($group in $groups) {
         $content += '<tr>'
-        #$members = $members = Get-ADsGroupMembers -GroupName $group.name
         foreach ($col in $columns) {
+            $laststep = "column: $col"
             $fv = $($group."$col")
             switch ($col) {
                 'Name' {
                     $fvx = '<a href="adgroup.ps1?f=Name&v='+$fv+'" title="Details">'+$fv+'</a>'
                     $content += '<td style=`"width:30%`">'+$fvx+'</td>'
+                    $laststep = "name: $fv"
                 }
                 default {
                     $fvx = $fv
@@ -77,6 +86,7 @@ try {
             }
         }
         $content += '</tr>'
+        $laststep = "row: $rowcount"
         $rowcount++
     }
     $content += '<tr>'
@@ -87,7 +97,9 @@ try {
     $content += '</td></tr></table>'    
 }
 catch {
-    $content = "Error: $($Error[0].Exception.Message)"
+    $content = "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)"
+    $content += "<br/>$laststep"
+    $content += "</td></tr></table>"
 }
 
 $tabset = New-MenuTabSet -BaseLink 'adgroups.ps1?x=begins&f=name&v=' -DefaultID $TabSelected
@@ -101,7 +113,6 @@ $tabset = New-MenuTabSet -BaseLink 'adgroups.ps1?x=begins&f=name&v=' -DefaultID 
 <body>
 
 <h1>$PageCaption</h1>
-<h3>$subcap</h3>
 
 $tabset
 $content

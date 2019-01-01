@@ -23,7 +23,8 @@ $links = @(
     'http://tech-comments.blogspot.com/2010/10/powershell-adsisearcher-basics.html',
     'https://serverfault.com/questions/512228/how-to-check-ad-ds-domain-forest-functional-level-from-domain-joined-workstation',
     'https://blogs.msmvps.com/richardsiddaway/category/powershellandactivedirectory',
-    'https://www.andersrodland.com/ultimate-sccm-querie-collection-list/'
+    'https://www.andersrodland.com/ultimate-sccm-querie-collection-list/',
+    'https://github.com/paulwetter/DocumentConfigMgrCB/blob/master/DocumentCMCB.ps1'
 )
 $content = "<table id=table2>"
 foreach ($link in $links) {
