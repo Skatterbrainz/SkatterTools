@@ -23,19 +23,14 @@ $STPageCaption = "About SkatterTools"
 	            <tr><td>Current User</td><td>$PoshUserName</td></tr>
                 <tr><td>Install Path</td><td>$HomeDirectory</td></tr>
                 <tr><td>SMS Provider</td><td>$CmSMSProvider</td></tr>
-                <tr><td>SkDBHost</td><td>$SkNotesDBHost</td></tr>
-                <tr><td>SkDBName</td><td>$SkDBDatabase</td></tr>
-                <tr><td>CustomConfig</td><td>$CustomConfig</td></tr>
-                <tr><td>Web Theme</td><td>$STTheme</td></tr>
             </table>
         </td>
         <td style='vertical-align:top;'>
             <table id=table2>
-                <tr><td>lib-ads</td><td>$Global:SkToolsLibADS</td></tr>
-                <tr><td>lib-cm</td><td>$Global:SkToolsLibCM</td></tr>
-                <tr><td>lib-db</td><td>$Global:SkToolsLibDB</td></tr>
-                <tr><td>lib-util</td><td>$Global:SkToolsLibUtil</td></tr>
-                <tr><td>lib-layout</td><td>$Global:SkToolsLibLayout</td></tr>
+                <tr><td>SkDBHost</td><td>$SkNotesDBHost</td></tr>
+                <tr><td>SkDBName</td><td>$SkDBDatabase</td></tr>
+                <tr><td>CustomConfig</td><td>$CustomConfig</td></tr>
+                <tr><td>Web Theme</td><td>$STTheme</td></tr>
                 <tr><td>Notes Enabled</td><td>$SkNotesEnable</td></tr>
                 <tr><td>Notes Path</td><td>$SkNotesPath</td></tr>
                 <tr><td>Last Load</td><td>$LastLoadTime</td></tr>

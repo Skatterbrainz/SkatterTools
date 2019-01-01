@@ -7,11 +7,15 @@ $TabSelected = Get-PageParam -TagName 'tab' -Default 'General'
 $Detailed    = Get-PageParam -TagName 'zz' -Default ""
 $Extension1  = Get-PageParam -TagName 'x1' -Default ""
 
-$PageTitle   = "AD Computer ($SearchValue)"
-$PageCaption = "AD Computer ($SearchValue)"
+$PageTitle   = "AD Computer ($SearchValue) - $TabSelected"
+$PageCaption = "AD Computer ($SearchValue) - $TabSelected"
 $IsFiltered  = $False
 $content = ""
 $tabset  = ""
+
+$plist = @('General','BIOS','Computer','Disks','Environment','Groups','Local Groups','Memory','Network','Operating System','Processor','Software','Startup','Updates','User Profiles','Tools')
+
+$menulist = New-SkMenuList -PropertyList $plist -TargetLink "adcomputer.ps1?v=$SearchValue" -Default $TabSelected
 
 if ($SkNotesEnable -eq 'true') {
     $tabs = @('General','Storage','Groups','Software','Ping','Tools','Notes')
@@ -37,7 +41,11 @@ switch ($TabSelected) {
         $content += "</table>"
         break;
     }
-    'Storage' {
+    'Computer' {
+        $content = Get-SkWmiPropTable2 -ComputerName $SearchValue -WmiClass "Win32_ComputerSystem"
+        break;
+    }
+    'Disks' {
         try {
             $disks = Get-WmiObject -Class "Win32_LogicalDisk" -ComputerName $SearchValue -ErrorAction Stop
             $content = "<table id=table1>"
@@ -72,6 +80,22 @@ switch ($TabSelected) {
         catch {
             $content = "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
         }
+        break;
+    }
+    'BIOS' {
+        $content = Get-SkWmiPropTable2 -ComputerName $SearchValue -WmiClass "Win32_BIOS"
+        break;
+    }
+    'Network' {
+        $content = Get-SkWmiPropTable1 -ComputerName $SearchValue -WmiClass "Win32_NetworkAdapterConfiguration" -Columns ('IPEnabled','DHCPEnabled','IPAddress','DefaultIPGateway','DNSDomain','ServiceName','Description','Index') -SortField 'Index'
+        break;
+    }
+    'Operating System' {
+        $content = Get-SkWmiPropTable2 -ComputerName $SearchValue -WmiClass "Win32_OperatingSystem"
+        break;
+    }
+    'Processor' {
+        $content = Get-SkWmiPropTable1 -ComputerName $SearchValue -WmiClass "Win32_Processor" -Columns ('DeviceID','Caption','Manufacturer','MaxClockSpeed') -SortField 'Caption'
         break;
     }
     'Software' {
@@ -132,7 +156,21 @@ switch ($TabSelected) {
         break;
     }
     'Groups' {
+        $groups = Get-ADsUserGroups -UserName "$SearchValue"
+
         $content = "<table id=table2><tr><td style=`"height:150px`">Stay tuned for more</td></tr></table>"
+        break;
+    }
+    'Local Groups' {
+        $content = (Get-WmiObject -Class "Win32_Group" -ComputerName $SearchValue -Filter "Domain = '$SearchValue'" | Select Name,Description,SID | Sort-Object Name | ConvertTo-Html -Fragment) -replace '<table>','<table id=table1>'
+        break;
+    }
+    'Startup' {
+        $content = Get-SkWmiPropTable1 -ComputerName $SearchValue -WmiClass "Win32_StartupCommand" -Columns ('Name','Description','Command','Location') -SortField 'Name'
+        break;
+    }
+    'User Profiles' {
+        $content = Get-SkWmiPropTable1 -ComputerName $SearchValue -WmiClass "Win32_UserProfile" -Columns ('LocalPath','LastUseTime','Special','RoamingConfigured') -SortField 'LocalPath'
         break;
     }
     'Ping' {
@@ -154,7 +192,9 @@ switch ($TabSelected) {
         break;
     }
     'Tools' {
-        $content = "<table id=table2><tr><td style=`"height:150px`">Stay tuned for more</td></tr></table>"
+        $content = "<table id=table2><tr><td><ul>"
+        $content += "<li><a href=`"adtool.ps1?t=gpupdate&c=$SearchValue`">Invoke Group Policy Update (GPUPDATE)</a></li>"
+        $content += "</ul></td></tr></table>"
         break;
     }
 } # switch
@@ -169,7 +209,7 @@ switch ($TabSelected) {
 
 <h1>$PageCaption</h1>
 
-$tabset
+$menulist
 $content
 
 </body>

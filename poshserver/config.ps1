@@ -42,7 +42,7 @@ $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
 # SkatterTools Site Configuration
 
-$Global:SkToolsVersion = "1812.29.01"
+$Global:SkToolsVersion = "1812.31.01"
 
 $configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
 if (!(Test-Path $configFile)) {
@@ -861,7 +861,6 @@ function Get-AdOuObjects {
     }
 }
 
-$Global:SkToolsLibADS = "1812.27.01"
 #---------------------------------------------------------------------
 
 function Get-CmCollectionsList {
@@ -1011,7 +1010,6 @@ function Get-CmPackageTypeName {
     }
 }
 
-$Global:SkToolsLibCM = "1812.27.01"
 #---------------------------------------------------------------------
 
 function New-MenuTabSet {
@@ -1107,7 +1105,31 @@ function New-ColumnSortRow {
     return $output
 }
 
-$Global:SkToolsLibLayout = "1812.27.03"
+function New-SkMenuList {
+    param (
+        [parameter(Mandatory=$True)]
+        $PropertyList,
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $TargetLink,
+        [parameter(Mandatory=$False)]
+        [string] $Default = ""
+    )
+    $output = "<form name='form2' id='form2' method='POST' action=''>"
+    $output += "<select name='p' id='p' size='1' style='width:300px;padding:5px' onChange=`"this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);`">"
+    $output += "<option value=''></option>"
+    $output += $plist | %{ 
+        if ($_ -eq $Default) {
+            "<option value=`$TargetLink`&tab=$_' selected>$_</option>"
+        }
+        else {
+            "<option value='$TargetLink`&tab=$_'>$_</option>"
+        }
+    }
+    $output += "</select></form>"
+    Write-Output $output
+}
+
 #---------------------------------------------------------------------
 
 function Get-OSBuildName {
@@ -1255,4 +1277,455 @@ function Write-HtmlButton {
     return $output
 }
 
-$Global:SkToolsLibUtil = "1812.27.01"
+function Get-SkWmiValue {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $PropName,
+        [parameter(Mandatory=$False)]
+        $Value
+    )
+    $output = ""
+    if (![string]::IsNullOrEmpty($Value)) {
+        switch ($PropName) {
+            'AdminPasswordStatus' {
+                switch ($Value) {
+                    0 { $output = 'Disabled'; break; }
+                    1 { $output = 'Enabled'; break; }
+                    2 { $output = 'Not implemented'; break; }
+                    3 { $output = 'Unknown'; break; }
+                }
+                break;
+            }
+            'BootOptionOnWatchDog' {
+                switch ($Value) {
+                    0 { $output = 'Reserved'; break; }
+                    1 { $output = 'Operating System'; break; }
+                    2 { $output = 'System Utilities'; break; }
+                    3 { $output = 'Do Not Reboot'; break; }
+                }
+                break;
+            }
+            'LastUseTime' {
+                try {
+                    $datepart = "$($Value.Substring(4,2))`/$($Value.Substring(6,2))`/$($Value.Substring(0,4))"
+                    $timepart = "$($Value.Substring(8,2))`:$($Value.Substring(10,2))"
+                    $output   = "$(([datetime]$datepart).ToShortDateString()+' '+$([datetime]$timepart).ToLongTimeString())"
+                }
+                catch {
+                    $output = "error"
+                }
+                break;
+            }
+            'InstallDate' {
+                try {
+                    $datepart = "$($Value.Substring(4,2))`/$($Value.Substring(6,2))`/$($Value.Substring(0,4))"
+                    $timepart = "$($Value.Substring(8,2))`:$($Value.Substring(10,2))"
+                    $output   = "$(([datetime]$datepart).ToShortDateString()+' '+$([datetime]$timepart).ToLongTimeString())"
+                }
+                catch {
+                    $output = "error"
+                }
+                break;
+            }
+            'LastBootUpTime' {
+                try {
+                    $datepart = "$($Value.Substring(4,2))`/$($Value.Substring(6,2))`/$($Value.Substring(0,4))"
+                    $timepart = "$($Value.Substring(8,2))`:$($Value.Substring(10,2))"
+                    $output   = "$(([datetime]$datepart).ToShortDateString()+' '+$([datetime]$timepart).ToLongTimeString())"
+                }
+                catch {
+                    $output = "error"
+                }
+                break;
+            }
+            'LocalDateTime' {
+                try {
+                    $datepart = "$($Value.Substring(4,2))`/$($Value.Substring(6,2))`/$($Value.Substring(0,4))"
+                    $timepart = "$($Value.Substring(8,2))`:$($Value.Substring(10,2))"
+                    $output   = "$(([datetime]$datepart).ToShortDateString()+' '+$([datetime]$timepart).ToLongTimeString())"
+                }
+                catch {
+                    $output = "error"
+                }
+                break;
+            }
+            'ChassisBootupState' {
+                switch ($Value) {
+                    1 { $output = 'Other'; break; }
+                    2 { $output = 'Unknown'; break; }
+                    3 { $output = 'Safe'; break; }
+                    4 { $output = 'Warning'; break; }
+                    5 { $output = 'Critical'; break; }
+                    6 { $output = 'Non-recoverable'; break; }
+                }
+                break;
+            }
+            'DomainRole' {
+                switch ($Value) {
+                    0 { $output = 'Standalone Workstation'; break; }
+                    1 { $output = 'Member Workstation'; break; }
+                    2 { $output = 'Standalone Server'; break; }
+                    3 { $output = 'Member Server'; break; }
+                    4 { $output = 'Backup Domain Controller'; break; }
+                    5 { $output = 'Primary Domain Controller'; break; }
+                }
+                break; 
+            }
+            'FrontPanelResetStatus' {
+                switch ($Value) {
+                    0 { $output = 'Disabled'; break; }
+                    1 { $output = 'Enabled'; break; }
+                    2 { $output = 'Not implemented'; break; }
+                    3 { $output = 'Unknown'; break; }
+                }
+                break;
+            }
+            'KeyboardPasswordStatus' {
+                switch ($Value) {
+                    0 { $output = 'Disabled'; break; }
+                    1 { $output = 'Enabled'; break; }
+                    2 { $output = 'Not implemented'; break; }
+                    3 { $output = 'Unknown'; break; }
+                }
+                break;
+            }
+            'OperatingSystemSKU' {
+                switch($Value) {
+                      0 { $output = 'Undefined'; break; }
+                      1 { $output = 'Ultimate'; break; }
+                      2 { $output = 'Basic'; break; }
+                      3 { $output = 'Home Premium'; break; }
+                      4 { $output = 'Enterprise'; break; }
+                      6 { $output = 'Business'; break; }
+                      7 { $output = 'Standard'; break; }
+                      8 { $output = 'DataCenter'; break; }
+                      9 { $output = 'Small Business'; break; }
+                     10 { $output = 'Enterprise'; break; }
+                     11 { $output = 'Starter'; break; }
+                     12 { $output = 'DataCenter Core'; break; }
+                     13 { $output = 'Standard Core'; break; }
+                     14 { $output = 'Enterprise Core'; break; }
+                     17 { $output = 'Web Server'; break; }
+                     19 { $output = 'Home Server'; break; }
+                     20 { $output = 'Storage Express'; break; }
+                     21 { $output = 'Storage Standard'; break; }
+                     22 { $output = 'Storage Workgroup'; break; }
+                     23 { $output = 'Storage Enterprise'; break; }
+                     24 { $output = 'Small Business'; break; }
+                     25 { $output = 'Small Business Server Premium Edition'; break; }
+                     27 { $output = 'Windows Enterprise Edition'; break; }
+                     28 { $output = 'Windows Ultimate Edition'; break; }
+                     29 { $output = 'Windows Server Web Server Edition (Server Core installation)'; break; }
+                     36 { $output = 'Windows Server Standard Edition without Hyper-V'; break; }
+                     37 { $output = 'Windows Server Datacenter Edition without Hyper-V (full installation)'; break; }
+                     38 { $output = 'Windows Server Enterprise Edition without Hyper-V (full installation)'; break; }
+                     39 { $output = 'Windows Server Datacenter Edition without Hyper-V (Server Core installation)'; break; }
+                     40 { $output = 'Windows Server Standard Edition without Hyper-V (Server Core installation)'; break; }
+                     41 { $output = 'Windows Server Enterprise Edition without Hyper-V (Server Core installation)'; break; }
+                     42 { $output = 'Microsoft Hyper-V Server'; break; }
+                     43 { $output = 'Storage Server Express Edition (Server Core installation)'; break; }
+                     44 { $output = 'Storage Server Standard Edition (Server Core installation)'; break; }
+                     45 { $output = 'Storage Server Workgroup Edition (Server Core installation)'; break; }
+                     46 { $output = 'Storage Server Enterprise Edition (Server Core installation)'; break; }
+                     50 { $output = 'Windows Server Essentials (Desktop Experience installation)'; break; }
+                     63 { $output = 'Small Business Server Premium (Server Core installation)'; break; }
+                     64 { $output = 'Windows Compute Cluster Server without Hyper-V'; break; }
+                     97 { $output = 'Windows RT'; break; }
+                    101 { $output = 'Windows Home'; break; }
+                    103 { $output = 'Windows Professional with Media Center'; break; }
+                    104 { $output = 'Windows Mobile'; break; }
+                    123 { $output = 'Windows IoT (Internet of Things) Core'; break; }
+                    143 { $output = 'Windows Server Datacenter Edition (Nano Server installation)'; break; }
+                    144 { $output = 'Windows Server Standard Edition (Nano Server installation)'; break; }
+                    147 { $output = 'Windows Server Datacenter Edition (Server Core installation)'; break; }
+                    148 { $output = 'Windows Server Standard Edition (Server Core installation)'; break; }
+                    default { $output = $Value; break; }
+                }
+                break;
+            }
+            'OSProductSuite' {
+                switch ($Value) {
+                        1 { $output = 'Small Business Server'; break; }
+                        2 { $output = 'Windows Server 2008'; break; }
+                        4 { $output = 'Windows BackOffice'; break; }
+                        8 { $output = 'Communication Server'; break; }
+                       16 { $output = 'Terminal Services'; break; }
+                       32 { $output = 'Small Business Server'; break; }
+                       64 { $output = 'Windows Embedded'; break; }
+                      128 { $output = 'DataCenter Edition'; break; }
+                      256 { $output = 'Terminal Services, single-session'; break; }
+                      512 { $output = 'Windows Home Edition'; break; }
+                     1024 { $output = 'Web Server Edition'; break; }
+                     8192 { $output = 'Storage Server Edition'; break; }
+                    16384 { $output = 'Compute Cluster Edition'; break; }
+                    default { $output = $Value; break; }
+                }
+                break;
+            }
+            'OSType' {
+                switch ($Value) {
+                     1 { $output = 'Other'; break; }
+                     2 { $output = 'MacOS'; break; }
+                     3 { $output = 'ATT UNIX'; break; }
+                     4 { $output = 'DGUX'; break; }
+                     5 { $output = 'DEC NT'; break; }
+                     6 { $output = 'Digital UNIX'; break; }
+                     7 { $output = 'OpenVMS'; break; }
+                     8 { $output = 'HPUX'; break; }
+                     9 { $output = 'AIX'; break; }
+                    10 { $output = 'MVX'; break; }
+                    11 { $output = 'OS400'; break; }
+                    12 { $output = 'OS/2'; break; }
+                    13 { $output = 'JavaVM'; break; }
+                    14 { $output = 'MS-DOS'; break; }
+                    15 { $output = 'Win3x'; break; }
+                    16 { $output = 'Win95'; break; }
+                    17 { $output = 'Win98'; break; }
+                    18 { $output = 'WinNT'; break; }
+                    19 { $output = 'WinCE'; break; }
+                    20 { $output = 'NCR3000'; break; }
+                    21 { $output = 'NetWare'; break; }
+                    22 { $output = 'OSF'; break; }
+                    23 { $output = 'DC/OS'; break; }
+                    24 { $output = 'Reliant UNIX'; break; }
+                    25 { $output = 'SCO UnixWare'; break; }
+                    26 { $output = 'SCO OpenServer'; break; }
+                    27 { $output = 'Sequent'; break; }
+                    28 { $output = 'IRIX'; break; }
+                    29 { $output = 'Solaris'; break; }
+                    30 { $output = 'SunOS'; break; }
+                    31 { $output = 'U6000'; break; }
+                    32 { $output = 'ASeries'; break; }
+                    33 { $output = 'TandemNSK'; break; }
+                    34 { $output = 'TandemNT'; break; }
+                    35 { $output = 'BS2000'; break; }
+                    36 { $output = 'Linux'; break; }
+                    37 { $output = 'Lynx'; break; }
+                    38 { $output = 'Xenix'; break; }
+                    39 { $output = 'VM/ESA'; break; }
+                    40 { $output = 'Interactive UNIX'; break; }
+                    41 { $output = 'BSD UNIX'; break; }
+                    42 { $output = 'FreeBSD'; break; }
+                    43 { $output = 'NetBSD'; break; }
+                    44 { $output = 'GNU Hurd'; break; }
+                    45 { $output = 'OS9'; break; }
+                    46 { $output = 'Mach Kernel'; break; }
+                    47 { $output = 'Inferno'; break; }
+                    48 { $output = 'QNX'; break; }
+                    49 { $output = 'EPOC'; break; }
+                    50 { $output = 'IxWorks'; break; }
+                    51 { $output = 'VxWorks'; break; }
+                    52 { $output = 'MiNT'; break; }
+                    53 { $output = 'BeOS'; break; }
+                    54 { $output = 'HP MPE'; break; }
+                    55 { $output = 'NextStep'; break; }
+                    56 { $output = 'PalmPilot'; break; }
+                    57 { $output = 'Rhapsody'; break; }
+                    58 { $output = 'Windows 2000'; break; }
+                    59 { $output = 'Dedicated'; break; }
+                    60 { $output = 'OS/390'; break; }
+                    61 { $output = 'VSE'; break; }
+                    62 { $output = 'TPF'; break; }
+                }
+                break; 
+            }
+            'PCSystemType' {
+                switch ($Value) {
+                    0 { $output = 'Unspecified'; break; }
+                    1 { $output = 'Desktop'; break; }
+                    2 { $output = 'Mobile'; break; }
+                    3 { $output = 'Workstation'; break; }
+                    4 { $output = 'Enterprise Server'; break; }
+                    5 { $output = 'SOHO Server'; break; }
+                    6 { $output = 'Appliance PC'; break; }
+                    7 { $output = 'Performance Server'; break; }
+                    8 { $output = 'Maximum'; break; }
+                }
+                break;
+            }
+            'ProductType' {
+                switch ($Value) {
+                    1 { $output = 'Workstation'; break; }
+                    2 { $output = 'Domain Controller'; break; }
+                    3 { $output = 'Server'; break; }
+                }
+                break;
+            }
+            'ResetCapability' {
+                switch ($Value) {
+                    1 { $output = 'Other'; break; }
+                    2 { $output = 'Unknown'; break; }
+                    3 { $output = 'Disabled'; break; }
+                    4 { $output = 'Enabled'; break; }
+                    5 { $output = 'Not implemented'; break; }
+                }
+                break;
+            }
+            'SuiteMask' {
+                $vlist = @{1 = 'Small Business'; 2 = 'Enterprise'; 4 = 'BackOffice'; 8 = 'Communications'; 16 = 'Terminal Services'; 32 = 'Small Business Restricted'; 64 = 'Embedded Edition'; 128 = 'Datacenter Edition'; 256 = 'Single User'; 512 = 'Home Edition'; 1024 = 'Web Server Edition'}
+                $output = ($vlist.Keys | where {$_ -band $Value} | foreach {$vlist.Item($_)}) -join ', '
+                break;
+            }
+            'MaxClockSpeed' {
+                $output = "$([math]::Round($Value/1024,2))"+' Ghz'
+                break;
+            }
+            'ThermalState' {
+                switch ($Value) {
+                    1 { $output = 'Other'; break; }
+                    2 { $output = 'Unknown'; break; }
+                    3 { $output = 'Safe'; break; }
+                    4 { $output = 'Warning'; break; }
+                    5 { $output = 'Critical'; break; }
+                    6 { $output = 'Non-recoverable'; break; }
+                }
+                break;
+            }
+            'WakeUpType' {
+                switch ($Value) {
+                    0 { $output = 'Reserved'; break; }
+                    1 { $output = 'Other'; break; }
+                    2 { $output = 'Unknown'; break; }
+                    3 { $output = 'APM Timer'; break; }
+                    4 { $output = 'Modem Ring'; break; }
+                    5 { $output = 'LAN Remote'; break; }
+                    6 { $output = 'Power Switch'; break; }
+                    7 { $output = 'PCI PME'; break; }
+                }
+                break;
+            }
+            default {
+                $output = $Value
+                break;
+            }
+        }
+    }
+    Write-Output $output
+}
+
+function Get-SkWmiPropTable1 {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ComputerName,
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $WmiClass,
+        [parameter(Mandatory=$False)]
+        [string[]] $Columns,
+        [parameter(Mandatory=$False)]
+        [string] $SortField = ""
+    )
+    $rowcount = 0
+    $output = "<table id=table1>"
+    try {
+        $props = Get-WmiObject -Class $WmiClass -ComputerName $SearchValue -ErrorAction SilentlyContinue
+        if ($SortField -ne "") {
+            $props = $props | Sort-Object $SortField
+        }
+        if ($Columns.Count -gt 0) {
+            $props = $props | Select $Columns
+        }
+        $cols = $props[0].psobject.Properties.Name
+        $colcount = $cols.Count
+        $output += "<tr>"
+        $output += $cols | %{ "<th>$_</th>" }
+        $output += "</tr>"
+        foreach ($prop in $props) {
+            $output += "<tr>"
+            $cindex = 0
+            foreach ($p in $prop.psobject.Properties) {
+                $pn  = $p.Name
+                $pv  = $p.Value
+                $pvx = Get-SkWmiValue -PropName $pn -Value $pv 
+                if ($cindex -gt 0) {
+                    $output += "<td style=`"text-align:center`">$pvx</td>"
+                }
+                else {
+                    $output += "<td>$pvx</td>"
+                }
+                $cindex++
+            }
+            $output += "</tr>"
+            $rowcount++
+        }
+        $output += "<tr><td colspan=$colcount class=lastrow>$rowcount items</td></tr>"
+    }
+    catch {
+        $output += "<tr><td>Error: $($Error[0].Exception.Message)</td></tr>"
+    }
+    finally {
+        $output += "</table>"
+        Write-Output $output
+    }
+}
+
+function Get-SkWmiPropTable2 {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ComputerName,
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $WmiClass
+    )
+    $output = "<table id=table2>"
+    try {
+        $props = Get-WmiObject -Class $WmiClass -ComputerName $ComputerName -ErrorAction SilentlyContinue
+        foreach ($p in $props.Properties) {
+            $pn = $p.Name
+            $pv = $p.Value
+            $pvx = Get-SkWmiValue -PropName $pn -Value $pv 
+            $output += "<tr><td class=`"t2td1`">$pn</td><td class=`"t2td2`">$pvx</td></tr>"
+        }
+    }
+    catch {
+        $output += "<tr><td>Error: $($Error[0].Exception.Message)</td></tr>"
+    }
+    finally {
+        $output += "</table>"
+        Write-Output $output
+    }
+}
+
+# https://gallery.technet.microsoft.com/scriptcenter/0e43993a-895a-4afe-a2b2-045a5146048a
+function Get-LoggedOnUser ($ComputerName) { 
+    try {
+        $regexa = '.+Domain="(.+)",Name="(.+)"$' 
+        $regexd = '.+LogonId="(\d+)"$'
+        $logontype = @{ 
+            "0"="Local System" 
+            "2"="Interactive" #(Local logon) 
+            "3"="Network" # (Remote logon) 
+            "4"="Batch" # (Scheduled task) 
+            "5"="Service" # (Service account logon) 
+            "7"="Unlock" #(Screen saver) 
+            "8"="NetworkCleartext" # (Cleartext network logon) 
+            "9"="NewCredentials" #(RunAs using alternate credentials) 
+            "10"="RemoteInteractive" #(RDP\TS\RemoteAssistance) 
+            "11"="CachedInteractive" #(Local w\cached credentials) 
+        }
+        $logon_sessions = @(Get-WmiObject Win32_LogonSession -ComputerName $ComputerName -ErrorAction SilentlyContinue) 
+        $logon_users = @(Get-WmiObject Win32_LoggedOnUser -ComputerName $ComputerName -ErrorAction SilentlyContinue) 
+        $session_user = @{}
+        $logon_users |% { 
+            $_.antecedent -match $regexa > $nul 
+            $username = $matches[1] + "\" + $matches[2] 
+            $_.dependent -match $regexd > $nul 
+            $session = $matches[1] 
+            $session_user[$session] += $username 
+        }
+        $logon_sessions | ForEach-Object { 
+            $starttime = [Management.ManagementDateTimeConverter]::ToDateTime($_.StartTime)
+            $loggedonuser = New-Object -TypeName psobject 
+            $loggedonuser | Add-Member -MemberType NoteProperty -Name "Session" -Value $_.logonid 
+            $loggedonuser | Add-Member -MemberType NoteProperty -Name "User" -Value $session_user[$_.logonid] 
+            $loggedonuser | Add-Member -MemberType NoteProperty -Name "Type" -Value $logontype[$_.logontype.ToString()] 
+            $loggedonuser | Add-Member -MemberType NoteProperty -Name "Auth" -Value $_.authenticationpackage 
+            $loggedonuser | Add-Member -MemberType NoteProperty -Name "StartTime" -Value $starttime 
+            $loggedonuser 
+        }
+    }
+    catch {}
+}

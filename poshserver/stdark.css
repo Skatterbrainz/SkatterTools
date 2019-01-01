@@ -141,6 +141,14 @@ h1,h2,h3 {
 
 #table2 tr {background-color: #343e4f; color:#fff;}
 
+.t2td1 {
+    width: 200px;
+}
+
+.t2td2 {
+    background-color:#303030;
+}
+
 #table3 {
     border: 0;
     width: 100%;
