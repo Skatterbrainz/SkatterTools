@@ -1,5 +1,5 @@
 ﻿SELECT 
-	dbo.v_R_User.User_Name0 as UserName,
+	dbo.v_R_User.User_Name0 as [UserName],
     dbo.v_R_User.Unique_User_Name0 AS UserDNSName, 
     dbo.v_R_User.Full_User_Name0 AS FullName, 
     dbo.v_R_User.Windows_NT_Domain0 AS UserDomain, 
