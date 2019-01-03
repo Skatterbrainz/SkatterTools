@@ -1,4 +1,4 @@
-﻿$Script:SearchField = Get-PageParam -TagName 'f' -Default ""
+﻿$Script:SearchField = Get-PageParam -TagName 'f' -Default "CollectionName"
 $Script:SearchValue = Get-PageParam -TagName 'v' -Default ""
 $Script:SearchType  = Get-PageParam -TagName 'x' -Default 'equals'
 $Script:SortField   = Get-PageParam -TagName 's' -Default "CollectionName"
@@ -6,19 +6,28 @@ $Script:SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
 $Script:TabSelected = Get-PageParam -TagName 'tab' -Default 'General'
 $Script:Detailed    = Get-PageParam -TagName 'zz' -Default ""
 $Script:CustomName  = Get-PageParam -TagName 'n' -Default ""
-$CollectionType = Get-PageParam -TagName 't' -Default '2'
+$ScriptCollectionType = Get-PageParam -TagName 't' -Default ""
 $Script:IsFiltered  = $False
+
+if ([string]::IsNullOrEmpty($Script:CustomName)) {
+    $collName = Get-SkCmCollectionName -CollectionID $Script:SearchValue
+}
+else {
+    $collName = $Script:CustomName
+}
 
 if ($CollectionType -eq '2') {
     $Ctype = "Device"
     $ResType = 5
+    $CollType = 2
 }
 else {
     $Ctype = "User"
     $ResType = 4
+    $CollType = 1
 }
-$Script:PageTitle   = "CM Collection: $CustomName"
-$Script:PageCaption = "CM Collection: $CustomName"
+$Script:PageTitle   = "CM Collection: $collName"
+$Script:PageCaption = "CM Collection: $collName"
 $content     = ""
 $tabset      = ""
 if ($SkNotesEnabled -eq "true") {
@@ -30,32 +39,28 @@ else {
 
 switch ($Script:TabSelected) {
     'General' {
+        $xxx = "Collection Type: $CollType"
         $content = Get-SkQueryTable2 -QueryFile "cmcollection.sql" -PageLink "cmcollection.ps1" -Columns ('CollectionName','CollectionID','Comment','Members','Type','Variables','LimitedTo')
         break;
     }
     'Members' {
-        $content = Get-SkQueryTable -QueryFile "cmcollectionmembers.sql" -PageLink "cmcollection.ps1" -Columns ('Name','ResourceID','ResourceType','Domain','SiteCode','RuleType') -Sorting "Name"
-        break;
-    }
-    'DirectRules' {
-        if ($SearchValue -notlike 'SMS*') {
-            $content = Get-SkQueryTable -QueryFile "cmcollectionmembers.sql" -PageLink "cmcollection.ps1" -Columns ('Name','ResourceID','ResourceType','Domain','SiteCode','RuleType')
+        $xxx = "Collection Type: $CollType"
+        if ($CollType -eq 2) {
+            $qfile = "cmdevicecollectionmembers.sql"
         }
         else {
-            $content = "<table id=table2><tr><td style=`"height:200px;text-align:center`">Direct Membership Rules do not apply</td></tr></table>"
+            $qfile = "cmusercollectionmembers.sql"
         }
+        $content = Get-SkQueryTable3 -QueryFile $qfile -PageLink "cmcollection.ps1" -NoUnFilter -NoCaption
         break;
     }
     'QueryRules' {
-        $content = "<table id=table1>"
-        $content += "<tr><td style=`"height:150px;text-align:center`">Still in Development. Check back soon.</td></tr>"
-        $content += "</table>"
+        $xxx = "Collection Type: $CollType"
+        $content = Get-SkQueryTable3 -QueryFile "cmcollectionqueryrules.sql" -PageLink "cmcollection.ps1" -Columns ('RuleName','QueryID','QueryExpression','LimitToCollectionID') -NoUnFilter -NoCaption -Sorting "RuleName"
         break;
     }
     'Variables' {
-        $content = "<table id=table1>"
-        $content += "<tr><td style=`"height:150px;text-align:center`">Still in Development. Check back soon.</td></tr>"
-        $content += "</table>"
+        $content = Get-SkQueryTable3 -QueryFile "cmcollectionvariables.sql" -PageLink "cmcollection.ps1" -Columns ('Name','Value','IsMasked')
         break;
     }
     'Tools' {

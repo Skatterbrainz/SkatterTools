@@ -15,8 +15,36 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = "<table id=table2><tr><td style=`"height:200px;text-align:center`">"
-$content += "Coming soon</td></tr></table>"
+try {
+    $query = "SELECT DISTINCT 
+	    dbo.v_GS_ADD_REMOVE_PROGRAMS.DisplayName0, 
+	    dbo.v_GS_ADD_REMOVE_PROGRAMS.Publisher0, 
+	    dbo.v_GS_ADD_REMOVE_PROGRAMS.Version0,
+	    COUNT(*) AS Installs 
+    FROM 
+	    dbo.v_R_System INNER JOIN 
+	    dbo.v_GS_ADD_REMOVE_PROGRAMS ON 
+	    dbo.v_R_System.ResourceID = dbo.v_GS_ADD_REMOVE_PROGRAMS.ResourceID 
+    GROUP BY 
+	    DisplayName0,
+	    Publisher0,
+	    Version0"
+    $result = @(Invoke-DbaQuery -SqlInstance $CmDbHost -Database "CM_$CmSiteCode" -Query $query -ErrorAction SilentlyContinue)
+    if ($result.Count -gt 0) {
+        $content = "<table id=table1>"
+        foreach ($rs in $result) {
+            $pn = $rs.ProductName
+            $pv = $rs.Version
+            $vn = $rs.Publisher
+            $qx = $rs.Installs
+            $content += "<tr><td>$pn</td><td>$pv</td><td>$vn</td><td>$qx</td></tr>"
+        }
+        $content += "</table>"
+    }
+}
+catch {
+    $content = "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
+}
 
 @"
 <html>

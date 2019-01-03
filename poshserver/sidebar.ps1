@@ -55,6 +55,7 @@ if ($CmEnabled -ne 'false') {
 		<li class="limenu"><a href="cmcompstat.ps1" target="main" title="Component Status">Site Components</a></li>
 		<li class="limenu"><a href="dbstats.ps1" target="main" title="ConfigMgr SQL Status">SQL Status</a></li>
         <li class="limenu"><a href="dbrecovery.ps1" target="main" title="SQL Server Recovery Models">DB Recovery</a></li>
+        <li class="limenu"><a href="skreports.ps1" target="main" title="Custom Reports">Custom Reports</a></li>
 	</ul>
 </div>
 
@@ -73,7 +74,7 @@ if ($CmEnabled -ne 'false') {
         <li class="limenu"><a href="cmsumtasks.ps1" target="main" title="Summary Tasks">Summary Tasks</a></li>
         <li class="limenu"><a href="cmcerts.ps1" target="main" title="Certificates">Certificates</a></li>
 		<li class="limenu">Client Settings</li>
-		<li class="limenu">Maintenance Tasks</li>
+		<li class="limenu"><a href="cmtasks.ps1" target="main" title="Maintenance Tasks">Maintenance Tasks</a></li>
 		<li class="limenu">Accounts</li>
 		<li class="limenu">Roles</li>
 	</ul>

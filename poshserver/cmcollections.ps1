@@ -8,7 +8,6 @@ $Script:Detailed    = Get-PageParam -TagName 'zz' -Default ""
 $Script:CustomName  = ""
 $Script:CollectionType = Get-PageParam -TagName 't' -Default '2'
 $Script:IsFiltered  = $False
-$Script:PageFile    = "cmdevices.ps1"
 
 if ($CollectionType -eq '2') {
     $Ctype = "Device"
@@ -36,9 +35,9 @@ else {
     }
 }
 
-$content = Get-SkQueryTable -QueryFile $qfname -PageLink "cmcollections.ps1" -Columns ('CollectionID','CollectionName','Comment','Members','Type','Variables','LimitedTo')
+$content = Get-SkQueryTable3 -QueryFile $qfname -PageLink "cmcollections.ps1" -NoUnFilter -NoCaption
 $tabset  = New-MenuTabSet -BaseLink "cmcollections.ps1?t=$CollectionType&f=collectionname&x=begins&v=" -DefaultID $TabSelected
-#$content += Write-DetailInfo -PageRef "$Script:PageFile" -Mode $Detailed
+$content += Write-DetailInfo -PageRef "cmcollections.ps1" -Mode $Detailed
 
 @"
 <html>

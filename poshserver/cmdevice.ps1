@@ -28,75 +28,7 @@ $tabset = New-MenuTabSet2 -MenuTabs $tabs -BaseLink "cmdevice.ps1"
 switch ($TabSelected) {
     'General' {
         try {
-            $query = 'SELECT
-	            ResourceID,
-	            [Name],
-	            Manufacturer,
-	            Model,
-	            SerialNumber,
-	            OperatingSystem,
-	            OSBuild,
-	            ClientVersion,
-	            LastHwScan,
-	            LastDDR,
-	            LastPolicyRequest,
-	            ADSite 
-            FROM (
-            SELECT 
-	            dbo.v_R_System.ResourceID, 
-	            dbo.v_R_System.Name0 as [Name], 
-	            dbo.v_GS_COMPUTER_SYSTEM.Manufacturer0 as Manufacturer, 
-	            dbo.v_GS_COMPUTER_SYSTEM.Model0 as Model, 
-	            dbo.v_GS_SYSTEM_ENCLOSURE.SerialNumber0 as SerialNumber, 
-	            dbo.vWorkstationStatus.ClientVersion, 
-	            dbo.vWorkstationStatus.LastHardwareScan as LastHwScan, 
-	            dbo.vWorkstationStatus.LastPolicyRequest, 
-	            dbo.vWorkstationStatus.LastDDR,
-	            dbo.v_R_System.AD_Site_Name0 as ADSite, 
-	            dbo.v_GS_OPERATING_SYSTEM.Caption0 as OperatingSystem, 
-	            dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 as OSBuild
-            FROM 
-	            dbo.v_R_System INNER JOIN
-                dbo.v_GS_COMPUTER_SYSTEM ON 
-	            dbo.v_R_System.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
-                dbo.v_GS_SYSTEM_ENCLOSURE ON 
-	            dbo.v_R_System.ResourceID = dbo.v_GS_SYSTEM_ENCLOSURE.ResourceID INNER JOIN
-                dbo.vWorkstationStatus ON 
-	            dbo.v_R_System.ResourceID = dbo.vWorkstationStatus.ResourceID INNER JOIN
-                dbo.v_GS_OPERATING_SYSTEM ON 
-	            dbo.v_R_System.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
-            ) AS T1 
-            WHERE ('+$SearchField+' = '''+$SearchValue+''')'
-            $xxx = "query: $query"
-            $connection = New-Object -ComObject "ADODB.Connection"
-            $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-            $connection.Open($connString);
-            $xxx += "<br/>connection opened"
-            $IsOpen = $True
-            $rs = New-Object -ComObject "ADODB.RecordSet"
-            $rs.Open($query, $connection)
-            if ($rs.BOF -and $rs.EOF) {
-                $content = "<table id=table2><tr><td style=`"height:150px;text-align:center`">No matching record found</td></tr></table>"
-            }
-            else {
-                $xxx += "<br/>recordset returned data"
-                $colcount = $rs.Fields.Count
-                $rs.MoveFirst()
-                $content = '<table id=table2><tr>'
-                for ($i = 0; $i -lt $colcount; $i++) {
-                    $fn = $rs.Fields($i).Name
-                    $fv = $rs.Fields($i).Value
-                    if (![string]::IsNullOrEmpty($fv)) {
-                        $fvx = '<a href="cmdevices.ps1?f='+$fn+'&v='+$fv+'" title="Filter">'+$fv+'</a>'
-                    }
-                    else {
-                        $fvx = ""
-                    }
-                    $content += '<tr><td style="width:200px;background-color:#435168">'+$fn+'</td>'
-                    $content += '<td>'+$fvx+'</td></tr>'        
-                }
-                $content += '</table>'
-            }
+            $content = Get-SkQueryTable2 -QueryFile "cmdevice.sql" -PageLink "cmdevice.ps1"
         }
         catch {
             $content += "Error: $($Error[0].Exception.Message)"
@@ -112,7 +44,6 @@ switch ($TabSelected) {
         break;
     }
     'Collections' {
-
         $xxx = "query defined"
         try {
             $query = 'SELECT DISTINCT 
@@ -193,6 +124,15 @@ switch ($TabSelected) {
         $content += "</select> <input type='submit' name='ok' id='ok' value='Add' class='button1' />"
         $content += " (direct membership collections only)</td></tr></table></form>"
 
+        break;
+    }
+    'Storage' {
+        $content = Get-SkQueryTable3 -QueryFile "cmdevicedrives.sql" -PageLink "cmdevice.ps1" -Columns ('Drive','DiskType','Description','DiskSize','Used','FreeSpace','PCT')
+        break;
+    }
+    'Software' {
+        $SearchField = 'Name0'
+        $content = Get-SkQueryTable3 -QueryFile "cmdeviceapps.sql" -PageLink "cmdevice.ps1" -Columns ('ProductName','Publisher','Version') -Sorting "ProductName"
         break;
     }
     'Notes' {
