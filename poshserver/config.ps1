@@ -42,7 +42,7 @@ $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
 # SkatterTools Site Configuration
 
-$Global:SkToolsVersion = "1901.02.01"
+$Global:SkToolsVersion = "1901.03.01"
 
 $configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
 if (!(Test-Path $configFile)) {
@@ -516,7 +516,7 @@ function Get-SKDbCellTextAlign {
         [string] $ColumnName
     )
     $output = ""
-    $centerlist = ('LimitedTo','Members','Variables','Type','PackageID','LastContacted',
+    $centerlist = ('LimitedTo','Members','Variables','Type','PackageID','LastContacted','MessageID','MessageType','Severity',
         'SiteCode','SiteSystem','TimeReported','Enabled','BeginTime','LatestBeginTime','BackupLocation','DeleteOlderThan',
         'PackageType','PkgType','SiteStatus','Status','State','Info','Warning','Error')
     $rightlist = ('DiskSize','FreeSpace','Used','PCT','Installs','Clients','QTY')

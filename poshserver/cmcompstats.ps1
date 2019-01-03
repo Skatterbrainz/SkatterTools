@@ -1,8 +1,8 @@
 ﻿$Script:SearchField = Get-PageParam -TagName 'f' -Default "Component"
 $Script:SearchValue = Get-PageParam -TagName 'v' -Default ""
 $Script:SearchType  = Get-PageParam -TagName 'x' -Default 'equals'
-$Script:SortField   = Get-PageParam -TagName 's' -Default 'Component'
-$Script:SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
+$Script:SortField   = Get-PageParam -TagName 's' -Default 'RecordID'
+$Script:SortOrder   = Get-PageParam -TagName 'so' -Default 'DESC'
 $Script:TabSelected = Get-PageParam -TagName 'tab' -Default ''
 $Script:Detailed    = Get-PageParam -TagName 'zz' -Default ""
 $Script:IsFiltered  = $False
@@ -14,7 +14,7 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmcompstat.sql" -PageLink "cmcompstats.ps1" -Columns ('RecordID','MachineName','ModuleName','Win32Error','Time','SiteCode','TopLevelSiteCode','ProcessID','ThreadID','Severity','MessageID','MessageType','ReportFunction','SuccessfulTransaction','Transaction','PerClient') -NoUnFilter
+$content = Get-SkQueryTable3 -QueryFile "cmcompstat.sql" -PageLink "cmcompstats.ps1" -Columns ('RecordID','MessageID','MessageType','Severity','MachineName','ModuleName','Win32Error','Time','SiteCode','TopLevelSiteCode','ProcessID','ThreadID','ReportFunction','SuccessfulTransaction','Transaction','PerClient') -NoUnFilter -NoCaption
 
 $content += Write-DetailInfo -PageRef "cmcompstats.ps1" -Mode $Detailed
 
