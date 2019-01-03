@@ -1,4 +1,4 @@
-SELECT DISTINCT
+﻿SELECT DISTINCT
 	COALESCE(AD_Site_Name0, 'Default') AS ADSiteName,
 	COUNT(*) AS Computers
 FROM
