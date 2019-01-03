@@ -1,7 +1,7 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 1812.31.01
+## Latest: 1901.02.01
 
 ## Overview
 
@@ -35,6 +35,15 @@ Skattered tools from Skatterbrainz
    * ConfigMgr 1806, 1810, 1811
 
 ## Release History
+   ### 1901.03.01
+   * Maintenance Tasks
+   * Custom Reports (19 uploaded so far)
+   * Site Component Status detail view
+   * SQL DB Recovery Status
+   * Collection Query Rules
+   * Collection Variables
+   * Bug fixes
+   
    ### 1812.31.01
    * Updated AD computers
    * Updated Search processing
