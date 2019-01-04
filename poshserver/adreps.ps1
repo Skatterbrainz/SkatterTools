@@ -4,6 +4,7 @@ $PageCaption = "AD Reports"
 $users = Get-ADsUsers
 $comps = Get-ADsComputers -SearchType All
 $noexp = Get-ADsUserPwdNoExpire
+$exps  = Get-ADsUserPwdExpirations | ? {$_.Expires -lt 14} | ? {$_.UserName -ne 'krbtgt'}
 
 $uDates = $users | Select -ExpandProperty LastLogon
 $mDates = $comps | Select -ExpandProperty LastLogon
@@ -21,11 +22,13 @@ $content += "<td style=`"width:50%; vertical-align:top`">"
         $content += "<tr>"
         $num = ($uDates | %{(New-TimeSpan -Start $_ -End $(Get-Date)).Days} | ?{$_ -gt $dx}).Count
         $content += "<td style=`"width:100px;text-align:right`">$num</td>"
-        $content += "<td><a href=`"adrep.ps1?d=$dx`">$dx days</a></td>"
+        $content += "<td><a href=`"adrep.ps1?a=user&d=$dx`">$dx days</a></td>"
         $content += "</tr>"
     }
     $content += "<tr><td style=`"width:100px;text-align:right`">"
-    $content += "<a href=`"aduserpwdexp.ps1`">$($noexp.Count)</a></td><td>Password never expires</td></tr>"
+    $content += "<a href=`"aduserpwdexp.ps1?p=0`">$($noexp.Count)</a></td><td>Password never expires</td></tr>"
+    $content += "<tr><td style=`"width:100px;text-align:right`">"
+    $content += "<a href=`"aduserpwdexp.ps1?p=1`">$($exps.Count)</a></td><td>Password expires within 14 days</td></tr>"
     $content += "</table>"
 
 $content += "</td><td style=`"width:50%;vertical-align:top`">"
@@ -38,7 +41,7 @@ $content += "</td><td style=`"width:50%;vertical-align:top`">"
         $content += "<tr>"
         $num = ($mDates | %{(New-TimeSpan -Start $_ -End $(Get-Date)).Days} | ?{$_ -gt $dx}).Count
         $content += "<td style=`"width:100px;text-align:right`">$num</td>"
-        $content += "<td>$dx days</td>"
+        $content += "<td><a href=`"adrep.ps1?a=computer&d=$dx`">$dx days</a></td>"
         $content += "</tr>"
     }
     $content += "</table>"

@@ -40,9 +40,8 @@ $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
 # --------------------------------------------------
 if (!$Global:SkLoaded) {
-    Write-Host "Loading SkatterTools junk. Please wait..." -ForegroundColor Green
-
-$Global:SkToolsVersion = "1901.03.03"
+    $Global:SkToolsVersion = "1901.04.03"
+    Write-Host "Loading a bunch of SkatterTools $Global:SkToolsVersion junk. Please wait..." -ForegroundColor Green
 
 $configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
 if (!(Test-Path $configFile)) {
@@ -562,17 +561,26 @@ function Get-ADsComputer {
         [string] $Name 
     )
     $as = [adsisearcher]"(&(objectCategory=computer)(name=$Name))"
+    [void]$as.PropertiesToLoad.Add('cn')
+    [void]$as.PropertiesToLoad.Add('distinguishedName')
+    [void]$as.PropertiesToLoad.Add('lastlogonTimeStamp')
+    [void]$as.PropertiesToLoad.Add('whenCreated')
+    [void]$as.PropertiesToLoad.Add('dnsHostName')
+    [void]$as.PropertiesToLoad.Add('operatingSystem')
+    [void]$as.PropertiesToLoad.Add('servicePrincipalName')
     $comp = $as.FindOne()
     $adprops = $comp.Properties
     $columns = $adprops.PropertyNames
-
+    [datetime]$created = ($comp.Properties.item('whenCreated') | Out-String).Trim()
+    $llogon = ([datetime]::FromFiletime(($comp.properties.item('lastlogonTimeStamp') | Out-String).Trim())) 
     $props = [ordered]@{
-        Name     = $($adprops.cn | Out-String).Trim()
-        Fullname = $($adprops.dnshostname | Out-String).Trim()
-        Created  = [datetime]($adprops.whencreated | Out-String)
-        DN       = $($adprops.distinguishedname | Out-String).Trim()
-        SPNlist  = $($adprops.serviceprincipalname)
-        OS       = $($adprops.operatingsystem | Out-String).Trim()
+        Name      = $($adprops.cn | Out-String).Trim()
+        Fullname  = $($adprops.dnshostname | Out-String).Trim()
+        Created   = [datetime]($adprops.whencreated | Out-String)
+        DN        = $($adprops.distinguishedname | Out-String).Trim()
+        SPNlist   = $($adprops.serviceprincipalname)
+        OS        = $($adprops.operatingsystem | Out-String).Trim()
+        LastLogon = $llogon
     }
     New-Object -TypeName PSObject -Property $props
 }
@@ -701,17 +709,57 @@ function Get-ADsServicePrincipalNames {
     }
 }
 
+function Get-ADsUserPwdExpirations {
+    param ()
+    try {
+        $noexp = Get-ADsUserPwdNoExpire | Select -ExpandProperty UserName
+        $domainname = $env:USERDOMAIN
+        [adsi]$domain = "WinNT://$domainname"
+        $mpwa = $($domain.MaxPasswordAge) / 86400
+        $as = [adsisearcher]"(objectCategory=User)"
+        [void]$as.PropertiesToLoad.Add('cn')
+        [void]$as.PropertiesToLoad.Add('sAMAccountName')
+        [void]$as.PropertiesToLoad.Add('lastlogonTimeStamp')
+        [void]$as.PropertiesToLoad.Add('pwdLastSet')
+        $as.PageSize = 1000
+        $results = $as.FindAll()
+        foreach ($item in $results) {
+            $pwdset = ([datetime]::FromFiletime(($item.properties.item('pwdLastSet') | Out-String).Trim()))
+            $pwdage = (New-TimeSpan -Start $pwdset -End (Get-Date)).Days
+            $uname = $($item.properties.item('samaccountname') | Out-String).Trim()
+            if ($uname -in $noexp) {
+                $exp = 'Never'
+            }
+            else {
+                $exp = $mpwa - $pwdage
+            }
+            $props = [ordered]@{
+                UserName   = $uname
+                LastPwdSet = $pwdset
+                PwdAge     = $pwdage
+                MaxPwAge   = $mpwa
+                Expires    = $exp
+            }
+            New-Object PSObject -Property $props
+        }
+    }
+    catch {}
+}
+
 function Get-ADsUserPwdNoExpire {
     param ()
     # https://richardspowershellblog.wordpress.com/2012/02/08/finding-user-accounts-with-passwords-set-to-never-expire/
-    $root = [ADSI]""            
-    $search = [adsisearcher]$root            
-    $search.Filter = "(&(objectclass=user)(objectcategory=user)(useraccountcontrol:1.2.840.113556.1.4.803:=65536))"            
-    $search.SizeLimit = 3000            
-    $results = $search.FindAll()            
-    foreach ($result in $results){            
-        $result.Properties |             
-        Select @{N="Name"; E={$_.name}}, @{N="DistinguishedName"; E={$_.distinguishedname}}            
+    $root = [ADSI]""
+    $search = [adsisearcher]$root
+    [void]$search.PropertiesToLoad.Add('sAMAccountName')
+    [void]$search.PropertiesToLoad.Add('distinguishedname')
+    [void]$search.PropertiesToLoad.Add('name')
+    $search.Filter = "(&(objectclass=user)(objectcategory=user)(useraccountcontrol:1.2.840.113556.1.4.803:=65536))"
+    $search.SizeLimit = 3000
+    $results = $search.FindAll()
+    foreach ($result in $results){
+        $result.Properties |
+        Select @{N="Name"; E={$_.name}},@{N="UserName"; E={$_.samaccountname}},@{N="DistinguishedName"; E={$_.distinguishedname}}
     }
 }
 
@@ -795,6 +843,34 @@ function Get-AdOuObjects {
             New-Object PSObject -Property $output
         }
     }
+}
+
+function Get-AdValueLink {
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $PropertyName,
+        [parameter(Mandatory=$False)]
+        [string] $Value = ""
+    )
+    $output = ""
+    if (![string]::IsNullOrEmpty($Value)) {
+        switch ($PropertyName) {
+            'ComputerName' {
+                $output = "<a href=`"adcomputer.ps1?f=name&v=$Value`" title=`"Details for $Value`">$Value</a>"
+                break;
+            }
+            'UserName' {
+                $output = "<a href=`"aduser.ps1?f=username&v=$Value`" title=`"Details for $Value`">$Value</a>"
+                break;
+            }
+            default {
+                $output = $Value
+                break;
+            }
+        } # switch
+    }
+    Write-Output $output
 }
 
 #---------------------------------------------------------------------
@@ -1701,6 +1777,18 @@ function Get-LoggedOnUser ($ComputerName) {
         }
     }
     catch {}
+}
+
+function Get-WmiAccessError {
+    param ()
+    $output = "<table id=table2><tr><td style=`"height:150px;text-align:center`">"
+    $output += "Machine is offline or inaccessible. Troubleshooting tips:"
+    $output += "<ul><li>Confirm machine is actually online</li>"
+    $output += "<li>Verify DNS IP mapping</li>"
+    $output += "<li>Check firewall service and configuration</li>"
+    $output += "<li>Verify WMI services are running</li></ul>"
+    $output += "<br/>Error: $($Error[0].Exception.Message)</td></tr></table>"
+    Write-Output $output 
 }
 
     Write-Host "SkatterTools $Global:SkToolsVersion is loaded and ready. You should get loaded too." -ForegroundColor Green

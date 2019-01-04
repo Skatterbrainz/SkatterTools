@@ -33,8 +33,9 @@ switch ($TabSelected) {
         $content += "<tr><td style=`"width:200px`">Full Name</td><td>$($cdata.FullName)</td></tr>"
         $content += "<tr><td style=`"width:200px`">LDAP Path</td><td>$($cdata.DN)</td></tr>"
         $content += "<tr><td style=`"width:200px`">OS</td><td>$($cdata.OS)</td></tr>"
-        if ($cdata.SPN.Count -gt 0) {
-            $spnlist = $cdata.SPN -join "</br>"
+        $content += "<tr><td style=`"width:200px`">Last Login</td><td>$($cdata.LastLogon)</td></tr>"
+        if ($cdata.SPNlist.Count -gt 0) {
+            $spnlist = $cdata.SPNlist -join "</br>"
             $content += "<tr><td style=`"width:200px`">SPNs</td>"
             $content += "<td>$spnlist</td></tr>"
         }
@@ -78,7 +79,9 @@ switch ($TabSelected) {
             $content += "</table>"
         }
         catch {
-            $content = "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
+            if ($Error[0].Exception.Message -like "Access is denied*") {
+                $content = Get-WmiAccessError
+            }
         }
         break;
     }
