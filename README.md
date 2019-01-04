@@ -1,7 +1,7 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 1901.03.01
+## Latest: 1901.04.03
 
 ## Overview
 
@@ -35,6 +35,10 @@ Skattered tools from Skatterbrainz
    * ConfigMgr 1806, 1810, 1811
 
 ## Release History
+   ### 1901.04.03
+   * So much is changing that I'm stopping the detailed version history for a while
+   * when the code is stable enough to call 'done' I will reset the history like how our news media resets public opinion
+   
    ### 1901.03.01
    * Maintenance Tasks
    * Custom Reports (19 uploaded so far)
