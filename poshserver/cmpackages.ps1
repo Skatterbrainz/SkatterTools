@@ -21,7 +21,7 @@ if ($Script:SearchValue -eq 'all') {
 }
 
 $xxx = "requesting query result"
-$content = Get-SkQueryTable3 -QueryFile "cmpackages.sql" -PageLink "cmpackages.ps1" -Columns ('PackageID','PkgName','PackageType','PkgType','Description','Version')
+$content = Get-SkQueryTableMultiple -QueryFile "cmpackages.sql" -PageLink "cmpackages.ps1" -Columns ('PackageID','PkgName','PackageType','PkgType','Description','Version')
 
 if ($Script:SearchField -eq 'PkgType') {
     $cap = Get-CmPackageTypeName -PkgType $Script:SearchValue

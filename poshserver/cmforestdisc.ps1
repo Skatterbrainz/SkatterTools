@@ -15,7 +15,7 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmforests.sql" -PageLink "cmforests.ps1" -Columns ('ForestID','SMSSiteCode','SMSSiteName','LastDiscoveryTime','LastDiscoveryStatus','LastPublishingTime','PublishingStatus','DiscoveryEnabled','PublishingEnabled')
+$content = Get-SkQueryTableMultiple -QueryFile "cmforests.sql" -PageLink "cmforests.ps1" -Columns ('ForestID','SMSSiteCode','SMSSiteName','LastDiscoveryTime','LastDiscoveryStatus','LastPublishingTime','PublishingStatus','DiscoveryEnabled','PublishingEnabled')
 
 #$tabset = New-MenuTabSet -BaseLink 'cmforestdisc.ps1' -DefaultID $TabSelected
 $content += Write-DetailInfo -PageRef "cmforestdisc.ps1" -Mode $Detailed

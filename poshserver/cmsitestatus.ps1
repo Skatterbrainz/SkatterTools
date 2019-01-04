@@ -14,7 +14,7 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmsitestatus.sql" -PageLink "cmsitestatus.ps1" -Columns ('SiteStatus','Role','SiteCode','SiteSystem','TimeReported')
+$content = Get-SkQueryTableMultiple -QueryFile "cmsitestatus.sql" -PageLink "cmsitestatus.ps1" -Columns ('SiteStatus','Role','SiteCode','SiteSystem','TimeReported')
 $content += Write-DetailInfo -PageRef "cmsitestatus.ps1" -Mode $Detailed
 
 @"

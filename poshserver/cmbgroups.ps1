@@ -15,7 +15,7 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmboundarygroups.sql" -PageLink "cmbgroups.ps1" -Columns ('BGName','GroupID','Description','Flags','DefaultSiteCode','CreatedOn','Boundaries','SiteSystems')
+$content = Get-SkQueryTableMultiple -QueryFile "cmboundarygroups.sql" -PageLink "cmbgroups.ps1" -Columns ('BGName','GroupID','Description','Flags','DefaultSiteCode','CreatedOn','Boundaries','SiteSystems')
 
 #$tabset = New-MenuTabSet -BaseLink 'cmbgroups.ps1?x=begins&f=bgname&v=' -DefaultID $Script:TabSelected
 $content += Write-DetailInfo -PageRef "cmgroups.ps1" -Mode $Detailed

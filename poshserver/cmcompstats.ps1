@@ -14,7 +14,7 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmcompstat.sql" -PageLink "cmcompstats.ps1" -Columns ('RecordID','MessageID','MessageType','Severity','MachineName','ModuleName','Win32Error','Time','SiteCode','TopLevelSiteCode','ProcessID','ThreadID','ReportFunction','SuccessfulTransaction','Transaction','PerClient') -NoUnFilter -NoCaption
+$content = Get-SkQueryTableMultiple -QueryFile "cmcompstat.sql" -PageLink "cmcompstats.ps1" -Columns ('RecordID','MessageID','MessageType','Severity','MachineName','ModuleName','Win32Error','Time','SiteCode','TopLevelSiteCode','ProcessID','ThreadID','ReportFunction','SuccessfulTransaction','Transaction','PerClient') -NoUnFilter -NoCaption
 
 $content += Write-DetailInfo -PageRef "cmcompstats.ps1" -Mode $Detailed
 

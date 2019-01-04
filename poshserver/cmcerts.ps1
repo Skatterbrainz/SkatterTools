@@ -15,7 +15,7 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmcerts.sql" -PageLink "cmcerts.ps1" -Columns ('ServerName','IssuedTo','CertType','KeyType','ValidFrom','ValidUntil','Approved','Blocked')
+$content = Get-SkQueryTableMultiple -QueryFile "cmcerts.sql" -PageLink "cmcerts.ps1" -Columns ('ServerName','IssuedTo','CertType','KeyType','ValidFrom','ValidUntil','Approved','Blocked')
 
 #$tabset = New-MenuTabSet -BaseLink 'cmcerts.ps1?x=begins&f=name&v=' -DefaultID $TabSelected
 #$content += Write-DetailInfo -PageRef "cmcerts.ps1" -Mode $Detailed

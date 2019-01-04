@@ -15,7 +15,7 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmtasks.sql" -PageLink "cmtasks.ps1" -NoUnFilter
+$content = Get-SkQueryTableMultiple -QueryFile "cmtasks.sql" -PageLink "cmtasks.ps1" -NoUnFilter
 
 #$tabset = New-MenuTabSet -BaseLink 'cmqueries.ps1?x=begins&f=name&v=' -DefaultID $TabSelected
 $content += Write-DetailInfo -PageRef "cmqueries.ps1" -Mode $Detailed

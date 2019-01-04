@@ -27,8 +27,8 @@ $STPageCaption = "About SkatterTools"
         </td>
         <td style='vertical-align:top;'>
             <table id=table2>
-                <tr><td>SkDBHost</td><td>$SkNotesDBHost</td></tr>
-                <tr><td>SkDBName</td><td>$SkDBDatabase</td></tr>
+                <tr><td>CM Collection Manage</td><td>$CmCollectionManage</td></tr>
+                <tr><td>AD Group Manage</td><td>$ADGroupManage</td></tr>
                 <tr><td>CustomConfig</td><td>$CustomConfig</td></tr>
                 <tr><td>Web Theme</td><td>$STTheme</td></tr>
                 <tr><td>Notes Enabled</td><td>$SkNotesEnable</td></tr>

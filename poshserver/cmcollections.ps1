@@ -35,7 +35,7 @@ else {
     }
 }
 
-$content = Get-SkQueryTable3 -QueryFile $qfname -PageLink "cmcollections.ps1" -NoUnFilter -NoCaption
+$content = Get-SkQueryTableMultiple -QueryFile $qfname -PageLink "cmcollections.ps1" -NoUnFilter -NoCaption
 $tabset  = New-MenuTabSet -BaseLink "cmcollections.ps1?t=$CollectionType&f=collectionname&x=begins&v=" -DefaultID $TabSelected
 $content += Write-DetailInfo -PageRef "cmcollections.ps1" -Mode $Detailed
 

@@ -15,12 +15,12 @@ $tabset  = ""
 switch ($Script:TabSelected) {
     'General' {
         $xxx = "queryfile: cmuser.sql"
-        $content = Get-SkQueryTable2 -QueryFile "cmuser.sql" -PageLink "cmuser.ps1" -Columns ('UserName','FullName','UserDomain','ResourceID','Department','Title','Email','UPN','UserDN','SID','Mgr')
+        $content = Get-SkQueryTableSingle -QueryFile "cmuser.sql" -PageLink "cmuser.ps1" -Columns ('UserName','FullName','UserDomain','ResourceID','Department','Title','Email','UPN','UserDN','SID','Mgr')
         break;
     }
     'Computers' {
         $xxx = "queryfile: cmuserdevices.sql"
-        $content = Get-SkQueryTable3 -QueryFile "cmuserdevices.sql" -PageLink "cmuser.ps1" -Columns ('ComputerName','ProfilePath','TimeStamp','ResourceID','ADSite') -NoUnFilter
+        $content = Get-SkQueryTableMultiple -QueryFile "cmuserdevices.sql" -PageLink "cmuser.ps1" -Columns ('ComputerName','ProfilePath','TimeStamp','ResourceID','ADSite') -NoUnFilter
         break;
     }
 } # switch

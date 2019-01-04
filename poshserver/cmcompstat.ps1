@@ -8,7 +8,7 @@ $Script:PageTitle   = "CM Site Components"
 $Script:PageCaption = "CM Site Components"
 $tabset = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmcomponentstatus.sql" -PageLink "cmcompstat.ps1" -Columns ('ComponentName','Status','State','LastContacted','Info','Warning','Error')
+$content = Get-SkQueryTableMultiple -QueryFile "cmcomponentstatus.sql" -PageLink "cmcompstat.ps1" -Columns ('ComponentName','Status','State','LastContacted','Info','Warning','Error')
 
 @"
 <html>

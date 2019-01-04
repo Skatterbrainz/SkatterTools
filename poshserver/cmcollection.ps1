@@ -40,7 +40,13 @@ else {
 switch ($Script:TabSelected) {
     'General' {
         $xxx = "Collection Type: $CollType"
-        $content = Get-SkQueryTable2 -QueryFile "cmcollection.sql" -PageLink "cmcollection.ps1" -Columns ('CollectionName','CollectionID','Comment','Members','Type','Variables','LimitedTo')
+        $params = @{
+            QueryFile = "cmcollection.sql"
+            PageLink  = "cmcollection.ps1"
+            Columns   = ('CollectionName','CollectionID','Comment','Members','Type','Variables','LimitedTo')
+        }
+        $content = Get-SkQueryTableSingle @params
+        #$content = Get-SkQueryTableSingle -QueryFile "cmcollection.sql" -PageLink "cmcollection.ps1" -Columns ('CollectionName','CollectionID','Comment','Members','Type','Variables','LimitedTo')
         break;
     }
     'Members' {
@@ -51,16 +57,16 @@ switch ($Script:TabSelected) {
         else {
             $qfile = "cmusercollectionmembers.sql"
         }
-        $content = Get-SkQueryTable3 -QueryFile $qfile -PageLink "cmcollection.ps1" -NoUnFilter -NoCaption
+        $content = Get-SkQueryTableMultiple -QueryFile $qfile -PageLink "cmcollection.ps1" -NoUnFilter -NoCaption
         break;
     }
     'QueryRules' {
         $xxx = "Collection Type: $CollType"
-        $content = Get-SkQueryTable3 -QueryFile "cmcollectionqueryrules.sql" -PageLink "cmcollection.ps1" -Columns ('RuleName','QueryID','QueryExpression','LimitToCollectionID') -NoUnFilter -NoCaption -Sorting "RuleName"
+        $content = Get-SkQueryTableMultiple -QueryFile "cmcollectionqueryrules.sql" -PageLink "cmcollection.ps1" -Columns ('RuleName','QueryID','QueryExpression','LimitToCollectionID') -NoUnFilter -NoCaption -Sorting "RuleName"
         break;
     }
     'Variables' {
-        $content = Get-SkQueryTable3 -QueryFile "cmcollectionvariables.sql" -PageLink "cmcollection.ps1" -Columns ('Name','Value','IsMasked')
+        $content = Get-SkQueryTableMultiple -QueryFile "cmcollectionvariables.sql" -PageLink "cmcollection.ps1" -Columns ('Name','Value','IsMasked')
         break;
     }
     'Tools' {

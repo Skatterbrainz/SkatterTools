@@ -5,8 +5,6 @@ $Script:SortField   = Get-PageParam -TagName 's' -Default 'Name'
 $Script:SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
 $Script:TabSelected = Get-PageParam -TagName 'tab' -Default $DefaultComputersTab
 $Script:Detailed    = Get-PageParam -TagName 'zz' -Default ""
-$Script:PageFile    = "cmdevices.ps1"
-
 $Script:PageTitle   = "CM Devices"
 $Script:PageCaption = "CM Devices"
 $Script:IsFiltered  = $False
@@ -25,7 +23,13 @@ else {
     $Caption = $Script:SearchValue
 }
 
-$content = Get-SkQueryTable3 -QueryFile "cmdevices.sql" -PageLink "cmdevices.ps1" -Columns ('ResourceID','Name','Manufacturer','Model','OSName','OSBuild','ADSiteName') -ColumnSorting
+$params = @{
+    QueryFile = "cmdevices.sql"
+    PageLink  = "cmdevices.ps1"
+    Columns   = ('Name','ResourceID','Manufacturer','Model','OSName','OSBuild','ADSiteName') 
+    ColumnSorting = $True
+}
+$content = Get-SkQueryTableMultiple @params
 
 $tabset = New-MenuTabSet -BaseLink "cmdevices.ps1`?x=begins&f=name&v=" -DefaultID $Script:TabSelected
 
@@ -33,6 +37,7 @@ $tabset = New-MenuTabSet -BaseLink "cmdevices.ps1`?x=begins&f=name&v=" -DefaultI
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="$STTheme"/>
+<title>$PageTitle</title>
 </head>
 
 <body>

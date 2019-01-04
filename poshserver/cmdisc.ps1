@@ -12,7 +12,7 @@ $Script:PageCaption = "CM Discovery Method: $CustomName"
 
 $tabset  = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmdiscovery.sql" -PageLink "cmdisc.ps1" -Columns ('ItemType','ID','Sitenumber','Name','Value1','Value2','Value3','SourceTable') -NoUnFilter
+$content = Get-SkQueryTableMultiple -QueryFile "cmdiscovery.sql" -PageLink "cmdisc.ps1" -Columns ('ItemType','ID','Sitenumber','Name','Value1','Value2','Value3','SourceTable') -NoUnFilter
 
 $content += Write-DetailInfo -PageRef "cmdisc.ps1" -Mode $Detailed
 

@@ -15,7 +15,7 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = Get-SkQueryTable2 -QueryFile "cmscript.sql" -PageLink "cmscript.ps1" -Columns ('ScriptName','ScriptVersion','ScriptGuid','Author','ScriptType','Feature','ApprovalState','Approval','Approver','Script','ScriptHashAlgorithm','ScriptHash','LastUpdateTime','Comment','ParameterlistXML','ParameterGroupHash')
+$content = Get-SkQueryTableSingle -QueryFile "cmscript.sql" -PageLink "cmscript.ps1" -Columns ('ScriptName','ScriptVersion','ScriptGuid','Author','ScriptType','Feature','ApprovalState','Approval','Approver','Script','ScriptHashAlgorithm','ScriptHash','LastUpdateTime','Comment','ParameterlistXML','ParameterGroupHash')
 $content += Write-DetailInfo -PageRef "cmscript.ps1" -Mode $Detailed
 
 @"

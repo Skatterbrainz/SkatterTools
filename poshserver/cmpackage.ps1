@@ -17,7 +17,7 @@ $xxx         = ""
 
 switch ($TabSelected) {
     'General' {
-        $content = Get-SkQueryTable2 -QueryFile "cmpackage.sql" -PageLink "cmpackage.ps1" -Columns ('PackageID','Name','Version','Manufacturer','PackageType','PkgType','Description','PkgSourcePath','SourceVersion','SourceDate','SourceSite','LastRefreshTime')
+        $content = Get-SkQueryTableSingle -QueryFile "cmpackage.sql" -PageLink "cmpackage.ps1" -Columns ('PackageID','Name','Version','Manufacturer','PackageType','PkgType','Description','PkgSourcePath','SourceVersion','SourceDate','SourceSite','LastRefreshTime')
         break;
     }
     'Programs' {

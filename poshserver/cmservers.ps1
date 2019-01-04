@@ -19,7 +19,7 @@ $xxx         = ""
 try {
     switch ($Script:RoleCode) {
         'dp' {
-            $content = Get-SkQueryTable3 -QueryFile "cmdps.sql" -PageLink "cmservers.ps1" -Columns ('DPID','DPName','Description','SMSSiteCode','IsPXE','DPType','Type')
+            $content = Get-SkQueryTableMultiple -QueryFile "cmdps.sql" -PageLink "cmservers.ps1" -Columns ('DPID','DPName','Description','SMSSiteCode','IsPXE','DPType','Type')
             $Script:PageCaption += ": Distribution Points"
             break;
         }

@@ -15,7 +15,7 @@ $outree      = $null
 $query       = $null
 $xxx         = ""
 
-$content = Get-SkQueryTable3 -QueryFile "cmdiscoveries.sql" -PageLink "cmdiscs.ps1" -Columns ('ItemType','SiteNumber','SourceTable')
+$content = Get-SkQueryTableMultiple -QueryFile "cmdiscoveries.sql" -PageLink "cmdiscs.ps1" -Columns ('ItemType','SiteNumber','SourceTable')
 
 #$tabset = New-MenuTabSet -BaseLink 'cmdiscs.ps1?x=begins&f=name&v=' -DefaultID $TabSelected
 $content += Write-DetailInfo -PageRef "cmdiscs.ps1" -Mode $Detailed

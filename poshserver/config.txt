@@ -2,17 +2,21 @@
 ; default theme (there are only two so far)
 STTheme=stdark.css
 ; enable configmgr features
-CMEnabled=true
+CMEnabled=TRUE
 ; enable active directory features
-ADenabled=true
+ADEnabled=TRUE
+; enable security group administration
+ADGroupManage=TRUE
 ; name of configmgr sql server host
 CmDBHost=cm02.contoso.local
 ; name of configmgr sms provider host
 CmSMSProvider=cm02.contoso.local
 ; configmgr site code
 CmSiteCode=P02
+; enable collection administration
+CmCollectionManage=TRUE
 ; enable skattertools object notes (not yet working)
-SkNotesEnable=false
+SkNotesEnable=FALSE
 SkNotesDBHost=
 SkDBDatabase=
 SkNotesPath=notes\notes.xml

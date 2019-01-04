@@ -12,7 +12,7 @@ try {
     switch ($Script:RoleCode) {
         'dp' {
             $Script:PageCaption += ": $CustomName"
-            $content = Get-SkQueryTable2 -QueryFile "cmdp.sql" -PageLink "cmserver.ps1"
+            $content = Get-SkQueryTableSingle -QueryFile "cmdp.sql" -PageLink "cmserver.ps1"
             break;
         }
         default {

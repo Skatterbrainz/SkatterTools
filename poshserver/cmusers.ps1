@@ -14,7 +14,7 @@ if ($Script:SearchValue -eq 'all') {
     $Script:SearchValue = ""
 }
 
-$content = Get-SkQueryTable3 -QueryFile "cmusers.sql" -PageLink "cmusers.ps1" -Columns ('ResourceID','UserName','AADUserID','Domain','UPN','Department','Title') -ColumnSorting
+$content = Get-SkQueryTableMultiple -QueryFile "cmusers.sql" -PageLink "cmusers.ps1" -Columns ('ResourceID','UserName','AADUserID','Domain','UPN','Department','Title') -ColumnSorting
 
 $tabset = New-MenuTabSet -BaseLink 'cmusers.ps1?x=begins&f=UserName&v=' -DefaultID $TabSelected
 $content += Write-DetailInfo -PageRef "cmusers.ps1" -Mode $Detailed

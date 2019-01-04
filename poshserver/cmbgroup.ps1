@@ -18,12 +18,12 @@ $xxx         = ""
 switch ($TabSelected) {
     'General' {
         $xxx += ";queryfile: cmboundarygroup.sql"
-        $content = Get-SkQueryTable2 -QueryFile "cmboundarygroup.sql" -PageLink "cmbgroup.ps1" -Columns ('BGName','DefaultSiteCode','GroupID','GroupGUID','Description','Flags','CreatedBy','CreatedOn','ModifiedBy','ModifiedOn','MemberCount','SiteSystemCount','Shared')
+        $content = Get-SkQueryTableSingle -QueryFile "cmboundarygroup.sql" -PageLink "cmbgroup.ps1" -Columns ('BGName','DefaultSiteCode','GroupID','GroupGUID','Description','Flags','CreatedBy','CreatedOn','ModifiedBy','ModifiedOn','MemberCount','SiteSystemCount','Shared')
         break;
     }
     'Boundaries' {
         $xxx += ";queryfile: cmboundaries.sql"
-        $content = Get-SkQueryTable3 -QueryFile "cmboundaries.sql" -PageLink "cmbgroup.ps1" -Columns ('DisplayName','BoundaryID','BValue','BoundaryType','BoundaryFlags','CreatedBy','CreatedOn','ModifiedBy','ModifiedOn','GroupID','BGName') -NoUnFilter
+        $content = Get-SkQueryTableMultiple -QueryFile "cmboundaries.sql" -PageLink "cmbgroup.ps1" -Columns ('DisplayName','BoundaryID','BValue','BoundaryType','BoundaryFlags','CreatedBy','CreatedOn','ModifiedBy','ModifiedOn','GroupID','BGName') -NoUnFilter
         break;
     }
 }
