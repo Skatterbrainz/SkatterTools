@@ -25,12 +25,14 @@ else {
 }
 $tabset = New-MenuTabSet2 -MenuTabs $tabs -BaseLink "cmdevice.ps1"
 
+$Script:xxx = "select block"
+
 switch ($TabSelected) {
     'General' {
+        $output = $null
         $params = @{
-            QueryFile = "cmdevice.sql"
-            PageLink  = "cmdevice.ps1"
-            Columns   = ('Name','ResourceID','Manufacturer','Model','SerialNumber','OperatingSystem','OSBuild','ClientVersion','LastHwScan','LastDDR','LastPolicyRequest','ADSiteName')
+            QueryFile   = "cmdevice.sql"
+            PageLink    = "cmdevice.ps1"
         }
         #$xxx = $params -join ';'
         $content = Get-SkQueryTableSingle @params

@@ -78,11 +78,12 @@ function Get-SkQueryTableSingle {
     )
     $output = $null
     $result = $null
+    $Script:xxx = "$SearchField = $SearchValue"
     try {
         $qpath  = $(Join-Path -Path $PSScriptRoot -ChildPath "queries")
         $qfile  = $(Join-Path -Path $qpath -ChildPath "$QueryFile")
         $result = @(Invoke-DbaQuery -SqlInstance $CmDbHost -Database "CM_$CmSiteCode" -File $qfile)
-        $result = $result | Where-Object {$_."$Script:SearchField" -eq $Script:SearchValue}
+        $result = $result | Where-Object {$_."$SearchField" -eq $SearchValue}
         if (![string]::IsNullOrEmpty($Columns)) {
             $result   = $result | Select $Columns
             $colcount = $Columns.Count
@@ -1171,7 +1172,7 @@ function Write-DetailInfo {
     <tr><td style=`"width:200px;`">Detailed</td><td>$Detailed</td></tr>
     <tr><td style=`"width:200px;`">PageTitle</td><td>$PageTitle</td></tr>
     <tr><td style=`"width:200px;`">PageCaption</td><td>$PageCaption</td></tr>
-    <tr><td style=`"width:200px;`">Last Step</td><td>$xxx</td></tr>
+    <tr><td style=`"width:200px;`">Last Step</td><td>$Script:xxx</td></tr>
     <tr><td colspan=2>
     <a href=`"$PageRef`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SearchOrder&t=$CollectionType&n=$CustomName&tab=$TabSelected`">Hide Details</a>
     </td></tr>

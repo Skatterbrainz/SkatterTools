@@ -21,7 +21,7 @@ $content += "<td style=`"width:50%; vertical-align:top`">"
         $content += "<tr>"
         $num = ($uDates | %{(New-TimeSpan -Start $_ -End $(Get-Date)).Days} | ?{$_ -gt $dx}).Count
         $content += "<td style=`"width:100px;text-align:right`">$num</td>"
-        $content += "<td>$dx days</td>"
+        $content += "<td><a href=`"adrep.ps1?d=$dx`">$dx days</a></td>"
         $content += "</tr>"
     }
     $content += "<tr><td style=`"width:100px;text-align:right`">"
