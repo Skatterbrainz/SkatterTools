@@ -1,6 +1,6 @@
 SELECT
-	ResourceID,
 	[Name],
+	ResourceID,
 	Manufacturer,
 	Model,
 	SerialNumber,
