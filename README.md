@@ -21,7 +21,7 @@ Skattered tools from Skatterbrainz
    * Install PoSH Server by launching the PoshServer.exe file and following the prompts.
    * Download the SkatterTools repo (big green download button, zip option)
    * Extract it to a folder
-   * Open the folder and run "Setup-Skattertools.ps1"
+   * Open PowerShell using Run as Administrator and launch "Setup-Skattertools.ps1"
    * Edit the "config.txt" file in Notepad (should appear during setup)
    * Save and close config.txt
    * Right-click "Start SkatterTools Web Service" / Run as Administrator
