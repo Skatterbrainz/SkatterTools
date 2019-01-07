@@ -1,4 +1,5 @@
 ﻿; SkatterTools Configuration Settings
+APPNAME=DeathFace
 ; default theme (there are only two so far)
 STTheme=stdark.css
 ; enable configmgr features

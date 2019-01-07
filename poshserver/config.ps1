@@ -39,27 +39,29 @@ $PHPCgiPath = ($env:PATH).Split(";") | Select-String "PHP"
 $PHPCgiPath = [string]$PHPCgiPath + "\php-cgi.exe"
 
 # --------------------------------------------------
-if (!$Global:SkLoaded) {
-    $Global:SkToolsVersion = "1901.04.03"
-    Write-Host "Loading a bunch of SkatterTools $Global:SkToolsVersion junk. Please wait..." -ForegroundColor Green
+if ($Global:SkLoaded -ne $True) {
+    $Global:SkToolsVersion = "1901.07.01"
+    #$Global:AppName = "SkyDouche"
+    
+    Write-Host "Loading a bunch of silly junk. Please wait..." -ForegroundColor Green
 
-$configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
-if (!(Test-Path $configFile)) {
-    Write-Warning "Config.txt was not found. Shit just got real."
-    break
-}
-$cdata = Get-Content $configFile | Where-Object{$_ -notlike ';*'}
-foreach ($line in $cdata) {
+    $configFile = Join-Path -Path $HomeDirectory -ChildPath "config.txt"
+    if (!(Test-Path $configFile)) {
+        Write-Warning "Config.txt was not found. Shit just got real."
+        break
+    }
+    $cdata = Get-Content $configFile | Where-Object{$_ -notlike ';*'}
+                            foreach ($line in $cdata) {
     $varset = $line -split '='
     if ($varset.Count -gt 1) {
         if (!(Get-Variable -Name $varset[0] -ErrorAction SilentlyContinue)) {
             Set-Variable -Name $varset[0] -Value $($varset[1]).Trim() -Scope Global -Force | Out-Null
         }
     }
-}
+    }
 
-$modules = @('dbatools')
-$modules | ForEach-Object { if(!(Get-Module -Name $_)) { Import-Module -Name $_}}
+    $modules = @('dbatools')
+    $modules | ForEach-Object { if(!(Get-Module -Name $_)) { Import-Module -Name $_}}
 
 #---------------------------------------------------------------------
 # DATABASE FUNCTIONS
@@ -82,7 +84,14 @@ function Get-SkQueryTableSingle {
         $qpath  = $(Join-Path -Path $PSScriptRoot -ChildPath "queries")
         $qfile  = $(Join-Path -Path $qpath -ChildPath "$QueryFile")
         $result = @(Invoke-DbaQuery -SqlInstance $CmDbHost -Database "CM_$CmSiteCode" -File $qfile)
-        $result = $result | Where-Object {$_."$SearchField" -eq $SearchValue}
+        if ([string]::IsNullOrEmpty($SearchField) -and ![string]::IsNullOrEmpty($SearchValue)) {
+            $SearchField = $($result[0].Table.Columns.ColumnName)[0]
+            $Script:xxx = "Searchfield remapped to $SearchField"
+            $result = $result | Where-Object {$_."$SearchField" -eq $SearchValue}
+        }
+        else {
+            $result = $result | Where-Object {$_."$SearchField" -eq $SearchValue}
+        }
         if (![string]::IsNullOrEmpty($Columns)) {
             $result   = $result | Select $Columns
             $colcount = $Columns.Count
@@ -114,18 +123,24 @@ function Get-SkQueryTableSingle {
 function Get-SkQueryTableMultiple {
     param (
         [parameter(Mandatory=$True)]
-        [ValidateNotNullOrEmpty()]
-        [string] $QueryFile,
+            [ValidateNotNullOrEmpty()]
+            [string] $QueryFile,
         [parameter(Mandatory=$True)]
-        [ValidateNotNullOrEmpty()]
-        [string] $PageLink,
+            [ValidateNotNullOrEmpty()]
+            [string] $PageLink,
         [parameter(Mandatory=$False)]
-        [string[]] $Columns = "",
+            [string[]] $Columns = "",
         [parameter(Mandatory=$False)]
-        [string] $Sorting = "",
-        [switch] $ColumnSorting,
-        [switch] $NoUnFilter,
-        [switch] $NoCaption
+            [string] $Sorting = "",
+        [parameter(Mandatory=$False)]
+            [ValidateSet('asc','desc')]
+            [string] $SortType = 'asc',
+        [parameter(Mandatory=$False)]
+            [switch] $ColumnSorting,
+        [parameter(Mandatory=$False)]
+            [switch] $NoUnFilter,
+        [parameter(Mandatory=$False)]
+            [switch] $NoCaption
     )
     $output = $null
     $result = $null
@@ -163,14 +178,11 @@ function Get-SkQueryTableMultiple {
             $Script:IsFiltered = $True
         }
         if ($Sorting -ne "") {
-            $result = $result | Sort-Object $Sorting
-        }
-        elseif ($Script:SortField -ne "") {
-            if ($Script:SortOrder -ne "asc") {
-                $result = $result | Sort-Object $Script:SortField -Descending
+            if ($SortType -eq 'desc') {
+                $result = $result | Sort-Object $Sorting -Descending
             }
             else {
-                $result = $result | Sort-Object $Script:SortField 
+                $result = $result | Sort-Object $Sorting
             }
         }
         if (![string]::IsNullOrEmpty($Columns)) {
@@ -184,10 +196,10 @@ function Get-SkQueryTableMultiple {
         }
         $output = "<table id=table1><tr>"
         if ($colcount -gt 0 -and $ColumnSorting) {
-            $output += New-ColumnSortRow -ColumnNames $Columns -BaseLink "$PageLink`?f=$Script:SearchField&v=$Script:SearchValue&x=$Script:SearchType" -SortDirection $Script:SortOrder
+            $output += New-ColumnSortRow -ColumnNames $Columns -BaseLink "$PageLink`?f=$($Script:SearchField)&v=$($Script:SearchValue)&x=$($Script:SearchType)" -SortDirection $Script:SortOrder
         }
         else {
-            $columns | %{ $output += "<th>$_</th>" }
+            $columns | Foreach-Object { $output += "<th>$_</th>" }
         }
         $output += "</tr>"
         $rowcount = 0
@@ -243,19 +255,23 @@ function Get-SKDbValueLink {
     $output = ""
     if (![string]::IsNullOrEmpty($Value)) {
         switch ($ColumnName) {
-            'Name' {
+            {($_ -eq 'Name') -or ($_ -eq 'ComputerName')} {
                 $output = "<a href=`"cmdevice.ps1?f=$ColumnName&v=$Value&x=equals&n=$Value`" title=`"Details for $Value`">$Value</a>"
                 break;
             }
-            'ComputerName' {
-                $output = "<a href=`"cmdevice.ps1?f=name&v=$Value&n=$Value&x=equals`" title=`"Details for $Value`">$Value</a>"
+            'ADComputerName' {
+                $output = "<a href=`"adcomputer.ps1?f=name&v=$Value&n=$Value&x=equals`" title=`"Details for $Value`">$Value</a>"
                 break;
             }
-            'OSName' {
+            {($_ -eq 'OSName') -or ($_ -eq 'OperatingSystem')} {
                 $output = "<a href=`"cmdevices.ps1?f=$ColumnName&v=$Value&x=equals&n=$Value`" title=`"Filter on $Value`">$Value</a>"
                 break;
             }
-            'ADSiteName' {
+            'OSBuild' {
+                $output = "<a href=`"cmdevices.ps1?f=OSBuild&v=$Value&x=equals`" title=`"Computers running $Value`">$Value</a>"
+                break;
+            }
+            {($_ -eq 'ADSiteName') -or ($_ -eq 'ADSite')} {
                 $output = "<a href=`"cmdevices.ps1?f=$ColumnName&v=$Value&x=equals&n=$Value`" title=`"Filter on $Value`">$Value</a>"
                 break;
             }
@@ -530,9 +546,11 @@ function Get-ADsComputers {
     [void]$as.PropertiesToLoad.Add('cn')
     [void]$as.PropertiesToLoad.Add('lastlogonTimeStamp')
     [void]$as.PropertiesToLoad.Add('whenCreated')
+    [void]$as.PropertiesToLoad.Add('dnsHostName')
     [void]$as.PropertiesToLoad.Add('operatingSystem')
     [void]$as.PropertiesToLoad.Add('operatingSystemVersion')
     [void]$as.PropertiesToLoad.Add('distinguishedName')
+    [void]$as.PropertiesToLoad.Add('servicePrincipalName')
     $as.PageSize = $pageSize
     $results = $as.FindAll()
     foreach ($item in $results) {
@@ -542,47 +560,17 @@ function Get-ADsComputers {
         $ouPath = ($item.Properties.item('distinguishedName') | Out-String).Trim() -replace $("CN=$cn,", "")
         $props  = [ordered]@{
             Name       = $cn
+            DnsName    = ($item.Properties.item('dnsHostName') | Out-String).Trim()
             OS         = ($item.Properties.item('operatingSystem') | Out-String).Trim()
             OSVer      = ($item.Properties.item('operatingSystemVersion') | Out-String).Trim()
             DN         = ($item.Properties.item('distinguishedName') | Out-String).Trim()
             OU         = $ouPath
+            SPNlist    = ($item.Properties.item('servicePrincipalName'))
             Created    = $created
             LastLogon  = $llogon
         }
         New-Object psObject -Property $props
     }
-}
-
-function Get-ADsComputer {
-    [CmdletBinding()]
-    param (
-        [parameter(Mandatory=$True)]
-        [ValidateNotNullOrEmpty()]
-        [string] $Name 
-    )
-    $as = [adsisearcher]"(&(objectCategory=computer)(name=$Name))"
-    [void]$as.PropertiesToLoad.Add('cn')
-    [void]$as.PropertiesToLoad.Add('distinguishedName')
-    [void]$as.PropertiesToLoad.Add('lastlogonTimeStamp')
-    [void]$as.PropertiesToLoad.Add('whenCreated')
-    [void]$as.PropertiesToLoad.Add('dnsHostName')
-    [void]$as.PropertiesToLoad.Add('operatingSystem')
-    [void]$as.PropertiesToLoad.Add('servicePrincipalName')
-    $comp = $as.FindOne()
-    $adprops = $comp.Properties
-    $columns = $adprops.PropertyNames
-    [datetime]$created = ($comp.Properties.item('whenCreated') | Out-String).Trim()
-    $llogon = ([datetime]::FromFiletime(($comp.properties.item('lastlogonTimeStamp') | Out-String).Trim())) 
-    $props = [ordered]@{
-        Name      = $($adprops.cn | Out-String).Trim()
-        Fullname  = $($adprops.dnshostname | Out-String).Trim()
-        Created   = [datetime]($adprops.whencreated | Out-String)
-        DN        = $($adprops.distinguishedname | Out-String).Trim()
-        SPNlist   = $($adprops.serviceprincipalname)
-        OS        = $($adprops.operatingsystem | Out-String).Trim()
-        LastLogon = $llogon
-    }
-    New-Object -TypeName PSObject -Property $props
 }
 
 function Get-ADsGroups {
@@ -857,11 +845,35 @@ function Get-AdValueLink {
     if (![string]::IsNullOrEmpty($Value)) {
         switch ($PropertyName) {
             'ComputerName' {
-                $output = "<a href=`"adcomputer.ps1?f=name&v=$Value`" title=`"Details for $Value`">$Value</a>"
+                $output = "<a href=`"adcomputer.ps1?f=name&v=$Value&x=equals`" title=`"Details for $Value`">$Value</a>"
                 break;
             }
             'UserName' {
-                $output = "<a href=`"aduser.ps1?f=username&v=$Value`" title=`"Details for $Value`">$Value</a>"
+                $output = "<a href=`"aduser.ps1?f=username&v=$Value&x=equals`" title=`"Details for $Value`">$Value</a>"
+                break;
+            }
+            'Title' {
+                $output = "<a href=`"adusers.ps1?f=title&v=$Value&x=equals`" title=`"Filter on $Value`">$Value</a>"
+                break;
+            }
+            'Department' {
+                $output = "<a href=`"adusers.ps1?f=department&v=$Value&x=equals`" title=`"Filter on $Value`">$Value</a>"
+                break;
+            }
+            'LastLogon' {
+                $output = "$Value `($($(New-TimeSpan -Start $Value -End (Get-Date)).Days)` days)"
+                break;
+            }
+            'Email' {
+                $output = "<a href=`"mailto://$Value`" title=`"Email $Value`">$Value</a>"
+                break;
+            }
+            'OS' {
+                $output = "<a href=`"adcomputers.ps1?f=OS&v=$Value&x=equals`" title=`"Filter on $Value`">$Value</a>"
+                break;
+            }
+            'OSVer' {
+                $output = "$Value - $(Get-OSBuildName -BuildData $Value)"
                 break;
             }
             default {
@@ -869,6 +881,227 @@ function Get-AdValueLink {
                 break;
             }
         } # switch
+    }
+    Write-Output $output
+}
+
+function Get-ADObjectTableMultiple {
+    param (
+        [parameter(Mandatory=$True)]
+            [ValidateSet('computer','user','group')]
+            [string] $ObjectType,
+        [parameter(Mandatory=$False)]
+            [string[]] $Columns,
+        [parameter(Mandatory=$False)]
+            [string] $SortColumn = "",
+        [parameter(Mandatory=$False)]
+            [switch] $NoSortHeadings
+    )
+    $output = ""
+    switch ($ObjectType) {
+        'computer' {
+            if (![string]::IsNullOrEmpty($SortColumn)) { 
+                $computers = Get-ADsComputers | Sort-Object $SortColumn
+            }
+            else {
+                $computers = Get-ADsComputers
+            }
+            if (![string]::IsNullOrEmpty($Script:SearchValue)) {
+                $IsFiltered = $True
+                switch ($SearchType) {
+                    {($_ -eq 'contains') -or ($_ -eq 'like')} {
+                        $computers = $computers | Where-Object {$_."$Script:SearchField" -like "*$Script:SearchValue*"}
+                        $cap = 'contains'
+                        break;
+                    }
+                    'begins' {
+                        $computers = $computers | Where-Object {$_."$Script:SearchField" -like "$Script:SearchValue*"}
+                        $cap = 'begins with'
+                        break;
+                    }
+                    'ends' {
+                        $computers = $computers | Where-Object {$_."$Script:SearchField" -like "*$Script:SearchValue"}
+                        $cap = 'ends with'
+                        break;
+                    }
+                    default {
+                        $computers = $computers | Where-Object {$_."$Script:SearchField" -eq $Script:SearchValue}
+                        $cap = '='
+                        break;
+                    }
+                }
+            }
+            if ($Columns.Count -gt 0) {
+                $colcount = $Columns.Count
+            }
+            else {
+                $columns = $computers[0].psobject.Properties.name
+                $colcount = $columns.Count
+            }
+            $output = '<table id=table1><tr>'
+            if (!$NoSortHeadings) {
+                $output += New-ColumnSortRow -ColumnNames $columns -BaseLink "$pagelink`?f=$($Script:SearchField)&v=$($Script:SearchValue)&x=$($Script:SortType)"
+            }
+            else {
+                $output += $columns | ForEach-Object {"<th>$_</th>"}
+            }
+            $output += '</tr>'
+            $rowcount = 0
+            foreach ($comp in $computers) {
+                $output += '<tr>'
+                foreach ($col in $columns) {
+                    $fn = $col
+                    $fv = $($comp."$col")
+                    if ($fn -eq 'Name') { $fn = 'ComputerName' }
+                    $fvx = Get-AdValueLink -PropertyName $fn -Value $fv
+                    $output += '<td>'+$fvx+'</td>'
+                }
+                $output += '</tr>'
+                $rowcount++
+            } # foreach
+            $output += '<tr>'
+            $output += "<td colspan=`"$colCount`" class=`"lastrow`">$rowcount computers found"
+            if ($IsFiltered -eq $True) {
+                $output += " - <a href=`"$pagelink`" title=`"Show All`">Show All</a>"
+            }
+            $output += '</td></tr></table>'    
+            break;
+        }
+        'user' {
+            if (![string]::IsNullOrEmpty($SortColumn)) { 
+                $users = Get-ADsUsers | Sort-Object $SortColumn | Select Name,UserName,DisplayName,Title,Department,DN,OUPath,Created,LastLogon
+            }
+            else {
+                $users = Get-ADsUsers | Select Name,UserName,DisplayName,Title,Department,DN,OUPath,Created,LastLogon
+            }
+            if (![string]::IsNullOrEmpty($Script:SearchValue)) {
+                $IsFiltered = $True
+                switch ($SearchType) {
+                    {($_ -eq 'contains') -or ($_ -eq 'like')} {
+                        $users = $users | Where-Object {$_."$Script:SearchField" -like "*$Script:SearchValue*"}
+                        $cap = 'contains'
+                        break;
+                    }
+                    'begins' {
+                        $users = $users | Where-Object {$_."$Script:SearchField" -like "$Script:SearchValue*"}
+                        $cap = 'begins with'
+                        break;
+                    }
+                    'ends' {
+                        $users = $users | Where-Object {$_."$Script:SearchField" -like "*$Script:SearchValue"}
+                        $cap = 'ends with'
+                        break;
+                    }
+                    default {
+                        $users = $users | Where-Object {$_."$Script:SearchField" -eq $Script:SearchValue}
+                        $cap = '='
+                        break;
+                    }
+                }
+            }
+            if ($Columns.Count -gt 0) {
+                $colcount = $Columns.Count
+            }
+            else {
+                $columns = $users[0].psobject.Properties.name
+                $colcount = $columns.Count
+            }
+            $output = '<table id=table1><tr>'
+            if (!$NoSortHeadings) {
+                $output += New-ColumnSortRow -ColumnNames $columns -BaseLink "$pagelink`?f=$($Script:SearchField)&v=$($Script:SearchValue)&x=$($Script:SortType)"
+            }
+            else {
+                $output += $columns | ForEach-Object {"<th>$_</th>"}
+            }
+            $output += '</tr>'
+            $rowcount = 0
+            foreach ($user in $users) {
+                $output += '<tr>'
+                foreach ($col in $columns) {
+                    $fn = $col
+                    $fv = $($user."$col")
+                    if ($fn -eq 'Name') { $fn = 'UserName' }
+                    $fvx = Get-AdValueLink -PropertyName $fn -Value $fv
+                    $output += "<td>$fvx</td>"
+                }
+                $output += '</tr>'
+                $rowcount++
+            } # foreach
+            $output += '<tr>'
+            $output += '<td colspan='+$($columns.Count)+' class=lastrow>'+$rowcount+' users found'
+            if ($IsFiltered -eq $True) {
+                $output += " - <a href=`"$pagelink`" title=`"Show All`">Show All</a>"
+            }
+            $output += '</td></tr></table>'    
+            break;
+        }
+        'group' {
+            if (![string]::IsNullOrEmpty($SortColumn)) {
+                $groups = Get-ADsGroups | Sort-Object $SortColumn | Select Name,Description
+            }
+            else {
+                $groups = Get-ADsGroups | Select Name,Description
+            }
+            if (![string]::IsNullOrEmpty($Script:SearchValue)) {
+                $IsFiltered = $True
+                switch ($SearchType) {
+                    {($_ -eq 'contains') -or ($_ -eq 'like')} {
+                        $groups = $groups | Where-Object {$_."$Script:SearchField" -like "*$Script:SearchValue*"}
+                        $cap = 'contains'
+                        break;
+                    }
+                    'begins' {
+                        $groups = $groups | Where-Object {$_."$Script:SearchField" -like "$Script:SearchValue*"}
+                        $cap = 'begins with'
+                        break;
+                    }
+                    'ends' {
+                        $groups = $groups | Where-Object {$_."$Script:SearchField" -like "*$Script:SearchValue"}
+                        $cap = 'ends with'
+                        break;
+                    }
+                    default {
+                        $groups = $groups | Where-Object {$_."$Script:SearchField" -eq $Script:SearchValue}
+                        $cap = '='
+                        break;
+                    }
+                }
+            }
+            if ($Columns.Count -gt 0) {
+                $colcount = $Columns.Count
+            }
+            else {
+                $columns = $groups[0].psobject.Properties.name
+                $colcount = $columns.Count
+            }
+            $output = '<table id=table1><tr>'
+            if (!$NoSortHeadings) {
+                $output += New-ColumnSortRow -ColumnNames $columns -BaseLink "$pagelink`?f=$($Script:SearchField)&v=$($Script:SearchValue)&x=$($Script:SortType)"
+            }
+            else {
+                $output += $columns | ForEach-Object {"<th>$_</th>"}
+            }
+            $output += '</tr>'
+            $rowcount = 0
+            foreach ($group in $groups) {
+                $output += '<tr>'
+                foreach ($col in $columns) {
+                    $fn  = $col
+                    $fv  = $($group."$col")
+                    $fvx = Get-AdValueLink -PropertyName $fn -Value $fv
+                    $output += "<td>$fvx</td>"
+                }
+                $output += '</tr>'
+                $rowcount++
+            } # foreach
+            $output += '<tr>'
+            $output += '<td colspan='+$($columns.Count)+' class=lastrow>'+$rowcount+' groups found'
+            if ($IsFiltered -eq $True) {
+                $output += " - <a href=`"$pagelink`" title=`"Show All`">Show All</a>"
+            }
+            $output += '</td></tr></table>'    
+            break;
+        }
     }
     Write-Output $output
 }
@@ -974,71 +1207,6 @@ function Get-CmDeviceCollectionMemberships {
     }
 }
 
-function Get-CmResourcesList {
-    [CmdletBinding()]
-    param (
-        [parameter(Mandatory=$True)]
-        [ValidateSet('device','user')]
-        [string] $ResourceType,
-        [parameter(Mandatory=$False)]
-        [string] $ExcludeCollectionID = ""
-    )
-    switch ($ResourceType) {
-        'device' {
-            $query = "SELECT ResourceID, Name FROM v_ClientMachines WHERE (v_ClientMachines.IsClient = 1)"
-            if ($ExcludeCollectionID -ne "") {
-                $query += " AND (ResourceID NOT IN (
-                    SELECT DISTINCT ResourceID 
-                    FROM v_CollectionRuleDirect 
-                    WHERE (CollectionID = '$ExcludeCollectionID')))"
-            }
-            $query += " ORDER BY Name"
-            break;
-        }
-        'user' {
-            $query = "SELECT ResourceID, User_Name0 as ResourceName FROM v_R_User"
-            if ($ExcludeCollectionID -ne "") {
-                $query += " WHERE ResourceID NOT IN (
-	                SELECT DISTINCT ResourceID
-	                FROM v_CollectionRuleDirect
-	                WHERE (CollectionID = '$ExcludeCollectionID'))"
-            }
-            $query += " ORDER BY ResourceName"
-            break;
-        }
-    } # switch
-    try {
-        $connection = New-Object -ComObject "ADODB.Connection"
-        $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-        $connection.Open($connString);
-        $IsOpen = $True
-        Write-Verbose "connection is opened"
-        $rs = New-Object -ComObject "ADODB.RecordSet"
-        $rs.Open($query, $connection)
-        Write-Verbose "recordset opened"
-        [void]$rs.MoveFirst()
-        while (!$rs.EOF) {
-            Write-Verbose "reading recordset row..."
-            $props = [ordered]@{
-                ResourceID   = $($rs.Fields("ResourceID").value | Out-String).Trim()
-                ResourceName = $($rs.Fields("Name").value | Out-String).Trim()
-            }
-            New-Object PSObject -Property $props
-            [void]$rs.MoveNext()
-        }
-        Write-Verbose "closing recordset"
-        [void]$rs.Close()
-    }
-    catch {
-        if ($IsOpen -eq $True) { [void]$connection.Close() }
-        throw "Error: $($Error[0].Exception.Message)"
-    }
-    finally {
-        Write-Verbose "closing connection"
-        if ($IsOpen -eq $True) { [void]$connection.Close() }
-    }
-}
-
 function Get-CmPackageTypeName {
     param (
         [parameter(Mandatory=$True)]
@@ -1060,6 +1228,43 @@ function Get-CmPackageTypeName {
 }
 
 #---------------------------------------------------------------------
+# LAYOUT FUNCTIONS
+
+$bodyset = @"
+<!DOCTYPE HTML>
+<html lang="en-us">
+<head>
+    <title>XPAGETITLE</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="SkatterTools">
+    <meta name="author" content="Skatterbrainz">
+    <link rel="stylesheet" type="text/css" href="$STTheme">
+</head>
+
+<body>
+
+<h1>XPAGETITLE</h1>
+
+XTABSET
+<!-- begin content section -->
+XCONTENT
+<!-- end content section -->
+
+</body>
+</html>
+"@
+
+function Get-SkParams {
+    param()
+    $Script:SearchField = Get-PageParam -TagName 'f' -Default ""
+    $Script:SearchValue = Get-PageParam -TagName 'v' -Default ""
+    $Script:SearchType  = Get-PageParam -TagName 'x' -Default "equals"
+    $Script:SortField   = Get-PageParam -TagName 's' -Default ""
+    $Script:SortOrder   = Get-PageParam -TagName 'so' -Default 'asc'
+    $Script:TabSelected = Get-PageParam -TagName 'tab' -Default ""
+    $Script:Detailed    = Get-PageParam -TagName 'zz' -Default ""
+    $Script:CustomName  = Get-PageParam -TagName 'n' -Default ""
+}
 
 function New-MenuTabSet {
     param (
@@ -1109,6 +1314,9 @@ function New-MenuTabSet2 {
         [string] $BaseLink
     )
     $output = "<table id=tablex><tr>"
+    if ([string]::IsNullOrEmpty($TabSelected)) {
+        $TabSelected = $MenuTabs[0]
+    }
     foreach ($tab in $tabs) {
         $xlink = "$baselink`?f=$SearchField&v=$SearchValue&x=$SearchType&s=$SortField&so=$SortOrder&n=$CustomName&tab=$tab"
         if ($tab -eq $TabSelected) {
@@ -1125,45 +1333,51 @@ function New-MenuTabSet2 {
 function New-ColumnSortRow {
     param (
         [parameter(Mandatory=$True)]
-        [string[]] $ColumnNames,
+            [string[]] $ColumnNames,
         [parameter(Mandatory=$True)]
-        [ValidateNotNullOrEmpty()]
-        [string] $BaseLink,
-        [parameter(Mandatory=$False)]
-        [ValidateSet('Asc','Desc')]
-        [string] $SortDirection = 'Asc'
+            [ValidateNotNullOrEmpty()]
+            [string] $BaseLink
     )
     $output = ""
+    if ([string]::IsNullOrEmpty($Script:SortField)) {
+        $Script:SortField = $Columns[0]
+    }
+    if ($BaseLink -like '*?*') { $append = '&' } else { $append = '?' }
     foreach ($col in $ColumnNames) {
-        if ($col -eq $SortField) {
-            if ($SortDirection -eq 'Asc') {
-                $xlink = "<a href=`"$BaseLink&s=$col&so=desc`">$col</a>"
+        if ($col -eq $Script:SortField) {
+            if ($Script:SortOrder -eq 'Asc') {
+                $xlink = "<a href=`"$BaseLink"+"$append`s=$col&so=desc`" title=`"Sort by $col / Descending`">$col</a>"
                 $ilink = "<img src='graphics/sortasc.png' border=0 alt='' />"
             }
             else {
-                $xlink = "<a href=`"$BaseLink&s=$col&so=asc`">$col</a>"
+                $xlink = "<a href=`"$BaseLink"+"$append`s=$col&so=asc`" title=`"Sort by $col`">$col</a>"
                 $ilink = "<img src='graphics/sortdesc.png' border=0 alt='' />"
             }
         }
         else {
-            $xlink = "<a href=`"$BaseLink&s=$col&so=asc`">$col</a>"
+            $xlink = "<a href=`"$BaseLink$append`s=$col&so=asc`" title=`"Sort by $col`">$col</a>"
             $ilink = ""
         }
         $output += '<th>'+$xlink+' '+$ilink+'</th>'
     }
+    $Script:SortField = ""
     return $output
 }
 
 function New-SkMenuList {
     param (
         [parameter(Mandatory=$True)]
-        $PropertyList,
+            $PropertyList,
         [parameter(Mandatory=$True)]
-        [ValidateNotNullOrEmpty()]
-        [string] $TargetLink,
+            [ValidateNotNullOrEmpty()]
+            [string] $TargetLink,
         [parameter(Mandatory=$False)]
-        [string] $Default = ""
+            [string] $Default = ""
     )
+    if ([string]::IsNullOrEmpty($Default)) {
+        $Default = $PropertyList[0]
+        $Script:TabSelected = $Default
+    }
     $output = "<form name='form2' id='form2' method='POST' action=''>"
     $output += "<select name='p' id='p' size='1' style='width:300px;padding:5px' onChange=`"this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);`">"
     $output += "<option value=''></option>"
@@ -1176,6 +1390,13 @@ function New-SkMenuList {
         }
     }
     $output += "</select></form>"
+    Write-Output $output
+}
+
+function Show-SkPage {
+    $output = $bodyset -replace 'XPAGETITLE', $PageTitle
+    $output = $output -replace 'XCONTENT', $content
+    $output = $output -replace 'XTABSET', $tabset
     Write-Output $output
 }
 
@@ -1644,6 +1865,23 @@ function Get-SkWmiValue {
                 }
                 break;
             }
+            'DriveType' {
+                switch ($Value) {
+                    2 { $output = 'Removable'; break }
+                    3 { $output = 'Fixed'; break }
+                    4 { $output = 'Network'; break }
+                    5 { $output = 'CD-ROM'; break }                
+                }
+                break;
+            }
+            'Size' {
+                $output = "$([math]::Round(($Value / 1GB), 2)) GB"
+                break;
+            }
+            'FreeSpace' {
+                $output = "$([math]::Round(($Value / 1GB), 2)) GB"
+                break;
+            }
             default {
                 $output = $Value
                 break;
@@ -1656,56 +1894,61 @@ function Get-SkWmiValue {
 function Get-SkWmiPropTable1 {
     param (
         [parameter(Mandatory=$True)]
-        [ValidateNotNullOrEmpty()]
-        [string] $ComputerName,
+            [ValidateNotNullOrEmpty()]
+            [string] $ComputerName,
         [parameter(Mandatory=$True)]
-        [ValidateNotNullOrEmpty()]
-        [string] $WmiClass,
+            [ValidateNotNullOrEmpty()]
+            [string] $WmiClass,
         [parameter(Mandatory=$False)]
-        [string[]] $Columns,
+            [string[]] $Columns,
         [parameter(Mandatory=$False)]
-        [string] $SortField = ""
+            [string] $SortField = ""
     )
     $rowcount = 0
-    $output = "<table id=table1>"
     try {
-        $props = Get-WmiObject -Class $WmiClass -ComputerName $SearchValue -ErrorAction SilentlyContinue
-        if ($SortField -ne "") {
-            $props = $props | Sort-Object $SortField
-        }
-        if ($Columns.Count -gt 0) {
-            $props = $props | Select $Columns
-        }
-        $cols = $props[0].psobject.Properties.Name
-        $colcount = $cols.Count
-        $output += "<tr>"
-        $output += $cols | %{ "<th>$_</th>" }
-        $output += "</tr>"
-        foreach ($prop in $props) {
-            $output += "<tr>"
-            $cindex = 0
-            foreach ($p in $prop.psobject.Properties) {
-                $pn  = $p.Name
-                $pv  = $p.Value
-                $pvx = Get-SkWmiValue -PropName $pn -Value $pv 
-                if ($cindex -gt 0) {
-                    $output += "<td style=`"text-align:center`">$pvx</td>"
-                }
-                else {
-                    $output += "<td>$pvx</td>"
-                }
-                $cindex++
+        if (Test-Connection -ComputerName $ComputerName -Count 1 -Quiet) {
+            $output = "<table id=table1>"
+            $props = Get-WmiObject -Class $WmiClass -ComputerName $SearchValue -ErrorAction SilentlyContinue
+            if ($SortField -ne "") {
+                $props = $props | Sort-Object $SortField
             }
+            if ($Columns.Count -gt 0) {
+                $props = $props | Select $Columns
+            }
+            $cols = $props[0].psobject.Properties.Name
+            $colcount = $cols.Count
+            $output += "<tr>"
+            $output += $cols | %{ "<th>$_</th>" }
             $output += "</tr>"
-            $rowcount++
+            foreach ($prop in $props) {
+                $output += "<tr>"
+                $cindex = 0
+                foreach ($p in $prop.psobject.Properties) {
+                    $pn  = $p.Name
+                    $pv  = $p.Value
+                    $pvx = Get-SkWmiValue -PropName $pn -Value $pv 
+                    if ($cindex -gt 0) {
+                        $output += "<td style=`"text-align:center`">$pvx</td>"
+                    }
+                    else {
+                        $output += "<td>$pvx</td>"
+                    }
+                    $cindex++
+                }
+                $output += "</tr>"
+                $rowcount++
+            }
+            $output += "<tr><td colspan=$colcount class=lastrow>$rowcount items</td></tr>"
+            $output += "</table>"
         }
-        $output += "<tr><td colspan=$colcount class=lastrow>$rowcount items</td></tr>"
+        else {
+            $output = "<table id=table2><tr><td>$ComputerName is not accessible</td></tr></table>"
+        }
     }
     catch {
-        $output += "<tr><td>Error: $($Error[0].Exception.Message)</td></tr>"
+        $output += "table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
     }
     finally {
-        $output += "</table>"
         Write-Output $output
     }
 }
@@ -1719,21 +1962,26 @@ function Get-SkWmiPropTable2 {
         [ValidateNotNullOrEmpty()]
         [string] $WmiClass
     )
-    $output = "<table id=table2>"
     try {
-        $props = Get-WmiObject -Class $WmiClass -ComputerName $ComputerName -ErrorAction SilentlyContinue
-        foreach ($p in $props.Properties) {
-            $pn = $p.Name
-            $pv = $p.Value
-            $pvx = Get-SkWmiValue -PropName $pn -Value $pv 
-            $output += "<tr><td class=`"t2td1`">$pn</td><td class=`"t2td2`">$pvx</td></tr>"
+        if (Test-Connection -ComputerName $ComputerName -Count 1 -Quiet) {
+            $props = Get-WmiObject -Class $WmiClass -ComputerName $ComputerName -ErrorAction SilentlyContinue
+            $output = "<table id=table2>"
+            foreach ($p in $props.Properties) {
+                $pn = $p.Name
+                $pv = $p.Value
+                $pvx = Get-SkWmiValue -PropName $pn -Value $pv 
+                $output += "<tr><td class=`"t2td1`">$pn</td><td class=`"t2td2`">$pvx</td></tr>"
+            }
+            $output += "</table>"
+        }
+        else {
+            $output = "<table id=table2><tr><td>$ComputerName is not accessible</td></tr></table>"
         }
     }
     catch {
-        $output += "<tr><td>Error: $($Error[0].Exception.Message)</td></tr>"
+        $output += "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
     }
     finally {
-        $output += "</table>"
         Write-Output $output
     }
 }
@@ -1791,6 +2039,8 @@ function Get-WmiAccessError {
     Write-Output $output 
 }
 
-    Write-Host "SkatterTools $Global:SkToolsVersion is loaded and ready. You should get loaded too." -ForegroundColor Green
+    Write-Host "$Global:AppName $Global:SkToolsVersion is loaded and ready. You should get loaded too." -ForegroundColor Green
+    Write-Host "(just don't get loaded and go driving or anything). Please read the license page for terms and other boring stuff" -ForegroundColor Green
+    $LastLoadTime = Get-Date
     $Global:SkLoaded = $True
 }

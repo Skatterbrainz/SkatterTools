@@ -20,19 +20,15 @@ switch ($TabSelected) {
         try {
             $user = Get-ADsUsers | Where-Object {$_.UserName -eq "$SearchValue"}
             $columns = $user.psobject.properties | Select-Object -ExpandProperty Name
-            $content = '<table id=table2><tr>'
+            $content = "<table id=table2>"
             foreach ($col in $columns) {
-                $fv = $($user."$col")
-                $fvx = '<a href="adusers.ps1?f='+$col+'&v='+$fv+'" title="Details">'+$fv+'</a>'
-                $content += '<tr>'
-                $content += '<td style="width:200px;">'+$col+'</td>'
-                $content += '<td>'+$fvx+'</td>'
-                $content += '</tr>'
+                $fvx = Get-AdValueLink -PropertyName $col -Value $($user."$col" | Out-String)
+                $content += "<tr><td class=`"t2td1`">$col</td><td class=`"t2td2`">$fvx</td></tr>"
             }
-            $content += '</tr></table>'    
+            $content += "</table>"
         }
         catch {
-            $content = "Error: $($Error[0].Exception.Message)"
+            $content = "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
         }
         break;
     }
@@ -67,89 +63,44 @@ switch ($TabSelected) {
     'Devices' {
         try {
             $query = "SELECT DISTINCT
-                dbo.v_R_System.Name0 AS Computer, 
-                dbo.v_GS_USER_PROFILE.LocalPath0 AS LocalPath, 
-                dbo.v_R_System.AD_Site_Name0 AS ADSite, 
-                dbo.v_GS_COMPUTER_SYSTEM.Model0 AS Model, 
-                dbo.v_GS_OPERATING_SYSTEM.Caption0 AS OperatingSystem, 
-                dbo.v_GS_OPERATING_SYSTEM.BuildNumber0 AS OSBuild, 
-                dbo.v_GS_USER_PROFILE.TimeStamp
-                FROM 
-                dbo.v_GS_USER_PROFILE INNER JOIN
-                dbo.v_R_System ON dbo.v_GS_USER_PROFILE.ResourceID = dbo.v_R_System.ResourceID INNER JOIN
-                dbo.v_GS_COMPUTER_SYSTEM ON 
-                dbo.v_GS_USER_PROFILE.ResourceID = dbo.v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
-                dbo.v_GS_OPERATING_SYSTEM ON 
-                dbo.v_GS_USER_PROFILE.ResourceID = dbo.v_GS_OPERATING_SYSTEM.ResourceID
-                WHERE (dbo.v_GS_USER_PROFILE.LocalPath0 LIKE '%$SearchValue')
-                ORDER BY dbo.v_GS_USER_PROFILE.TimeStamp DESC"
-            $connection = New-Object -ComObject "ADODB.Connection"
-            $connString = "Data Source=$CmDBHost;Initial Catalog=CM_$CmSiteCode;Integrated Security=SSPI;Provider=SQLOLEDB"
-            $connection.Open($connString);
-            $IsOpen = $True
-            $rs = New-Object -ComObject "ADODB.RecordSet"
-            $rs.Open($query, $connection)
-            $rowcount = 0
-            $colcount = $rs.Fields.Count
-            $rs.MoveFirst()
+                v_R_System.Name0 AS ADComputerName, 
+                v_GS_USER_PROFILE.LocalPath0 AS LocalPath, 
+                v_R_System.AD_Site_Name0 AS ADSite, 
+                v_GS_COMPUTER_SYSTEM.Model0 AS Model, 
+                v_GS_OPERATING_SYSTEM.Caption0 AS OperatingSystem, 
+                v_GS_OPERATING_SYSTEM.BuildNumber0 AS OSBuild, 
+                v_GS_USER_PROFILE.TimeStamp
+                FROM v_GS_USER_PROFILE INNER JOIN
+                v_R_System ON dbo.v_GS_USER_PROFILE.ResourceID = v_R_System.ResourceID INNER JOIN
+                v_GS_COMPUTER_SYSTEM ON 
+                v_GS_USER_PROFILE.ResourceID = v_GS_COMPUTER_SYSTEM.ResourceID INNER JOIN
+                v_GS_OPERATING_SYSTEM ON 
+                v_GS_USER_PROFILE.ResourceID = v_GS_OPERATING_SYSTEM.ResourceID
+                WHERE (v_GS_USER_PROFILE.LocalPath0 LIKE '%$SearchValue')
+                ORDER BY v_GS_USER_PROFILE.TimeStamp DESC"
+            $result = @(Invoke-DbaQuery -SqlInstance $CmDbHost -Database "CM_$CmSiteCode" -Query $query -ErrorAction Stop)
             $content = "<table id=table1><tr>"
-            for ($i = 0; $i -lt $colcount; $i++) {
-                $fn = $rs.Fields($i).Name
-                $content += "<th>$fn</th>"
-            }
-            $content += "</tr>"
-            while (!$rs.EOF) {
-                $content += "<tr>"
-                for ($i = 0; $i -lt $colcount; $i++) {
-                    $fn = $rs.Fields($i).Name
-                    $fv = $rs.Fields($i).Value
-                    switch($fn) {
-                        'Computer' {
-                            $devname = $fv
-                            $fvx = "<a href=`"adcomputer.ps1?f=name&v=$fv&x=equals&n=$fv`" title=`"Computer Details`">$fv</a>"
-                            break;
-                        }
-                        'LocalPath' {
-                            $fpath = $fv -replace 'C:', $("\\$devname\c`$")
-                            $fvx = "<a href=`"showfiles.ps1?f=folderpath&v=$fpath&x=equals`">$fv</a>"
-                            break;
-                        }
-                        'ADSite' {
-                            $fvx = "<a href=`"cmdevices.ps1?f=ADSite&v=$fv&x=equals&n=$fv`" title=`"Computers in site $fv`">$fv</a>"
-                            break;
-                        }
-                        'Model' {
-                            $fvx = "<a href=`"cmdevices.ps1?f=Model&v=$fv&x=equals&n=$fv`" title=`"Computers by model $fv`">$fv</a>"
-                            break;
-                        }
-                        'OperatingSystem' {
-                            $fvx = "<a href=`"cmdevices.ps1?f=OperatingSystem&v=$fv&x=equals&n=$fv`" title=`"Computers running $fv`">$fv</a>"
-                            break;
-                        }
-                        'OSBuild' {
-                            $fvx = "<a href=`"cmdevices.ps1?f=OSBuild&v=$fv&x=equals&n=$fv`" title=`"Computers running $fv`">$fv</a>"
-                            break;
-                        }
-                        default {
-                            $fvx = $fv
-                            break;
-                        }
-                    }
-                    $content += "<td>$fvx</td>"
-                }
+            if ($result.Count -gt 0) {
+                $columns  = $result[0].Table.Columns.ColumnName
+                $colcount = $columns.Count
+                $columns | ForEach-Object { $content += "<th>$_</th>" }
                 $content += "</tr>"
-                $rowcount++
-                [void]$rs.MoveNext()
+                foreach ($rs in $result) {
+                    $content += "<tr>"
+                    foreach ($fn in $columns) {
+                        $fv = $rs."$fn"
+                        $fvx = Get-SKDbValueLink -ColumnName $col -Value $fv
+                        $content += "<td>$fvx</td>"
+                    }
+                    $content += "</tr>"
+                    $rowcount++
+                }
             }
-            [void]$rs.Close()
             $content += "<tr><td colspan=$colcount class=lastrow>$rowcount rows returned</td></tr>"
             $content += "</table>"
         }
-        catch {}
-        finally {
-            if ($IsOpen -eq $True) {
-                [void]$connection.Close()
-            }
+        catch {
+            $content = "<table id=table2><tr><td>Error: $($Error[0].Exception.Message)</td></tr></table>"
         }
         break;
     }

@@ -1,52 +1,17 @@
-﻿$Script:SearchField = Get-PageParam -TagName 'f' -Default ""
-$Script:SearchValue = Get-PageParam -TagName 'v' -Default ""
-$Script:SearchType  = Get-PageParam -TagName 'x' -Default 'like'
-$Script:SortField   = Get-PageParam -TagName 's' -Default 'Name'
-$Script:SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
-$Script:TabSelected = Get-PageParam -TagName 'tab' -Default $DefaultComputersTab
-$Script:Detailed    = Get-PageParam -TagName 'zz' -Default ""
-$Script:PageTitle   = "CM Devices"
-$Script:PageCaption = "CM Devices"
-$Script:IsFiltered  = $False
+﻿Get-SkParams | Out-Null
 
-$content = ""
-
-if ($Script:SearchField -eq 'name') {
-    $Script:TabSelected = $SearchValue
+$PageTitle   = "CM Devices"
+if (![string]::IsNullOrEmpty($Script:SearchValue)) {
+    $PageTitle += ": $($Script:SearchValue)"
 }
-
-if ($Script:SearchValue -eq 'all') {
-    $Script:SearchValue = ""
-    $Caption = "All"
-}
-else {
-    $Caption = $Script:SearchValue
-}
-
-$params = @{
-    QueryFile = "cmdevices.sql"
-    PageLink  = "cmdevices.ps1"
-    Columns   = ('Name','ResourceID','Manufacturer','Model','OSName','OSBuild','ADSiteName') 
-    ColumnSorting = $True
-}
-$content = Get-SkQueryTableMultiple @params
+$content  = ""
+$menulist = ""
+$tabset   = ""
+$pagelink = Split-Path -Leaf $MyInvocation.MyCommand.Definition
 
 $tabset = New-MenuTabSet -BaseLink "cmdevices.ps1`?x=begins&f=name&v=" -DefaultID $Script:TabSelected
 
-@"
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="$STTheme"/>
-<title>$PageTitle</title>
-</head>
+$qfile = "cmdevices.sql"
+$content = Get-SkQueryTableMultiple -QueryFile $qfile -PageLink $pagelink -Columns ('Name','ResourceID','Manufacturer','Model','OSName','OSBuild','ADSiteName') -Sorting "Name"
 
-<body>
-
-<h1>$PageCaption</h1>
-
-$tabset
-$content
-
-</body>
-</html>
-"@
+Show-SkPage

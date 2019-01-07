@@ -1,38 +1,25 @@
-﻿$SearchField = Get-PageParam -TagName 'f' -Default ""
-$SearchValue = Get-PageParam -TagName 'v' -Default ""
-$SearchType  = Get-PageParam -TagName 'x' -Default 'like'
-$SortField   = Get-PageParam -TagName 's' -Default 'Name'
-$SortOrder   = Get-PageParam -TagName 'so' -Default 'Asc'
-$TabSelected = Get-PageParam -TagName 'tab' -Default 'all'
-$Detailed    = Get-PageParam -TagName 'zz' -Default ""
-$CustomName  = Get-PageParam -TagName 'n' -Default ""
+﻿Get-SkParams | Out-Null
 
 $PageTitle   = "Help"
-$PageCaption = "Help"
-$content     = ""
-$tabset      = ""
-
-# add code here
+$content  = ""
+$menulist = ""
+$tabset   = ""
+$pagelink = Split-Path -Leaf $MyInvocation.MyCommand.Definition
 
 $content += "<table id=table2><tr><td style=`"height:150px;text-align:center`">"
 $content += "Be patient. I'm still working on it. :)</td></tr></table>"
 
-@"
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="$STTheme"/>
-</head>
 
-<body>
-
-<h1>$PageCaption</h1>
-
+$content = @"
 <table id=table2>
     <tr>
         <td>
-            <h2>Welcome!</h2>
+            <h2>You Sure do Need Help!</h2>
 
-            <p>So, what the ____ exactly is this SkatterTools crap anyway?</p>
+            <p>If you clicked on a link to this page, you're in trouble.  But don't worry, this page
+            should keep you sufficiently confused and annoyed.</p>
+            
+            <p>So, what the ____ exactly is this $Global:AppName crap anyway?</p>
 
             <p>It began with a stupid idea and turned into a dumb project.  Okay, that's not entirely true.
             But... It actually began from the pieces left from a dozen past web app projects involving ASP, 
@@ -50,7 +37,7 @@ $content += "Be patient. I'm still working on it. :)</td></tr></table>"
             </ul>
             That's it.</p>
 
-            <p>Last updated: 2018.12.27.13:03</p>
+            <p>Version: $Global:SkToolsVersion</p>
         </td>
     </tr>
     <tr>
@@ -67,16 +54,15 @@ $content += "Be patient. I'm still working on it. :)</td></tr></table>"
             <h2>Options and Variables</h2>
 
             <ul>
+                <li>AppName = The name of this app, which is currently $Global:AppName</li>
                 <li>STTheme = CSS stylesheet theme to apply. (stdark.css or stlight.css)</li>
                 <li>CMEnabled = Enable Configuration Manager features (true or false)</li>
                 <li>ADenabled = Enable Active Directory features (true or false)</li>
+                <li>ADGroupManage = Enable features to modify AD group memberships</li>
+                <li>CMCollectionManage = Enable features to modify Collection memberships</li>
                 <li>CmDBHost = Configuration Manager SQL Server hostname</li>
                 <li>CmSMSProvider = Configuration Manager SMS Provider hostname</li>
                 <li>CmSiteCode = Configuration Manager site code</li>
-                <li>SkNotesEnable = (currently not used)</li>
-                <li>SkNotesDBHost = (currently not used)</li>
-                <li>SkDBDatabase = (currently not used)</li>
-                <li>SkNotesPath = (currently not used)</li>
                 <li>DefaultGroupsTab = Default menubar index tab for Groups</li>
                 <li>DefaultUsersTab = Default menubar index tab for Users</li>
                 <li>DefaultComputersTab = Default menubar index tab for Computers/Devices</li>
@@ -87,12 +73,13 @@ $content += "Be patient. I'm still working on it. :)</td></tr></table>"
             is a real word. I looked it up. Don't confuse "wax" with "whacks".  You can "wax on" and "wax off", but if you 
             get caught doing a "whacks off" you might end up in jail.</p>
 
+            <p>If you modify config.txt, you will need to stop and start the PoSH Server process again.</p>
+
             <p>Stay tuned.  More to come!</p>
 
         </td>
     </tr>
 </table>
-
-</body>
-</html>
 "@
+
+Show-SkPage

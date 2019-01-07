@@ -1,15 +1,6 @@
-@"
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="$STTheme"/>
-</head>
+$PageTitle = "Welcome $PoshUserName !"
 
-<body>
+$tabset = ""
+$content = "<img src=`"graphics/sktools4.png`" border=`"0`" alt=`"`" />"
 
-<h1>Welcome $PoshUserName !</h1>
-
-<img src="graphics/sktools4.png" border="0" alt="" />
-
-</body>
-</html>
-"@
+Show-SkPage

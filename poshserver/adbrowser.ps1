@@ -24,10 +24,10 @@ else {
 }
 $rowcount = 0
 if ($SearchValue -ne "") {
-    $content = "<table id=table2><tr><td><h4>$SearchValue</h4></td></tr></table>"
+    $content = "<h3>$($SearchValue.ToUpper())</h3>"
 }
 else {
-    $content = "<table id=table2><tr><td><h4>root:</h4></td><tr></table>"
+    $content = "<h3>$($env:USERDNSDOMAIN)</h3>"
 }
 $content += "<table style=`"width:100%; border=0`"><tr>"
 $content += "<td style=`"width:250px;vertical-align:top`">"

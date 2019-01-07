@@ -1,17 +1,7 @@
-$STPageTitle   = "About SkatterTools"
-$STPageCaption = "About SkatterTools"
+$PageTitle = "About $Global:AppName"
 
-@"
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="$STTheme"/>
-</head>
-
-<body>
-
-<h1>$STPageCaption</h1>
-
-<table style='width:100%;border:none;'>
+$tabset = ""
+$content = "<table style='width:100%;border:none;'>
     <tr>
         <td style='width:50%;vertical-align:top'>
             <table id=table2>
@@ -37,8 +27,6 @@ $STPageCaption = "About SkatterTools"
             </table>
         </td>
     </tr>
-</table>
+</table>"
 
-</body>
-</html>
-"@
+Show-SkPage

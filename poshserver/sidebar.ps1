@@ -51,6 +51,7 @@ if ($CmEnabled -ne 'false') {
 <div class="panel">
 	<ul class="ulmenu">
 		<li class="limenu"><a href="cmqueries.ps1" target="main" title="Queries">Queries</a></li>
+        <li class="limenu"><a href="http://$CmSmsProvider/reports/browse/ConfigMgr_$CmSiteCode" target="_new" title="Reports">Reports</a></li>
 		<li class="limenu"><a href="cmsitestatus.ps1" target="main" title="Site Status">Site Status</a></li>
 		<li class="limenu"><a href="cmcompstat.ps1" target="main" title="Component Status">Site Components</a></li>
 		<li class="limenu"><a href="dbstats.ps1" target="main" title="ConfigMgr SQL Status">SQL Status</a></li>

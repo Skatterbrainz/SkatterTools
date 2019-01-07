@@ -1,18 +1,6 @@
-﻿$SearchField = Get-PageParam -TagName 'f' -Default ""
-$SearchValue = Get-PageParam -TagName 'v' -Default ""
-$SearchType  = Get-PageParam -TagName 'x' -Default ""
-$SortField   = Get-PageParam -TagName 's' -Default ""
-$SortOrder   = Get-PageParam -TagName 'so' -Default ""
-$TabSelected = Get-PageParam -TagName 'tab' -Default ""
-$Detailed    = Get-PageParam -TagName 'zz' -Default ""
-$CustomName  = Get-PageParam -TagName 'n' -Default ""
-$IsFiltered  = $False
-$PageTitle   = "Acknowledgements"
-$PageCaption = "Acknowledgements"
-$content     = ""
-$tabset      = ""
-$xxx         = ""
+﻿$PageTitle = "Acknowledgements"
 
+$tabset = ""
 $links = @(
     'https://docs.microsoft.com/en-us/powershell/module/configurationmanager/?view=sccm-ps',
     'https://www.petri.com/managing-active-directory-groups-adsi-powershell',
@@ -32,19 +20,5 @@ foreach ($link in $links) {
 }
 $content += "</table>"
 
-@"
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="$STTheme"/>
-</head>
+Show-SkPage
 
-<body>
-
-<h1>$PageCaption</h1>
-
-$tabset
-$content
-
-</body>
-</html>
-"@

@@ -1,7 +1,6 @@
 ﻿$SearchPhrase = $($PoshPost.qtext).Trim()
 $SearchType   = $PoshPost.scope
-$PageTitle    = "Search Results"
-$PageCaption  = "Search Results"
+$PageTitle    = "Search Results: $SearchPhrase"
 
 if (!(Get-Module dbatools)) { Import-Module dbatools }
 
@@ -22,7 +21,7 @@ $targets = ($a1, $a2, $a3, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8)
 $rowcount = 0
 $targets = $targets | Where-Object{if($_) {$_}}
 
-$content = "<h1>$PageCaption</h1>"
+$content = "<h1>$PageTitle</h1>"
 
 if ($SearchPhrase -eq "") {
     $content += "<table id=table2><tr style=`"height:100px`"><td style=`"text-align:center`">"
