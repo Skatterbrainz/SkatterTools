@@ -1,7 +1,7 @@
 # SkatterTools
 Skattered tools from Skatterbrainz
 
-## Latest: 1901.04.03
+## Latest: 1901.07.01
 
 ## Overview
 
@@ -30,13 +30,14 @@ Skattered tools from Skatterbrainz
    * Change your underwear :)
 
 ## Test Notes
-   * Tested with IE 11, Chrome 70
+   * Tested with IE 11, Edge, FireFox, Chrome
    * SQL Server 2016, 2017
-   * ConfigMgr 1806, 1810, 1811
+   * ConfigMgr 1806, 1810, 1811, 1812
 
 ## Release History
    
-   ### 1901.04.03
+   ### 1901.07.01
+   * Rewritten and still rewriting, but this version appears stable for now
    * So much is changing that I'm stopping the detailed version history for a while
    * when the code is stable enough to call 'done' I will reset the history like how our news media resets public opinion
    
