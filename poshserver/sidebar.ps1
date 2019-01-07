@@ -1,4 +1,12 @@
 $content = ""
+$tabset  = ""
+$menulist = ""
+
+$content = @"
+<form action="search.ps1" method="get">
+    <button type="submit" class="statbutton" formtarget="main" title="Search">Search</button>
+</form>
+"@
 
 if ($ADEnabled -ne 'false') {
     $content += @"
@@ -80,8 +88,30 @@ if ($CmEnabled -ne 'false') {
 		<li class="limenu">Roles</li>
 	</ul>
 </div>
+
 "@
 }
+
+$content += @"
+<button class="accordion" title="Resources">Resources</button>
+<div class="panel">
+	<ul class="ulmenu">
+		<li class="limenu"><a href="https://docs.microsoft.com/en-us/sccm/" target="_new" title="ConfigMgr Docs">ConfigMgr Docs</a></li>
+		<li class="limenu"><a href="downloads.ps1" target="main" title="Downloads">Downloads</a></li>
+		<li class="limenu"><a href="learning.ps1" target="main" title="Learning">Learning</a></li>
+        <li class="limenu"><a href="acknowledgements.ps1" target="main" title="Acknowledgements">Acknowledgements</a></li>
+	</ul>
+</div>
+
+<button class="accordion" title="Support">Support</button>
+<div class="panel">
+	<ul class="ulmenu">
+		<li class="limenu"><a href="help.ps1" target="main" title="SkatterTools Help">SkatterTools Help</a></li>
+		<li class="limenu"><a href="https://github.com/Skatterbrainz/SkatterTools/blob/master/README.md" target="_new" title="Check for Update">Check for Update</a></li>
+		<li class="limenu"><a href="about.ps1" target="main" title="About">About</a></li>
+    </ul>
+</div>
+"@
 
 @"
 <!DOCTYPE html>
@@ -93,24 +123,8 @@ if ($CmEnabled -ne 'false') {
 </head>
 <body style="margin: 0;">
 
-<form action="search.ps1" method="get">
-<button type="submit" class="statbutton" formtarget="main" title="Search">Search</button>
-</form>
 
 $content
-
-<button class="accordion" title="Support">Support</button>
-<div class="panel">
-	<ul class="ulmenu">
-		<li class="limenu"><a href="https://docs.microsoft.com/en-us/sccm/" target="_new" title="ConfigMgr Docs">ConfigMgr Docs</a></li>
-		<li class="limenu"><a href="downloads.ps1" target="main" title="Downloads">Downloads</a></li>
-		<li class="limenu"><a href="learning.ps1" target="main" title="Learning">Learning</a></li>
-        <li class="limenu"><a href="acknowledgements.ps1" target="main" title="Acknowledgements">Acknowledgements</a></li>
-		<li class="limenu"><a href="help.ps1" target="main" title="SkatterTools Help">SkatterTools Help</a></li>
-		<li class="limenu"><a href="https://github.com/Skatterbrainz/SkatterTools/blob/master/README.md" target="_new" title="Check for Update">Check for Update</a></li>
-		<li class="limenu"><a href="about.ps1" target="main" title="About">About</a></li>
-	</ul>
-</div>
 
 <script>
 SetMenu();
